@@ -48,3 +48,11 @@ class Exam(models.Model):
 
     def __str__(self):
         return f"{self.course.code} - {self.name}"
+
+
+class LearningOutcome(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.course.code} - {self.title}"
