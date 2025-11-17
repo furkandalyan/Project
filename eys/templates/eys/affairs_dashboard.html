@@ -1,0 +1,7 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<h2>Hoş geldin {{ request.user.username }} ({{ request.user.role.name }})</h2>
+
+<p style="margin-top:20px; font-size:18px;">Öğrenci ve ders yönetim işlemlerini buradan yapabilirsiniz.</p>
+{% endblock %}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EYS</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: #f4f4f4;
+        }
+
+        .navbar {
+            background: #1f1f1f;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-left a {
+            color: white;
+            margin-right: 25px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .nav-left a:hover {
+            color: #dddddd;
+        }
+
+        .nav-right a {
+            background: #1db954;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 17px;
+        }
+
+        .nav-right a:hover {
+            background: #169b43;
+        }
+
+        .container {
+            width: 80%;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: #1db954;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            animation: fadein 0.3s ease-out, fadeout 0.3s ease-in 2s forwards;
+        }
+
+        @keyframes fadein {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeout {
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+    </style>
+</head>
+
+<body>
+
+{% if not hide_navbar %}
+    <div class="navbar">
+        <div class="nav-left"></div>
+
+        <div class="nav-right">
+            {% if user.is_authenticated %}
+                <a href="/logout/">Çıkış</a>
+            {% else %}
+                <a href="/login/">Giriş Yap</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+{% endif %}
+
+{% block content %}
+{% endblock %}
+
+{% if messages %}
+<div id="toast-container">
+    {% for message in messages %}
+    <div class="toast">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if not hide_navbar %}
+    </div>
+{% endif %}
+
+</body>
+</html>

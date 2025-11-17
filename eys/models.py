@@ -44,7 +44,9 @@ class Course(models.Model):
 class Exam(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    weight = models.FloatField()
+    description = models.TextField(blank=True)
+    scheduled_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return f"{self.course.code} - {self.name}"
@@ -53,6 +55,7 @@ class Exam(models.Model):
 class LearningOutcome(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.course.code} - {self.title}"

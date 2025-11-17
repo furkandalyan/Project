@@ -1,0 +1,22 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<h2>LO Bağla: {{ exam.name }}</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Learning Outcome</label><br>
+    {{ form.learning_outcome }}
+
+    <label>Yüzdelik (%)</label><br>
+    <input type="number" name="weight" min="1" max="100"
+           style="width:100%; padding:10px; margin-top:10px; border-radius:6px; border:1px solid #ccc;">
+
+    <button type="submit"
+            style="margin-top:20px; background:#1db954; padding:10px 20px; border:none; border-radius:6px; color:white;">
+        Kaydet
+    </button>
+</form>
+
+{% endblock %}

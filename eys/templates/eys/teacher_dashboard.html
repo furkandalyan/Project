@@ -1,0 +1,54 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="background:white; padding:30px; border-radius:14px; box-shadow:0 15px 40px rgba(0,0,0,0.1); margin-bottom:30px;">
+    <h2 style="font-size:32px; margin-bottom:10px;">Hoş geldin {{ request.user.get_full_name|default:request.user.username }} 👋</h2>
+    <p style="font-size:18px; color:#666;">Bugünkü özetin hazır. Derslerine ve önemli araçlara tek tıkla ulaş.</p>
+    <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:20px;">
+        <a href="/teacher/courses/" style="background:#1db954; color:white; padding:12px 20px; border-radius:8px; text-decoration:none; font-weight:600;">📚 Derslerim</a>
+        <a href="/teacher/courses/" style="background:#1f1f1f; color:white; padding:12px 20px; border-radius:8px; text-decoration:none; font-weight:600;">🔗 Exam – LO Yönetimi</a>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; margin-bottom:30px;">
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+        <p style="margin:0; color:#999;">📚 Dersler</p>
+        <h3 style="margin:5px 0 0 0; font-size:28px;">{{ course_count }}</h3>
+    </div>
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+        <p style="margin:0; color:#999;">🗂 LO'lar</p>
+        <h3 style="margin:5px 0 0 0; font-size:28px;">{{ lo_total }}</h3>
+    </div>
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+        <p style="margin:0; color:#999;">📝 Sınavlar</p>
+        <h3 style="margin:5px 0 0 0; font-size:28px;">{{ exam_total }}</h3>
+    </div>
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+        <p style="margin:0; color:#999;">🔗 LO Bağlantıları</p>
+        <h3 style="margin:5px 0 0 0; font-size:28px;">{{ connection_total }}</h3>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px;">
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">📚 Derslerim</h3>
+        <p style="color:#666;">Ders içeriklerini düzenle ve öğrencilerini yönet.</p>
+        <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Panele Git →</a>
+    </div>
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">🗂 Learning Outcome Yönetimi</h3>
+        <p style="color:#666;">LO ekle, güncelle ve sınavlara bağla.</p>
+        <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">İşlemleri Gör →</a>
+    </div>
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">📝 Not Girişi</h3>
+        <p style="color:#666;">Yakında: Öğrenci notlarını hızlı gir.</p>
+        <span style="color:#aaa;">Yakında</span>
+    </div>
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">🔗 Exam – LO Bağlantıları</h3>
+        <p style="color:#666;">Sınavlar ve LO yüzdelerini tek ekrandan kontrol et.</p>
+        <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Bağlantıları Yönet →</a>
+    </div>
+</div>
+{% endblock %}

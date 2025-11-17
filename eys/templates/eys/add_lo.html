@@ -1,0 +1,18 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="max-width:520px; margin:0 auto;">
+    <div style="background:white; padding:30px; border-radius:14px; box-shadow:0 12px 30px rgba(0,0,0,0.1);">
+        <h2 style="margin-top:0;">{{ course.name }} - LO Ekle</h2>
+        <p style="color:#777;">Learning Outcome başlığını ve açıklamasını girerek dersinizi zenginleştirin.</p>
+        <form method="POST" style="display:flex; flex-direction:column; gap:15px;">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit"
+                    style="background:#1db954; padding:12px 0; border:none; border-radius:8px; color:white; font-size:16px; font-weight:600; cursor:pointer;">
+                Kaydet
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

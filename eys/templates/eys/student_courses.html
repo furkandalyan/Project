@@ -1,0 +1,36 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:15px;">
+    <div>
+        <h1 style="margin:0;">Derslerim</h1>
+        <p style="color:#888;">Aldığın tüm derslerin detayları burada.</p>
+    </div>
+    <a href="/student/dashboard/" style="color:#1db954; font-weight:600; text-decoration:none;">← Dashboard</a>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px;">
+    {% for c in courses %}
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); display:flex; flex-direction:column; gap:12px;">
+        <div>
+            <p style="margin:0; color:#9b9b9b;">{{ c.code }}</p>
+            <h3 style="margin:5px 0 10px 0;">{{ c.name }}</h3>
+            <p style="margin:0; color:#777;">Öğretim Elemanı: {{ c.instructor.get_full_name|default:c.instructor.username|default:"Atanmadı" }}</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; font-size:14px;">
+            <span>LO Sayısı: {{ c.learningoutcome_set.count }}</span>
+            <span>Sınav Sayısı: {{ c.exam_set.count }}</span>
+        </div>
+        <div style="display:flex; justify-content:flex-end;">
+            <a href="/student/course/{{ c.id }}/"
+               style="background:#1db954; color:white; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:600;">
+                Görüntüle →
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <p>Henüz kayıtlı dersiniz bulunmuyor.</p>
+    {% endfor %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,60 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="background:white; padding:30px; border-radius:14px; box-shadow:0 15px 40px rgba(0,0,0,0.08); margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+    <div>
+        <h2 style="font-size:32px; margin:0;">Hoş geldin {{ request.user.get_full_name|default:request.user.username }} 🎓</h2>
+        <p style="color:#666; font-size:17px; margin-top:8px;">Aşağıdan derslerine erişebilir, ilerlemeni takip edebilirsin.</p>
+    </div>
+    <a href="/student/courses/" style="background:#1db954; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">📚 Derslerimi Gör</a>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; margin-bottom:30px;">
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.06);">
+        <p style="margin:0; color:#a0a0a0;">📚 Ders Sayısı</p>
+        <h3 style="margin:5px 0 0 0; font-size:30px;">{{ course_count }}</h3>
+    </div>
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.06);">
+        <p style="margin:0; color:#a0a0a0;">🎯 Learning Outcome Sayısı</p>
+        <h3 style="margin:5px 0 0 0; font-size:30px;">{{ lo_total }}</h3>
+    </div>
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.06);">
+        <p style="margin:0; color:#a0a0a0;">📝 Aldığın Sınav Sayısı</p>
+        <h3 style="margin:5px 0 0 0; font-size:30px;">{{ exam_total }}</h3>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:25px;">
+    <div style="background:white; padding:25px; border-radius:14px; box-shadow:0 12px 35px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">🎯 LO Başarı Haritası</h3>
+        <p style="color:#888; margin-top:0;">Demo amaçlı örnek başarı yüzdeleri.</p>
+        {% for item in lo_success_data %}
+        <div style="margin-bottom:15px;">
+            <div style="display:flex; justify-content:space-between; font-size:14px; color:#666;">
+                <span>{{ item.label }}</span>
+                <span>%{{ item.percent }}</span>
+            </div>
+            <div style="background:#f0f0f0; border-radius:999px; height:10px; overflow:hidden; margin-top:6px;">
+                <div style="background:#1db954; height:100%; width:{{ item.percent }}%;"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div style="background:white; padding:25px; border-radius:14px; box-shadow:0 12px 35px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">📝 Sınav Sonuçları</h3>
+        <p style="color:#888; margin-top:0;">Not girilmemiş sınavlar “Henüz not girilmedi” olarak görünür.</p>
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            {% for exam in exam_results %}
+            <div style="border:1px solid #f0f0f0; border-radius:10px; padding:12px 15px; display:flex; justify-content:space-between; align-items:center;">
+                <span>{{ exam.name }}</span>
+                {% if exam.score %}
+                    <strong style="color:#1db954;">{{ exam.score }}</strong>
+                {% else %}
+                    <span style="color:#999;">Henüz not girilmedi</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
