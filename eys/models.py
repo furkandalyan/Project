@@ -56,3 +56,12 @@ class LearningOutcome(models.Model):
 
     def __str__(self):
         return f"{self.course.code} - {self.title}"
+
+
+class ExamLOWeight(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    learning_outcome = models.ForeignKey(LearningOutcome, on_delete=models.CASCADE)
+    weight = models.FloatField()  # Bu LO’ya etki yüzdesi (%30 gibi)
+
+    def __str__(self):
+        return f"{self.exam.name} → {self.learning_outcome.title} (%{self.weight})"
