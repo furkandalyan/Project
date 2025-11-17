@@ -40,3 +40,11 @@ class Course(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.name}"
+
+class Exam(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    weight = models.FloatField()
+
+    def __str__(self):
+        return f"{self.course.code} - {self.name}"
