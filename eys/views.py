@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from django.db.models import Avg, Count, Q
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib import messages
 from django.utils import timezone
@@ -43,7 +44,9 @@ TEACHER_ROLES = {"Regular Instructor", "Advisor Instructor", "Head of Department
 def serialize_exam_for_student(exam, now=None):
     now = now or timezone.now()
     scheduled_local = timezone.localtime(exam.scheduled_at) if exam.scheduled_at else None
-    upcoming_window = now + timedelta(days=7)
+    upcoming_window = now + timedelta(days=3)
+    end_of_week = timezone.localtime(now).date()
+    end_of_week = end_of_week + timedelta(days=(6 - end_of_week.weekday()))
 
     return {
         "id": exam.id,
@@ -62,7 +65,11 @@ def serialize_exam_for_student(exam, now=None):
             else (
                 "soon"
                 if scheduled_local and now <= scheduled_local <= upcoming_window
-                else "future"
+                else (
+                    "this_week"
+                    if scheduled_local and scheduled_local.date() <= end_of_week
+                    else "future"
+                )
             )
         ),
         "has_schedule": scheduled_local is not None,
@@ -71,6 +78,12 @@ def serialize_exam_for_student(exam, now=None):
         "year": scheduled_local.year if scheduled_local else None,
         "weekday_index": scheduled_local.weekday() if scheduled_local else None,
         "score": getattr(exam, "score", None),
+        "type_label": (
+            "Vize" if (exam.name or "").lower().find("vize") != -1 or (exam.name or "").lower().find("midterm") != -1
+            else ("Final" if (exam.name or "").lower().find("final") != -1
+            else ("Quiz" if (exam.name or "").lower().find("quiz") != -1 or (exam.name or "").lower().find("kısa") != -1
+            else None))
+        ),
     }
 
 def user_login(request):
@@ -606,6 +619,45 @@ def teacher_dashboard(request):
     lo_total = LearningOutcome.objects.filter(course_id__in=course_ids).count()
     exam_total = Exam.objects.filter(course_id__in=course_ids).count()
     connection_total = ExamLOWeight.objects.filter(exam__course_id__in=course_ids).count()
+
+    now = timezone.now()
+    exams_qs = (
+        Exam.objects.filter(course_id__in=course_ids, scheduled_at__isnull=False)
+        .select_related("course")
+        .order_by("scheduled_at")
+    )
+    upcoming_exams = [
+        serialize_exam_for_student(exam, now)
+        for exam in exams_qs
+        if exam.scheduled_at and exam.scheduled_at >= now
+    ][:5]
+
+    announcement_qs = (
+        Announcement.objects.filter(Q(course_id__in=course_ids) | Q(author=request.user))
+        .select_related("course", "author")
+        .order_by("-created_at")[:3]
+    )
+    announcement_cards = []
+    for ann in announcement_qs:
+        local_created = timezone.localtime(ann.created_at)
+        month_label = MONTH_LABELS[local_created.month - 1]
+        created_label = f"{local_created.day} {month_label} {local_created.year} · {local_created.strftime('%H:%M')}"
+        author_name = (
+            ann.author.get_full_name()
+            if ann.author and ann.author.get_full_name()
+            else getattr(ann.author, "username", "Sistem")
+        )
+        announcement_cards.append(
+            {
+                "title": ann.title,
+                "body": ann.body,
+                "meta": f"{author_name} • {created_label}",
+                "course_label": f"{ann.course.code} · {ann.course.name}"
+                if ann.course
+                else "Genel Duyuru",
+            }
+        )
+
     return render(
         request,
         "eys/teacher_dashboard.html",
@@ -614,6 +666,8 @@ def teacher_dashboard(request):
             "lo_total": lo_total,
             "exam_total": exam_total,
             "connection_total": connection_total,
+            "upcoming_exams": upcoming_exams,
+            "announcement_cards": announcement_cards,
         },
     )
 
@@ -793,3 +847,194 @@ def exam_detail(request, exam_id):
             "student_total": student_total,
         },
     )
+def teacher_calendar(request):
+    now = timezone.localtime(timezone.now())
+    today = timezone.localdate()
+
+    try:
+        selected_month = int(request.GET.get("month", now.month))
+        selected_year = int(request.GET.get("year", now.year))
+    except ValueError:
+        selected_month = now.month
+        selected_year = now.year
+
+    if selected_month < 1 or selected_month > 12:
+        selected_month = now.month
+    if selected_year < 1900 or selected_year > 2100:
+        selected_year = now.year
+
+    def shift_month(year, month, delta):
+        month += delta
+        while month < 1:
+            month += 12
+            year -= 1
+        while month > 12:
+            month -= 12
+            year += 1
+        return year, month
+
+    prev_year, prev_month = shift_month(selected_year, selected_month, -1)
+    next_year, next_month = shift_month(selected_year, selected_month, 1)
+
+    view_mode = request.GET.get("view", "month").strip().lower()
+    raw_ids = request.GET.getlist("course_id")
+    selected_course_ids = []
+    for rid in raw_ids:
+        try:
+            selected_course_ids.append(int(rid))
+        except ValueError:
+            pass
+
+    courses = Course.objects.filter(instructor=request.user).order_by("code")
+    exams_filter = {"scheduled_at__isnull": False, "course__in": courses}
+    if selected_course_ids:
+        exams_filter["course_id__in"] = selected_course_ids
+    exams_qs = (
+        Exam.objects.filter(**exams_filter)
+        .select_related("course")
+        .order_by("scheduled_at")
+    )
+    serialized_exams = [serialize_exam_for_student(exam, now) for exam in exams_qs]
+
+    exams_by_date = defaultdict(list)
+    for exam in serialized_exams:
+        if exam["scheduled_local"]:
+            exams_by_date[exam["scheduled_local"].date()].append(exam)
+
+    weekday_labels = ["Pzt", "Salı", "Çar", "Per", "Cum", "Cmt", "Paz"]
+
+    if view_mode == "week":
+        week_date_str = request.GET.get("date")
+        try:
+            base_date = date.fromisoformat(week_date_str) if week_date_str else today
+        except ValueError:
+            base_date = today
+        start_of_week = base_date - timedelta(days=base_date.weekday())
+        week_days = []
+        for i in range(7):
+            d = start_of_week + timedelta(days=i)
+            week_days.append(
+                {
+                    "date": d,
+                    "label": f"{d.day} {MONTH_LABELS[d.month - 1]} {d.year}",
+                    "weekday": weekday_labels[i],
+                    "is_today": d == today,
+                    "items": exams_by_date.get(d, []),
+                }
+            )
+        prev_week = (start_of_week - timedelta(days=7)).isoformat()
+        next_week = (start_of_week + timedelta(days=7)).isoformat()
+        upcoming_list = [
+            exam
+            for exam in serialized_exams
+            if exam["scheduled_local"] and exam["scheduled_local"].date() >= today
+        ][:6]
+        return render(
+            request,
+            "eys/teacher_calendar.html",
+            {
+                "view_mode": "week",
+                "weekday_labels": weekday_labels,
+                "week_days": week_days,
+                "prev_week": prev_week,
+                "next_week": next_week,
+                "courses": courses,
+                "selected_course_ids": selected_course_ids,
+                "upcoming_list": upcoming_list,
+            },
+        )
+    else:
+        days_in_month = monthrange(selected_year, selected_month)[1]
+        first_weekday = date(selected_year, selected_month, 1).weekday()
+
+        month_cells = []
+        for _ in range(first_weekday):
+            month_cells.append(None)
+
+        for day in range(1, days_in_month + 1):
+            current_date = date(selected_year, selected_month, day)
+            month_cells.append(
+                {
+                    "day": day,
+                    "date": current_date,
+                    "is_today": current_date == today,
+                    "items": exams_by_date.get(current_date, []),
+                }
+            )
+
+        while len(month_cells) % 7 != 0:
+            month_cells.append(None)
+
+        calendar_rows = [
+            month_cells[i : i + 7] for i in range(0, len(month_cells), 7)
+        ]
+
+        upcoming_list = [
+            exam
+            for exam in serialized_exams
+            if exam["scheduled_local"] and exam["scheduled_local"].date() >= today
+        ][:6]
+
+        return render(
+            request,
+            "eys/teacher_calendar.html",
+            {
+                "view_mode": "month",
+                "month_name": MONTH_LABELS[selected_month - 1],
+                "selected_year": selected_year,
+                "prev_month": {"month": prev_month, "year": prev_year},
+                "next_month": {"month": next_month, "year": next_year},
+                "weekday_labels": weekday_labels,
+                "calendar_rows": calendar_rows,
+                "has_events": any(cell and cell["items"] for cell in month_cells),
+                "upcoming_list": upcoming_list,
+                "courses": courses,
+                "selected_course_ids": selected_course_ids,
+            },
+        )
+
+def teacher_calendar_ics(request):
+    now = timezone.now()
+    raw_ids = request.GET.getlist("course_id")
+    selected_course_ids = []
+    for rid in raw_ids:
+        try:
+            selected_course_ids.append(int(rid))
+        except ValueError:
+            pass
+
+    courses = Course.objects.filter(instructor=request.user)
+    exams_filter = {"scheduled_at__isnull": False, "course__in": courses}
+    if selected_course_ids:
+        exams_filter["course_id__in"] = selected_course_ids
+    exams_qs = Exam.objects.filter(**exams_filter).select_related("course").order_by("scheduled_at")
+
+    lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//EYS//TeacherCalendar//TR",
+        "X-WR-CALNAME:EYS Öğretmen Takvimi",
+    ]
+    for exam in exams_qs:
+        if not exam.scheduled_at:
+            continue
+        start_utc = timezone.localtime(exam.scheduled_at, timezone.utc)
+        end_utc = start_utc + timedelta(hours=1)
+        uid = f"exam-{exam.id}@eys"
+        summary = f"{exam.course.code} - {exam.name}"
+        description = (exam.description or "").replace("\n", "\\n")
+        lines.extend([
+            "BEGIN:VEVENT",
+            f"UID:{uid}",
+            f"DTSTAMP:{now.strftime('%Y%m%dT%H%M%SZ')}",
+            f"DTSTART:{start_utc.strftime('%Y%m%dT%H%M%SZ')}",
+            f"DTEND:{end_utc.strftime('%Y%m%dT%H%M%SZ')}",
+            f"SUMMARY:{summary}",
+            f"DESCRIPTION:{description}",
+            "END:VEVENT",
+        ])
+    lines.append("END:VCALENDAR")
+    content = "\r\n".join(lines)
+    resp = HttpResponse(content, content_type="text/calendar")
+    resp["Content-Disposition"] = "attachment; filename=teacher-calendar.ics"
+    return resp

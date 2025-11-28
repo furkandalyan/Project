@@ -14,6 +14,8 @@ urlpatterns = [
     path('student/profile/', views.student_profile, name='student_profile'),
     path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
     path('teacher/announcements/new/', views.teacher_create_announcement, name='teacher_create_announcement'),
+    path('teacher/calendar/', views.teacher_calendar, name='teacher_calendar'),
+    path('teacher/calendar/ics/', views.teacher_calendar_ics, name='teacher_calendar_ics'),
     path('search/', views.global_search, name='global_search'),
     path('affairs/dashboard/', views.affairs_dashboard, name='affairs_dashboard'),
 

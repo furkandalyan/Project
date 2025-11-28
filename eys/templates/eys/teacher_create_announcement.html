@@ -46,6 +46,16 @@
                         {% endfor %}
                     </div>
 
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <span style="color:#666; font-size:13px;">Hızlı şablonlar:</span>
+                        <button type="button" id="tpl-homework"
+                                style="padding:8px 12px; border:1px solid #e0e0e0; background:white; border-radius:8px; cursor:pointer;">Ödev hatırlatma</button>
+                        <button type="button" id="tpl-exam"
+                                style="padding:8px 12px; border:1px solid #e0e0e0; background:white; border-radius:8px; cursor:pointer;">Sınav duyurusu</button>
+                        <button type="button" id="tpl-general"
+                                style="padding:8px 12px; border:1px solid #e0e0e0; background:white; border-radius:8px; cursor:pointer;">Genel bilgi</button>
+                    </div>
+
                     <button type="submit"
                             style="padding:14px 0; border:none; border-radius:12px; background:linear-gradient(120deg,#1db954,#1aa34a); color:white; font-weight:600; font-size:16px; cursor:pointer; box-shadow:0 15px 25px rgba(29,185,84,0.25);">
                         Duyuruyu Yayınla
@@ -86,6 +96,7 @@
     const previewCourse = document.getElementById("preview-course");
     const previewMeta = document.getElementById("preview-meta");
     const authorName = "{{ request.user.get_full_name|default:request.user.username|escapejs }}";
+    let lastAutoTitle = "";
 
     function labelForCourse() {
         const option = courseSelect.options[courseSelect.selectedIndex];
@@ -113,6 +124,40 @@
     });
 
     syncPreview();
+
+    const tplHomework = document.getElementById("tpl-homework");
+    const tplExam = document.getElementById("tpl-exam");
+    const tplGeneral = document.getElementById("tpl-general");
+
+    function applyTemplate(kind) {
+        if (kind === "homework") {
+            titleInput.value = "Ödev Hatırlatma";
+            bodyInput.value = "Merhaba,\n\nİlgili ödevin teslim tarihi yaklaşmaktadır. Lütfen belirtilen tarihe kadar ödevinizi sisteme yükleyin. Sorularınız için bu iletiye yanıt verebilirsiniz.";
+        } else if (kind === "exam") {
+            titleInput.value = "Sınav Duyurusu";
+            bodyInput.value = "Değerli öğrenciler,\n\nSınav tarihi ve saati duyurulmuştur. Sınava gelirken kimlik kartınızı getiriniz. Başarılar dilerim.";
+        } else if (kind === "general") {
+            titleInput.value = "Bilgilendirme";
+            bodyInput.value = "Selamlar,\n\nDersle ilgili genel bilgilendirme yapılmıştır. Takvim ve materyaller günceldir. İyi çalışmalar.";
+        }
+        syncPreview();
+    }
+
+    if (tplHomework) tplHomework.addEventListener("click", function(){ applyTemplate("homework") });
+    if (tplExam) tplExam.addEventListener("click", function(){ applyTemplate("exam") });
+    if (tplGeneral) tplGeneral.addEventListener("click", function(){ applyTemplate("general") });
+
+    if (courseSelect) {
+        courseSelect.addEventListener("change", function() {
+            const label = labelForCourse();
+            const autoTitle = label && label !== "Genel duyuru" ? `${label} duyurusu` : "Bilgilendirme";
+            if (!titleInput.value.trim() || titleInput.value.trim() === lastAutoTitle) {
+                titleInput.value = autoTitle;
+                lastAutoTitle = autoTitle;
+                syncPreview();
+            }
+        });
+    }
 })();
 </script>
 {% endblock %}
