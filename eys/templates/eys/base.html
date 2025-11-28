@@ -20,6 +20,17 @@
             justify-content: space-between;
         }
 
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-left a.brand {
+            font-size: 20px;
+            font-weight: 700;
+            margin-right: 35px;
+        }
+
         .nav-left a {
             color: white;
             margin-right: 25px;
@@ -86,7 +97,17 @@
 
 {% if not hide_navbar %}
     <div class="navbar">
-        <div class="nav-left"></div>
+        <div class="nav-left">
+            <a href="{% url 'home' %}" class="brand">EYS</a>
+
+            {% if user.is_authenticated and user.role and user.role.name == 'Student' %}
+                <a href="{% url 'student_courses' %}">Derslerim</a>
+                <a href="{% url 'student_dashboard' %}#exam-results">Notlarım</a>
+                <a href="{% url 'student_dashboard' %}#calendar">Takvimim</a>
+                <a href="{% url 'student_dashboard' %}#announcements">Duyurular</a>
+                <a href="{% url 'student_dashboard' %}#profile-settings">Kullanıcı Düzenle</a>
+            {% endif %}
+        </div>
 
         <div class="nav-right">
             {% if user.is_authenticated %}

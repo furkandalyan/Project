@@ -40,7 +40,7 @@
         </div>
         {% endfor %}
     </div>
-    <div style="background:white; padding:25px; border-radius:14px; box-shadow:0 12px 35px rgba(0,0,0,0.08);">
+    <div id="exam-results" style="background:white; padding:25px; border-radius:14px; box-shadow:0 12px 35px rgba(0,0,0,0.08);">
         <h3 style="margin-top:0;">📝 Sınav Sonuçları</h3>
         <p style="color:#888; margin-top:0;">Not girilmemiş sınavlar “Henüz not girilmedi” olarak görünür.</p>
         <div style="display:flex; flex-direction:column; gap:15px;">
@@ -56,5 +56,30 @@
             {% endfor %}
         </div>
     </div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:25px; margin-top:30px;">
+    <div id="calendar" style="background:white; padding:25px; border-radius:14px; box-shadow:0 12px 35px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">📅 Takvimim</h3>
+        <p style="color:#888; margin-top:0;">Yaklaşan sınav ve etkinlikler burada listelenecek.</p>
+        <div style="border:1px dashed #d9d9d9; border-radius:10px; padding:20px; color:#999; text-align:center;">
+            Takvim verisi mevcut değil. Danışmanınızla iletişime geçebilirsiniz.
+        </div>
+    </div>
+    <div id="announcements" style="background:white; padding:25px; border-radius:14px; box-shadow:0 12px 35px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">📢 Duyurular</h3>
+        <p style="color:#888; margin-top:0;">Fakülte ve ders duyuruları bu alanda görüntülenecek.</p>
+        <div style="border:1px dashed #d9d9d9; border-radius:10px; padding:20px; color:#999; text-align:center;">
+            Henüz duyuru bulunmuyor.
+        </div>
+    </div>
+</div>
+
+<div id="profile-settings" style="background:white; padding:25px; border-radius:14px; box-shadow:0 12px 35px rgba(0,0,0,0.08); margin-top:30px;">
+    <h3 style="margin-top:0;">👤 Kullanıcı Düzenle</h3>
+    <p style="color:#666;">Profil bilgilerini güncelleme ekranı yakında aktif olacak. Şimdilik öğrenci işleri birimi ile iletişime geçerek güncelleme talebinde bulunabilirsin.</p>
+    <a href="#" style="display:inline-flex; align-items:center; gap:8px; background:#1f1f1f; color:white; padding:12px 22px; border-radius:8px; text-decoration:none; font-weight:600; opacity:0.7; pointer-events:none;">
+        🚧 Yakında
+    </a>
 </div>
 {% endblock %}
