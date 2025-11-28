@@ -38,6 +38,9 @@
                  style="background:white; padding:20px; border-radius:10px; box-shadow:0 0 8px rgba(0,0,0,0.1); cursor:pointer;">
                 <h3 style="margin:0;">LO {{ lo.id }}</h3>
                 <p style="margin:8px 0 0 0; color:#999;">{{ lo.title }}</p>
+                {% if lo.student_score %}
+                    <p style="margin:6px 0 0 0; color:#1db954; font-weight:600;">Puanın: {{ lo.student_score }}</p>
+                {% endif %}
             </div>
             <div id="lo-detail-{{ lo.id }}" style="display:none;">
                 <h3>LO {{ lo.id }} – {{ lo.title }}</h3>
@@ -50,6 +53,11 @@
                         <li>Henüz herhangi bir sınava bağlı değil.</li>
                     {% endfor %}
                 </ul>
+                {% if lo.student_score %}
+                    <p><strong>LO Puanın:</strong> {{ lo.student_score }}</p>
+                {% else %}
+                    <p><strong>LO Puanın:</strong> Henüz hesaplanmadı.</p>
+                {% endif %}
             </div>
             {% empty %}
             <p>Henüz LO eklenmemiş.</p>
@@ -62,20 +70,39 @@
             <h2>Sınavlar</h2>
         </div>
 
-        <div style="margin-top:20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:15px;">
-            {% for exam in exams %}
-            <div style="position:relative; background:white; padding:20px; border-radius:10px; box-shadow:0 0 8px rgba(0,0,0,0.1);">
-                <a href="{% url 'exam_detail' exam.id %}"
-                   style="font-size:20px; font-weight:600; color:#1f1f1f; text-decoration:none;">
-                    {{ exam.name }}
-                </a>
-                <p style="font-size:14px; color:#555; margin:10px 0;">{{ exam.description|default:"Açıklama eklenmedi." }}</p>
-                <p style="font-size:13px; color:#999; margin:0;">{{ exam.scheduled_at|date:"d.m.Y H:i" }}</p>
+        {% if exam_cards %}
+        <div style="margin-top:20px; border-left:3px solid #1db954; padding-left:20px; display:flex; flex-direction:column; gap:20px;">
+            {% for exam in exam_cards %}
+            <div style="position:relative; padding-left:25px; background:white; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08); padding:18px 20px; margin-left:-20px;">
+                <span style="position:absolute; left:-36px; top:24px; width:16px; height:16px; border-radius:50%; background:#1db954; box-shadow:0 0 0 6px rgba(29,185,84,0.15);"></span>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap;">
+                    <div>
+                        <a href="{% url 'exam_detail' exam.id %}" style="font-size:18px; font-weight:600; color:#1f1f1f; text-decoration:none;">
+                            {{ exam.name }}
+                        </a>
+                        <p style="font-size:14px; color:#666; margin:6px 0 0 0;">{{ exam.description|default:"Açıklama eklenmedi." }}</p>
+                    </div>
+                    {% if exam.status == 'past' %}
+                        <span style="font-size:12px; background:#eeeeee; color:#555; padding:4px 12px; border-radius:999px;">Tamamlandı</span>
+                    {% elif exam.status == 'soon' %}
+                        <span style="font-size:12px; background:#fff0da; color:#b86a00; padding:4px 12px; border-radius:999px;">Bu Hafta</span>
+                    {% else %}
+                        <span style="font-size:12px; background:#e5f7ee; color:#1d7c4a; padding:4px 12px; border-radius:999px;">Yaklaşıyor</span>
+                    {% endif %}
+                </div>
+                <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; font-size:14px; color:#555;">
+                    <span>Planlanan Tarih: {{ exam.display_label }}</span>
+                    <span>Ders: {{ exam.course_code }}</span>
+                    {% if exam.score %}
+                        <span style="font-weight:600; color:#1db954;">Notun: {{ exam.score }}</span>
+                    {% endif %}
+                </div>
             </div>
-            {% empty %}
-            <p>Henüz sınav eklenmemiş.</p>
             {% endfor %}
         </div>
+        {% else %}
+            <p style="margin-top:20px; color:#999;">Henüz sınav eklenmemiş.</p>
+        {% endif %}
     </div>
 
 </div>

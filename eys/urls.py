@@ -9,7 +9,12 @@ urlpatterns = [
     path('student/dashboard/', views.student_dashboard, name='student_dashboard'),
     path('student/courses/', views.student_courses, name='student_courses'),
     path('student/course/<int:course_id>/', views.student_course_detail, name='student_course_detail'),
+    path('student/calendar/', views.student_calendar, name='student_calendar'),
+    path('student/announcements/', views.student_announcements, name='student_announcements'),
+    path('student/profile/', views.student_profile, name='student_profile'),
     path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
+    path('teacher/announcements/new/', views.teacher_create_announcement, name='teacher_create_announcement'),
+    path('search/', views.global_search, name='global_search'),
     path('affairs/dashboard/', views.affairs_dashboard, name='affairs_dashboard'),
 
     path('teacher/courses/', views.teacher_courses, name='teacher_courses'),
@@ -19,4 +24,5 @@ urlpatterns = [
     path('teacher/course/<int:course_id>/add-exam/', views.add_exam, name='add_exam'),
     path('teacher/exam/<int:exam_id>/', views.exam_detail, name='exam_detail'),
     path('teacher/exam/<int:exam_id>/add-lo-weight/', views.add_exam_lo_weight, name='add_exam_lo_weight'),
+    path('teacher/exam/<int:exam_id>/grades/', views.manage_exam_scores, name='manage_exam_scores'),
 ]

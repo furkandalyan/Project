@@ -1,0 +1,65 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:15px; margin-bottom:25px;">
+    <div>
+        <p style="margin:0; color:#9a9a9a;">Duyuru merkezinden tüm mesajları takip et</p>
+        <h1 style="margin:5px 0 0 0;">📢 Duyuru Kutum</h1>
+    </div>
+    <div style="color:#555; font-size:14px;">Toplam {{ total_count }} duyuru</div>
+</div>
+
+<div style="display:grid; grid-template-columns:3fr 1fr; gap:22px;">
+    <div style="background:white; border-radius:18px; padding:28px; box-shadow:0 20px 45px rgba(0,0,0,0.08);">
+        {% if timeline %}
+            <div style="position:relative; padding-left:25px;">
+                <div style="position:absolute; left:10px; top:0; bottom:0; width:2px; background:linear-gradient(180deg, #1db954, #bee9cd);"></div>
+                {% for group in timeline %}
+                    <div style="margin-bottom:30px;">
+                        <div style="margin-bottom:16px; font-weight:600; color:#1db954;">{{ group.date_label }}</div>
+                        {% for item in group.items %}
+                            <div style="display:flex; gap:15px; margin-bottom:18px;">
+                                <div style="width:42px; height:42px; border-radius:50%; background:#1db954; color:white; display:flex; align-items:center; justify-content:center; font-weight:600;">
+                                    {{ item.author_initials }}
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                                        <div>
+                                            <h3 style="margin:0;">{{ item.title }}</h3>
+                                            <p style="margin:4px 0; color:#666; font-size:13px;">{{ item.course_label }}</p>
+                                        </div>
+                                        <span style="color:#999; font-size:13px;">{{ item.timestamp }}</span>
+                                    </div>
+                                    <div style="background:#f8f8f8; padding:14px 16px; border-radius:12px; margin-top:10px;">
+                                        <p style="margin:0; white-space:pre-line;">{{ item.body }}</p>
+                                    </div>
+                                    <p style="margin:8px 0 0 0; color:#8a8a8a; font-size:13px;">Gönderen: {{ item.author_name }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align:center; color:#a0a0a0; padding:60px 0;">
+                Henüz duyuru yayınlanmamış. Öğretim elemanların mesaj paylaşmaya başladığında burada listelenecek.
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="background:white; border-radius:18px; padding:24px; box-shadow:0 20px 45px rgba(0,0,0,0.08); position:sticky; top:20px; height:max-content;">
+        <h3 style="margin-top:0;">Hızlı Erişim</h3>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <a href="{% url 'student_dashboard' %}"
+               style="padding:10px 14px; border-radius:10px; background:#f1fff6; color:#1db954; text-decoration:none; font-weight:600;">Dashboarda Dön</a>
+            <a href="{% url 'student_courses' %}"
+               style="padding:10px 14px; border-radius:10px; border:1px solid #e6e6e6; text-decoration:none; color:#333;">Derslerim</a>
+            <a href="{% url 'student_calendar' %}"
+               style="padding:10px 14px; border-radius:10px; border:1px solid #e6e6e6; text-decoration:none; color:#333;" target="_blank" rel="noopener noreferrer">Takvimim</a>
+        </div>
+        <hr style="margin:20px 0; border:none; border-top:1px solid #f0f0f0;">
+        <p style="font-size:13px; color:#999;">Duyurular ders kodu ve öğretim elemanına göre otomatik filtrelenir. Eski mesajlara aşağı kaydırarak ulaşabilirsin.</p>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,36 +1,132 @@
 {% extends "eys/base.html" %}
 
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:15px;">
+<div style="background:white; border-radius:20px; padding:30px; box-shadow:0 26px 60px rgba(0,0,0,0.08); margin-bottom:30px; display:flex; flex-wrap:wrap; gap:20px; align-items:center;">
     <div>
-        <h1 style="margin:0;">Derslerim</h1>
-        <p style="color:#888;">Aldığın tüm derslerin detayları burada.</p>
+        <p style="margin:0; color:#9a9a9a; text-transform:uppercase; letter-spacing:0.08em; font-size:12px;">Öğrenci Paneli</p>
+        <h1 style="margin:6px 0 10px 0;">📚 Derslerim</h1>
+        <p style="margin:0; color:#6f6f6f;">Aldığın derslerin LO’larını, sınavlarını ve içeriklerini buradan takip edebilirsin.</p>
     </div>
-    <a href="/student/dashboard/" style="color:#1db954; font-weight:600; text-decoration:none;">← Dashboard</a>
+    <div style="margin-left:auto; display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="{% url 'student_dashboard' %}" style="padding:10px 18px; border-radius:12px; background:#f1f1f1; color:#333; text-decoration:none; font-weight:600;">← Dashboard</a>
+        <a href="{% url 'student_calendar' %}" style="padding:10px 18px; border-radius:12px; border:1px solid #1db954; color:#1db954; text-decoration:none; font-weight:600;">Takvim</a>
+    </div>
 </div>
 
-<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px;">
+<div style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom:20px; align-items:center;">
+    <div style="flex:1; min-width:240px;">
+        <input id="course-search" type="text" placeholder="Ders adı veya kodu ara..."
+               style="width:100%; padding:12px 16px; border-radius:12px; border:1px solid #ddd; font-size:15px;">
+    </div>
+    <div style="display:flex; gap:12px;">
+        <select id="course-filter-type" style="padding:12px 16px; border-radius:12px; border:1px solid #ddd;">
+            <option value="">Tümü</option>
+            <option value="has-exam">Sınavı olanlar</option>
+            <option value="has-lo">LO ekli dersler</option>
+        </select>
+    </div>
+</div>
+
+<div class="course-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:24px;">
     {% for c in courses %}
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); display:flex; flex-direction:column; gap:12px;">
-        <div>
-            <p style="margin:0; color:#9b9b9b;">{{ c.code }}</p>
-            <h3 style="margin:5px 0 10px 0;">{{ c.name }}</h3>
-            <p style="margin:0; color:#777;">Öğretim Elemanı: {{ c.instructor.get_full_name|default:c.instructor.username|default:"Atanmadı" }}</p>
+    <div class="course-card" data-name="{{ c.name|lower }} {{ c.code|lower }}" data-has-exam="{{ c.exam_set.count|yesno:'1,0' }}" data-has-lo="{{ c.learningoutcome_set.count|yesno:'1,0' }}"
+         style="background:white; border-radius:20px; padding:24px; box-shadow:0 16px 40px rgba(0,0,0,0.08); position:relative;">
+        <div style="display:flex; justify-content:space-between; gap:15px;">
+            <div>
+                <span style="font-size:13px; color:#1db954; font-weight:600;">{{ c.code }}</span>
+                <h2 style="margin:6px 0 4px 0; font-size:22px;">{{ c.name }}</h2>
+                <p style="margin:0; color:#777; font-size:14px;">{{ c.instructor.get_full_name|default:c.instructor.username|default:"Öğretim elemanı atanmamış" }}</p>
+            </div>
+            <div style="text-align:right;">
+                <span style="font-size:12px; color:#9a9a9a;">LO / Sınav</span>
+                <h3 style="margin:2px 0 0 0;">{{ c.learningoutcome_set.count }} / {{ c.exam_set.count }}</h3>
+            </div>
         </div>
-        <div style="display:flex; flex-direction:column; gap:6px; font-size:14px;">
-            <span>LO Sayısı: {{ c.learningoutcome_set.count }}</span>
-            <span>Sınav Sayısı: {{ c.exam_set.count }}</span>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:18px 0;">
+            <div style="background:#f8f8f8; border-radius:12px; padding:12px;">
+                <p style="margin:0; font-size:12px; color:#7a7a7a;">Sıradaki Sınav</p>
+                {% if c.next_exam_card %}
+                    <strong>{{ c.next_exam_card.name }}</strong>
+                    <span style="display:block; font-size:12px; color:#555;">{{ c.next_exam_card.display_label }}</span>
+                {% else %}
+                    <span style="font-size:13px; color:#999;">Planlanmadı</span>
+                {% endif %}
+            </div>
+            <div style="background:#f8f8f8; border-radius:12px; padding:12px;">
+                <p style="margin:0; font-size:12px; color:#7a7a7a;">Öğrenci Sayısı</p>
+                <strong>{{ c.student_total }}</strong>
+            </div>
         </div>
-        <div style="display:flex; justify-content:flex-end;">
-            <a href="/student/course/{{ c.id }}/"
-               style="background:#1db954; color:white; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:600;">
-                Görüntüle →
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="course-toggle" data-target="detail-{{ c.id }}"
+                    style="flex:1; border:none; border-radius:10px; padding:10px 0; background:#f1f1f1; font-weight:600; cursor:pointer;">
+                İçeriği Göster
+            </button>
+            <a href="{% url 'student_course_detail' c.id %}"
+               style="flex:1; text-align:center; padding:10px 0; border-radius:10px; background:#1db954; color:white; text-decoration:none; font-weight:600;">
+                Ders Sayfası →
             </a>
+        </div>
+        <div id="detail-{{ c.id }}" class="course-detail" style="margin-top:18px; padding:18px; border-radius:16px; background:#f9f9f9; display:none;">
+            <h4 style="margin-top:0;">Learning Outcomes</h4>
+            <ul style="margin:0; padding-left:18px; color:#555;">
+                {% for lo in c.learningoutcome_set.all|slice:":3" %}
+                    <li>{{ lo.title }}</li>
+                {% empty %}
+                    <li>Henüz LO eklenmemiş.</li>
+                {% endfor %}
+            </ul>
+            <h4>Aktiviteler / Sınavlar</h4>
+            <ul style="margin:0; padding-left:18px; color:#555;">
+                {% for exam in c.exam_set.all|slice:":3" %}
+                    <li>{{ exam.name }} – {{ exam.scheduled_at|date:"d.m.Y H:i"|default:"Tarih bekleniyor" }}</li>
+                {% empty %}
+                    <li>Bu ders için sınav tanımlanmamış.</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
     {% empty %}
     <p>Henüz kayıtlı dersiniz bulunmuyor.</p>
     {% endfor %}
 </div>
-{% endblock %}
 
+<script>
+(function() {
+    const searchInput = document.getElementById("course-search");
+    const filterSelect = document.getElementById("course-filter-type");
+    const cards = Array.from(document.querySelectorAll(".course-card"));
+
+    function applyFilters() {
+        const query = (searchInput.value || "").toLowerCase();
+        const filter = filterSelect.value;
+        cards.forEach(card => {
+            const matchesSearch = card.dataset.name.indexOf(query) > -1;
+            let matchesFilter = true;
+            if (filter === "has-exam") {
+                matchesFilter = card.dataset.hasExam === "1";
+            } else if (filter === "has-lo") {
+                matchesFilter = card.dataset.hasLo === "1";
+            }
+            card.style.display = matchesSearch && matchesFilter ? "block" : "none";
+        });
+    }
+
+    document.querySelectorAll(".course-toggle").forEach(button => {
+        button.addEventListener("click", () => {
+            const target = document.getElementById(button.dataset.target);
+            if (target.style.display === "none" || !target.style.display) {
+                target.style.display = "block";
+                button.textContent = "İçeriği Gizle";
+            } else {
+                target.style.display = "none";
+                button.textContent = "İçeriği Göster";
+            }
+        });
+    });
+
+    searchInput.addEventListener("input", applyFilters);
+    filterSelect.addEventListener("change", applyFilters);
+})();
+</script>
+{% endblock %}

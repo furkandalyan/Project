@@ -1,0 +1,69 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; margin-bottom:24px;">
+    <div>
+        <p style="margin:0; color:#9c9c9c; text-transform:uppercase; letter-spacing:0.08em; font-size:12px;">Küresel Arama</p>
+        <h1 style="margin:6px 0 0 0;">🔍 Ders & Sınav Ara</h1>
+    </div>
+    <form method="get" action="{% url 'global_search' %}" style="display:flex; gap:10px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="Ders kodu, öğretim elemanı veya sınav adı..."
+               style="width:280px; padding:12px 16px; border-radius:12px; border:1px solid #e0e0e0;">
+        <button type="submit" style="padding:12px 20px; border:none; border-radius:12px; background:#1db954; color:white; font-weight:600;">Ara</button>
+    </form>
+</div>
+
+{% if not query %}
+    <div style="background:white; border-radius:18px; padding:28px; box-shadow:0 20px 45px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">Nasıl Ararım?</h3>
+        <ul style="margin:0; padding-left:20px; line-height:1.7; color:#6c6c6c;">
+            <li>Ders adına göre arama yap: <code>Matematik</code>, <code>{{ request.user.courses_taken.all.0.code|default:"CSE101" }}</code></li>
+            <li>Sınav veya açıklama parçacığı yaz: <code>Vize</code>, <code>Proje sunumu</code></li>
+            <li>Öğretmen rolündeysen kendi derslerin ve sınavların listelenir.</li>
+        </ul>
+    </div>
+{% else %}
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:24px;">
+        <div style="background:white; border-radius:18px; padding:26px; box-shadow:0 18px 40px rgba(0,0,0,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0;">Dersler</h2>
+                <span style="font-size:13px; color:#888;">{{ results_courses|length }} sonuç</span>
+            </div>
+            <div style="margin-top:18px; display:flex; flex-direction:column; gap:14px;">
+                {% for course in results_courses %}
+                <a href="{% if role_name == 'Student' %}/student/course/{{ course.id }}/{% else %}/teacher/course/{{ course.id }}/{% endif %}"
+                   style="border:1px solid #f0f0f0; border-radius:12px; padding:16px; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:4px;">
+                    <span style="font-size:12px; color:#1db954;">{{ course.code }}</span>
+                    <strong>{{ course.name }}</strong>
+                    <span style="color:#777; font-size:13px;">Öğretim Elemanı: {{ course.instructor.get_full_name|default:course.instructor.username|default:"Atanmadı" }}</span>
+                </a>
+                {% empty %}
+                <p style="color:#a0a0a0;">Sonuç bulunamadı.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div style="background:white; border-radius:18px; padding:26px; box-shadow:0 18px 40px rgba(0,0,0,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0;">Sınavlar</h2>
+                <span style="font-size:13px; color:#888;">{{ results_exams|length }} sonuç</span>
+            </div>
+            <div style="margin-top:18px; display:flex; flex-direction:column; gap:14px;">
+                {% for exam in results_exams %}
+                <a href="{% url 'exam_detail' exam.id %}" style="border:1px solid #f0f0f0; border-radius:12px; padding:16px; text-decoration:none; color:inherit; display:block;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>{{ exam.name }}</strong>
+                        <span style="font-size:12px; color:#999;">{{ exam.course.code }}</span>
+                    </div>
+                    <p style="margin:6px 0; color:#666; font-size:13px;">{{ exam.description|default:"Açıklama yok." }}</p>
+                    <span style="font-size:12px; color:#888;">{{ exam.scheduled_at|date:"d.m.Y H:i" }}</span>
+                </a>
+                {% empty %}
+                <p style="color:#a0a0a0;">Sonuç bulunamadı.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+

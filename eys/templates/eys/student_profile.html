@@ -1,0 +1,90 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; flex-wrap:wrap; gap:24px;">
+    <div style="flex:1; min-width:320px; background:white; border-radius:20px; padding:32px; box-shadow:0 25px 55px rgba(0,0,0,0.08);">
+        <p style="margin:0; color:#9c9c9c; letter-spacing:0.08em; text-transform:uppercase; font-size:12px;">Profil Bilgilerin</p>
+        <h1 style="margin:6px 0 18px 0;">{{ request.user.get_full_name|default:request.user.username }}</h1>
+
+        <form method="POST" style="display:flex; flex-direction:column; gap:18px;">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div style="background:#fff2f2; border:1px solid #ffbcbc; color:#c20000; padding:12px; border-radius:10px;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px;">
+                <div>
+                    <label for="{{ form.first_name.id_for_label }}" style="font-weight:600; color:#333; display:block; margin-bottom:6px;">Ad</label>
+                    {{ form.first_name }}
+                    {% for error in form.first_name.errors %}<span style="color:#d00000; font-size:13px;">{{ error }}</span>{% endfor %}
+                </div>
+                <div>
+                    <label for="{{ form.last_name.id_for_label }}" style="font-weight:600; color:#333; display:block; margin-bottom:6px;">Soyad</label>
+                    {{ form.last_name }}
+                    {% for error in form.last_name.errors %}<span style="color:#d00000; font-size:13px;">{{ error }}</span>{% endfor %}
+                </div>
+            </div>
+            <div>
+                <label for="{{ form.email.id_for_label }}" style="font-weight:600; color:#333; display:block; margin-bottom:6px;">E-posta</label>
+                {{ form.email }}
+                {% for error in form.email.errors %}<span style="color:#d00000; font-size:13px;">{{ error }}</span>{% endfor %}
+            </div>
+            <hr style="border:none; border-top:1px solid #f0f0f0; margin:10px 0;">
+            <div>
+                <p style="margin:0 0 8px 0; color:#6c6c6c;">Parolayı güncellemek istemiyorsan aşağıdaki alanları boş bırakabilirsin.</p>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px;">
+                    <div>
+                        <label for="{{ form.new_password.id_for_label }}" style="font-weight:600; color:#333; display:block; margin-bottom:6px;">Yeni Parola</label>
+                        {{ form.new_password }}
+                    </div>
+                    <div>
+                        <label for="{{ form.confirm_password.id_for_label }}" style="font-weight:600; color:#333; display:block; margin-bottom:6px;">Parola Tekrar</label>
+                        {{ form.confirm_password }}
+                    </div>
+                </div>
+            </div>
+            <button type="submit"
+                    style="padding:14px 0; border:none; border-radius:12px; background:linear-gradient(120deg,#1db954,#119c45); color:white; font-weight:600; font-size:16px; cursor:pointer;">
+                Değişiklikleri Kaydet
+            </button>
+        </form>
+    </div>
+
+    <div style="flex:0.8; min-width:280px; display:flex; flex-direction:column; gap:20px;">
+        <div style="background:white; border-radius:20px; padding:24px; box-shadow:0 20px 45px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Hesap Özeti</h3>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px;">
+                <div style="background:#f8f8f8; border-radius:14px; padding:14px;">
+                    <p style="margin:0; font-size:12px; color:#7a7a7a;">Kullanıcı Adı</p>
+                    <strong>{{ username }}</strong>
+                </div>
+                <div style="background:#f8f8f8; border-radius:14px; padding:14px;">
+                    <p style="margin:0; font-size:12px; color:#7a7a7a;">Rol</p>
+                    <strong>{{ role_name }}</strong>
+                </div>
+                <div style="background:#f8f8f8; border-radius:14px; padding:14px;">
+                    <p style="margin:0; font-size:12px; color:#7a7a7a;">Katılım Tarihi</p>
+                    <strong>{{ joined_date }}</strong>
+                </div>
+                <div style="background:#f8f8f8; border-radius:14px; padding:14px;">
+                    <p style="margin:0; font-size:12px; color:#7a7a7a;">Son Giriş</p>
+                    <strong>{{ last_login }}</strong>
+                </div>
+            </div>
+        </div>
+        <div style="background:#1f1f1f; color:white; border-radius:20px; padding:24px; box-shadow:0 25px 50px rgba(0,0,0,0.35);">
+            <h3 style="margin-top:0;">Güvenlik İpuçları</h3>
+            <ul style="margin:0; padding-left:18px; line-height:1.6; color:#dcdcdc;">
+                <li>Parolan minimum 8 karakter olsun ve özel karakter içersin.</li>
+                <li>Aynı parolayı farklı platformlarda kullanmamaya çalış.</li>
+                <li>E-posta adresini güncel tut ki sıfırlama işlemleri sorunsuz olsun.</li>
+            </ul>
+            <a href="/logout/" style="margin-top:16px; display:inline-flex; align-items:center; gap:8px; color:#ffbcbc; text-decoration:none;">
+                Çıkış Yap
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
