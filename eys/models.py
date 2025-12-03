@@ -102,9 +102,10 @@ class Announcement(models.Model):
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="announcements"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    pinned = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["-pinned", "-created_at"]
 
     def __str__(self):
         if self.course:

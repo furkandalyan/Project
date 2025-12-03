@@ -2,6 +2,8 @@ from calendar import monthrange
 from collections import defaultdict
 from datetime import date, timedelta
 from decimal import Decimal
+import csv
+import io
 
 from django.db.models import Avg, Count, Q
 from django.shortcuts import render, redirect, get_object_or_404
@@ -9,6 +11,7 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib import messages
 from django.utils import timezone
+from django.urls import reverse
 
 from .models import Course, LearningOutcome, Exam, ExamLOWeight, Announcement, ExamResult
 from .forms import LOForm, ExamForm, ExamLOWeightForm, AnnouncementForm, ProfileUpdateForm
@@ -47,6 +50,19 @@ def serialize_exam_for_student(exam, now=None):
     upcoming_window = now + timedelta(days=3)
     end_of_week = timezone.localtime(now).date()
     end_of_week = end_of_week + timedelta(days=(6 - end_of_week.weekday()))
+    palette = [
+        "#1db954",
+        "#2459c3",
+        "#b86a00",
+        "#ff6b6b",
+        "#7d5fff",
+        "#00a8e8",
+        "#e91e63",
+        "#2ecc71",
+        "#9c27b0",
+    ]
+    code_sum = sum(ord(ch) for ch in (exam.course.code or str(exam.course_id)))
+    course_color = palette[code_sum % len(palette)]
 
     return {
         "id": exam.id,
@@ -78,6 +94,7 @@ def serialize_exam_for_student(exam, now=None):
         "year": scheduled_local.year if scheduled_local else None,
         "weekday_index": scheduled_local.weekday() if scheduled_local else None,
         "score": getattr(exam, "score", None),
+        "course_color": course_color,
         "type_label": (
             "Vize" if (exam.name or "").lower().find("vize") != -1 or (exam.name or "").lower().find("midterm") != -1
             else ("Final" if (exam.name or "").lower().find("final") != -1
@@ -191,7 +208,7 @@ def student_dashboard(request):
             Q(course__in=courses) | Q(course__isnull=True)
         )
         .select_related("course", "author")
-        .order_by("-created_at")[:3]
+        .order_by("-pinned", "-created_at")[:3]
     )
 
     announcement_cards = []
@@ -315,10 +332,12 @@ def student_course_detail(request, course_id):
 
 def student_announcements(request):
     courses = request.user.courses_taken.all()
+    show_pinned_only = request.GET.get("pinned") == "1"
+    base_qs = Announcement.objects.filter(Q(course__in=courses) | Q(course__isnull=True))
+    if show_pinned_only:
+        base_qs = base_qs.filter(pinned=True)
     announcement_qs = (
-        Announcement.objects.filter(Q(course__in=courses) | Q(course__isnull=True))
-        .select_related("course", "author")
-        .order_by("-created_at")
+        base_qs.select_related("course", "author").order_by("-pinned", "-created_at")
     )
 
     grouped = defaultdict(list)
@@ -360,6 +379,7 @@ def student_announcements(request):
         {
             "timeline": timeline,
             "total_count": announcement_qs.count(),
+            "show_pinned_only": show_pinned_only,
         },
     )
 
@@ -569,6 +589,63 @@ def manage_exam_scores(request, exam_id):
     }
 
     if request.method == "POST":
+        if request.FILES.get("csv_file"):
+            file = request.FILES["csv_file"]
+            try:
+                text = io.TextIOWrapper(file.file, encoding="utf-8")
+            except Exception:
+                text = io.StringIO(file.read().decode("utf-8", errors="ignore"))
+            reader = csv.DictReader(text)
+            errors = []
+            processed = 0
+            created_count = 0
+            updated_count = 0
+            deleted_count = 0
+            for row in reader:
+                sid = (row.get("student_id") or "").strip()
+                username = (row.get("username") or "").strip()
+                score_raw = (row.get("score") or "").strip()
+                feedback = (row.get("feedback") or "").strip()
+                student = None
+                if sid.isdigit():
+                    student = exam.course.students.filter(id=int(sid)).first()
+                if not student and username:
+                    student = exam.course.students.filter(username=username).first()
+                if not student:
+                    errors.append(f"Öğrenci bulunamadı: id={sid} username={username}")
+                    continue
+                processed += 1
+                if score_raw == "":
+                    if student.id in existing:
+                        existing[student.id].delete()
+                        deleted_count += 1
+                    continue
+                try:
+                    score_val = float(score_raw.replace(",", "."))
+                except ValueError:
+                    errors.append(f"{student.get_full_name() or student.username} için skor değeri sayı olmalı.")
+                    continue
+                score_val = max(0, min(100, score_val))
+                result, created = ExamResult.objects.get_or_create(
+                    exam=exam,
+                    student=student,
+                    defaults={"score": score_val, "feedback": feedback},
+                )
+                if not created:
+                    result.score = score_val
+                    result.feedback = feedback
+                    result.save()
+                    updated_count += 1
+                else:
+                    created_count += 1
+
+            if errors:
+                for err in errors:
+                    messages.error(request, err)
+            else:
+                messages.success(request, f"CSV içe aktarma tamamlandı. Toplam: {processed}, Yeni: {created_count}, Güncellenen: {updated_count}, Silinen: {deleted_count}.")
+                return redirect("manage_exam_scores", exam_id=exam.id)
+
         errors = []
         for student in students:
             score_raw = request.POST.get(f"score_{student.id}", "").strip()
@@ -612,6 +689,29 @@ def manage_exam_scores(request, exam_id):
             "student_rows": student_rows,
         },
     )
+
+def export_exam_scores_csv(request, exam_id):
+    exam = get_object_or_404(
+        Exam.objects.select_related("course__instructor"), id=exam_id, course__instructor=request.user
+    )
+    students = exam.course.students.all().order_by("first_name", "last_name", "username")
+    existing = {res.student_id: res for res in ExamResult.objects.filter(exam=exam).select_related("student")}
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["student_id", "username", "full_name", "email", "score", "feedback"])
+    for s in students:
+        res = existing.get(s.id)
+        writer.writerow([
+            s.id,
+            s.username,
+            s.get_full_name() or "",
+            s.email or "",
+            res.score if res else "",
+            res.feedback if res else "",
+        ])
+    resp = HttpResponse(output.getvalue(), content_type="text/csv")
+    resp["Content-Disposition"] = f"attachment; filename=exam-{exam.id}-scores.csv"
+    return resp
 
 def teacher_dashboard(request):
     courses = Course.objects.filter(instructor=request.user)
@@ -703,7 +803,7 @@ def course_detail(request, course_id):
     announcement_qs = (
         Announcement.objects.filter(course=course)
         .select_related("author")
-        .order_by("-created_at")[:6]
+        .order_by("-pinned", "-created_at")[:6]
     )
     announcement_cards = []
     for ann in announcement_qs:
@@ -887,6 +987,22 @@ def teacher_calendar(request):
 
     courses = Course.objects.filter(instructor=request.user).order_by("code")
     exams_filter = {"scheduled_at__isnull": False, "course__in": courses}
+    start_raw = request.GET.get("start")
+    end_raw = request.GET.get("end")
+    start_date = None
+    end_date = None
+    try:
+        if start_raw:
+            start_date = date.fromisoformat(start_raw)
+        if end_raw:
+            end_date = date.fromisoformat(end_raw)
+    except ValueError:
+        start_date = None
+        end_date = None
+    if start_date:
+        exams_filter["scheduled_at__date__gte"] = start_date
+    if end_date:
+        exams_filter["scheduled_at__date__lte"] = end_date
     if selected_course_ids:
         exams_filter["course_id__in"] = selected_course_ids
     exams_qs = (
@@ -941,6 +1057,8 @@ def teacher_calendar(request):
                 "courses": courses,
                 "selected_course_ids": selected_course_ids,
                 "upcoming_list": upcoming_list,
+                "start": start_date,
+                "end": end_date,
             },
         )
     else:
@@ -990,6 +1108,8 @@ def teacher_calendar(request):
                 "upcoming_list": upcoming_list,
                 "courses": courses,
                 "selected_course_ids": selected_course_ids,
+                "start": start_date,
+                "end": end_date,
             },
         )
 
@@ -1005,6 +1125,15 @@ def teacher_calendar_ics(request):
 
     courses = Course.objects.filter(instructor=request.user)
     exams_filter = {"scheduled_at__isnull": False, "course__in": courses}
+    start_raw = request.GET.get("start")
+    end_raw = request.GET.get("end")
+    try:
+        if start_raw:
+            exams_filter["scheduled_at__date__gte"] = date.fromisoformat(start_raw)
+        if end_raw:
+            exams_filter["scheduled_at__date__lte"] = date.fromisoformat(end_raw)
+    except ValueError:
+        pass
     if selected_course_ids:
         exams_filter["course_id__in"] = selected_course_ids
     exams_qs = Exam.objects.filter(**exams_filter).select_related("course").order_by("scheduled_at")
@@ -1023,6 +1152,7 @@ def teacher_calendar_ics(request):
         uid = f"exam-{exam.id}@eys"
         summary = f"{exam.course.code} - {exam.name}"
         description = (exam.description or "").replace("\n", "\\n")
+        url = reverse("exam_detail", args=[exam.id])
         lines.extend([
             "BEGIN:VEVENT",
             f"UID:{uid}",
@@ -1030,7 +1160,7 @@ def teacher_calendar_ics(request):
             f"DTSTART:{start_utc.strftime('%Y%m%dT%H%M%SZ')}",
             f"DTEND:{end_utc.strftime('%Y%m%dT%H%M%SZ')}",
             f"SUMMARY:{summary}",
-            f"DESCRIPTION:{description}",
+            f"DESCRIPTION:{description}\\nURL:{url}",
             "END:VEVENT",
         ])
     lines.append("END:VCALENDAR")

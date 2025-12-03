@@ -5,6 +5,15 @@
     <p style="margin:0; color:#9a9a9a; text-transform:uppercase; letter-spacing:0.08em; font-size:12px;">Sınav Not Girişi</p>
     <h1 style="margin:6px 0 0 0;">{{ exam.course.code }} • {{ exam.name }}</h1>
     <p style="color:#666;">Bu dersin tüm öğrencileri için skor ve geri bildirim girebilirsin. Boş bıraktığın satırlar silinir.</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+        <a href="{% url 'export_exam_scores_csv' exam.id %}"
+           style="padding:8px 12px; border:1px solid #ddd; border-radius:10px; text-decoration:none; color:#333;">CSV Dışa Aktar</a>
+        <form method="POST" enctype="multipart/form-data" style="display:inline-flex; gap:8px; align-items:center;">
+            {% csrf_token %}
+            <input type="file" name="csv_file" accept="text/csv" style="border:1px solid #ddd; border-radius:10px; padding:6px;">
+            <button type="submit" style="padding:8px 12px; border:none; border-radius:10px; background:#1f1f1f; color:white;">CSV İçe Aktar</button>
+        </form>
+    </div>
 </div>
 
 <form method="POST" style="background:white; border-radius:20px; padding:24px; box-shadow:0 20px 50px rgba(0,0,0,0.08); display:flex; flex-direction:column; gap:18px;">
@@ -50,5 +59,44 @@
         </button>
     </div>
 </form>
+<script>
+(function(){
+    const inputs = Array.from(document.querySelectorAll('input[name^="score_"]'));
+    const form = document.querySelector('form[method="POST"]');
+    inputs.forEach((inp, idx) => {
+        inp.addEventListener('keydown', function(e){
+            if (e.key === 'Enter' && !e.ctrlKey) {
+                e.preventDefault();
+                const next = inputs[idx+1];
+                if (next) next.focus();
+                return;
+            }
+            if (e.key === 'Enter' && e.ctrlKey) {
+                e.preventDefault();
+                if (form) form.submit();
+                return;
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = inputs[idx+1];
+                if (next) next.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = inputs[idx-1];
+                if (prev) prev.focus();
+            }
+        });
+        inp.addEventListener('focus', function(){
+            try { localStorage.setItem('lastScoreInput', inp.name); } catch(e) {}
+        });
+    });
+    try {
+        const last = localStorage.getItem('lastScoreInput');
+        if (last) {
+            const el = document.querySelector(`input[name="${last}"]`);
+            if (el) el.focus();
+        }
+    } catch(e) {}
+})();
+</script>
 {% endblock %}
-

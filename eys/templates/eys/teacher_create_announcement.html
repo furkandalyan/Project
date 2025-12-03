@@ -46,6 +46,11 @@
                         {% endfor %}
                     </div>
 
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        {{ form.pinned }}
+                        <label for="{{ form.pinned.id_for_label }}" style="font-weight:600; color:#333;">Sabit Duyuru</label>
+                    </div>
+
                     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                         <span style="color:#666; font-size:13px;">Hızlı şablonlar:</span>
                         <button type="button" id="tpl-homework"

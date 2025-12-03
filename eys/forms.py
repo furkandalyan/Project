@@ -40,14 +40,16 @@ class ExamLOWeightForm(forms.ModelForm):
 class AnnouncementForm(forms.ModelForm):
     class Meta:
         model = Announcement
-        fields = ['title', 'body', 'course']
+        fields = ['title', 'body', 'course', 'pinned']
         labels = {
             'title': 'Duyuru Başlığı',
             'body': 'Açıklama / Mesaj',
             'course': 'İlgili Ders (opsiyonel)',
+            'pinned': 'Sabit',
         }
         widgets = {
             'body': forms.Textarea(attrs={'rows': 6}),
+            'pinned': forms.CheckboxInput(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -71,6 +73,9 @@ class AnnouncementForm(forms.ModelForm):
         })
         self.fields['course'].widget.attrs.update({
             'style': select_style,
+        })
+        self.fields['pinned'].widget.attrs.update({
+            'style': 'width:auto;',
         })
 
 

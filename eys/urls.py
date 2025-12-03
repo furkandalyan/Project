@@ -27,4 +27,5 @@ urlpatterns = [
     path('teacher/exam/<int:exam_id>/', views.exam_detail, name='exam_detail'),
     path('teacher/exam/<int:exam_id>/add-lo-weight/', views.add_exam_lo_weight, name='add_exam_lo_weight'),
     path('teacher/exam/<int:exam_id>/grades/', views.manage_exam_scores, name='manage_exam_scores'),
+    path('teacher/exam/<int:exam_id>/grades/csv/', views.export_exam_scores_csv, name='export_exam_scores_csv'),
 ]
