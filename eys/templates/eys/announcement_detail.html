@@ -1,0 +1,77 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <!-- Duyuru Detayı Kartı -->
+    <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: 0 28px 60px rgba(0,0,0,0.08); margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h1 style="margin-top: 0;">{{ announcement.title }}</h1>
+                <p style="color: #6f6f6f; font-size: 14px;">
+                    Yayınlayan: <strong>{{ announcement.author.get_full_name|default:announcement.author.username }}</strong> | 
+                    Tarih: {{ announcement.created_at|date:"d M Y, H:i" }} |
+                    {% if announcement.course %}
+                        İlgili Ders: {{ announcement.course.name }}
+                    {% else %}
+                        Genel Duyuru
+                    {% endif %}
+                </p>
+            </div>
+            {% if announcement.pinned %}
+                <span style="background:#fff0da; color:#b86a00; padding:6px 12px; border-radius:999px; font-size:13px; font-weight: 600;">📌 Sabitlenmiş</span>
+            {% endif %}
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #f0f0f0; margin: 20px 0;">
+
+        <div style="line-height: 1.7; color: #333;">
+            {{ announcement.body|safe }}
+        </div>
+
+        {% if announcement.attachment %}
+            <div style="margin-top: 25px; padding: 15px; background: #f9f9f9; border-radius: 12px;">
+                <a href="{{ announcement.attachment.url }}" target="_blank" style="text-decoration: none; color: #1db954; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">📎</span>
+                    <span>{{ announcement.attachment.name|cut:"announcements/" }} dosyasını indir</span>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Yorumlar Bölümü -->
+    <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: 0 28px 60px rgba(0,0,0,0.08);">
+        <h2 style="margin-top: 0; margin-bottom: 20px;">Yorumlar ({{ comments.count }})</h2>
+
+        <!-- Yeni Yorum Formu -->
+        <form method="POST" style="display: flex; gap: 15px; margin-bottom: 30px;">
+            {% csrf_token %}
+            <div style="flex-grow: 1;">
+                {{ comment_form.body }}
+            </div>
+            <button type="submit" style="padding: 12px 20px; border: none; border-radius: 10px; background: #1db954; color: white; font-weight: 600; cursor: pointer; height: fit-content;">
+                Gönder
+            </button>
+        </form>
+
+        <!-- Yorum Listesi -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            {% for comment in comments %}
+                <div style="display: flex; gap: 15px;">
+                    <div style="width: 45px; height: 45px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #555; flex-shrink: 0;">
+                        {{ comment.author.first_name.0|default:comment.author.username.0|upper }}
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+                            <span style="font-size: 12px; color: #999;">{{ comment.created_at|date:"d M Y, H:i" }}</span>
+                        </div>
+                        <p style="margin: 5px 0 0 0; color: #444; white-space: pre-line;">{{ comment.body }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p style="color: #888; text-align: center; padding: 20px 0;">Henüz hiç yorum yapılmamış. İlk yorumu sen yap!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

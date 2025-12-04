@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from ckeditor.widgets import CKEditorWidget
 
-from .models import Course, LearningOutcome, Exam, ExamLOWeight, Announcement
+from .models import Course, LearningOutcome, Exam, ExamLOWeight, Announcement, AnnouncementComment
 
 User = get_user_model()
 
@@ -38,17 +39,17 @@ class ExamLOWeightForm(forms.ModelForm):
 
 
 class AnnouncementForm(forms.ModelForm):
+    body = forms.CharField(widget=CKEditorWidget(), label="Açıklama / Mesaj")
     class Meta:
         model = Announcement
-        fields = ['title', 'body', 'course', 'pinned']
+        fields = ['title', 'body', 'course', 'attachment', 'pinned']
         labels = {
             'title': 'Duyuru Başlığı',
-            'body': 'Açıklama / Mesaj',
             'course': 'İlgili Ders (opsiyonel)',
+            'attachment': 'Dosya Eki (opsiyonel)',
             'pinned': 'Sabit',
         }
         widgets = {
-            'body': forms.Textarea(attrs={'rows': 6}),
             'pinned': forms.CheckboxInput(),
         }
 
@@ -61,22 +62,31 @@ class AnnouncementForm(forms.ModelForm):
         self.fields['course'].required = False
         self.fields['course'].empty_label = "Genel duyuru (tüm öğrenciler)"
         base_input_style = "width:100%; padding:12px 14px; border:1px solid #e2e2e2; border-radius:10px; font-size:15px; font-family:inherit; background:#fff;"
-        textarea_style = base_input_style + " min-height:160px;"
         select_style = base_input_style + " background:#fdfdfd;"
         self.fields['title'].widget.attrs.update({
             'placeholder': 'Örn. Haftalık bilgilendirme, sınav duyurusu...',
             'style': base_input_style,
         })
-        self.fields['body'].widget.attrs.update({
-            'placeholder': 'Mesajınızı buraya yazın. Öğrenciler açıklamayı birebir görecek.',
-            'style': textarea_style,
-        })
         self.fields['course'].widget.attrs.update({
             'style': select_style,
+        })
+        self.fields['attachment'].widget.attrs.update({
+            'style': base_input_style,
         })
         self.fields['pinned'].widget.attrs.update({
             'style': 'width:auto;',
         })
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = AnnouncementComment
+        fields = ['body']
+        widgets = {
+            'body': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Yorumunuzu buraya yazın...'}),
+        }
+        labels = {
+            'body': ''
+        }
 
 
 class ProfileUpdateForm(forms.ModelForm):

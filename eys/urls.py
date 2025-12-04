@@ -12,10 +12,17 @@ urlpatterns = [
     path('student/calendar/', views.student_calendar, name='student_calendar'),
     path('student/announcements/', views.student_announcements, name='student_announcements'),
     path('student/profile/', views.student_profile, name='student_profile'),
+
     path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
+    path('teacher/announcements/', views.teacher_announcements, name='teacher_announcements'),
     path('teacher/announcements/new/', views.teacher_create_announcement, name='teacher_create_announcement'),
+    path('teacher/announcement/<int:ann_id>/edit/', views.edit_announcement, name='edit_announcement'),
+    path('teacher/announcement/<int:ann_id>/delete/', views.delete_announcement, name='delete_announcement'),
     path('teacher/calendar/', views.teacher_calendar, name='teacher_calendar'),
     path('teacher/calendar/ics/', views.teacher_calendar_ics, name='teacher_calendar_ics'),
+    
+    path('announcement/<int:ann_id>/', views.announcement_detail, name='announcement_detail'),
+
     path('search/', views.global_search, name='global_search'),
     path('affairs/dashboard/', views.affairs_dashboard, name='affairs_dashboard'),
 

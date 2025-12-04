@@ -1,0 +1,26 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; text-align: center;">
+    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 28px 60px rgba(0,0,0,0.08);">
+        <h2 style="margin-top: 0;">Duyuruyu Sil</h2>
+        <p style="color: #6f6f6f; line-height: 1.6;">
+            "{{ ann.title }}" başlıklı duyuruyu kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+        </p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
+                <a href="{% url 'teacher_dashboard' %}" 
+                   style="padding: 12px 24px; border-radius: 10px; background: #f0f0f0; color: #333; text-decoration: none; font-weight: 600;">
+                    İptal
+                </a>
+                <button type="submit" 
+                        style="padding: 12px 24px; border: none; border-radius: 10px; background: #d9534f; color: white; font-weight: 600; cursor: pointer;">
+                    Evet, Sil
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -101,6 +101,7 @@ class Announcement(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="announcements"
     )
+    attachment = models.FileField(upload_to='announcements/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     pinned = models.BooleanField(default=False)
 
@@ -111,3 +112,15 @@ class Announcement(models.Model):
         if self.course:
             return f"{self.course.code} - {self.title}"
         return self.title
+
+class AnnouncementComment(models.Model):
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcement_comments')
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f'Comment by {self.author} on {self.announcement}'

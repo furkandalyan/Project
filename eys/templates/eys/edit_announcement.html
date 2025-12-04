@@ -1,0 +1,68 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="background: white; padding: 34px; border-radius: 20px; box-shadow: 0 28px 60px rgba(0,0,0,0.08);">
+        <h2 style="margin-top: 0;">Duyuruyu Düzenle</h2>
+        <p style="color: #6f6f6f; line-height: 1.5;">
+            Duyurunun başlığını, içeriğini, ilgili dersi veya sabitlenme durumunu güncelleyebilirsiniz.
+        </p>
+
+        <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
+            {% csrf_token %}
+            {{ form.media }}
+            {% if form.non_field_errors %}
+                <div style="background: #fff2f2; border: 1px solid #ffbcbc; color: #c20000; padding: 12px; border-radius: 10px;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="{{ form.title.id_for_label }}" style="font-weight: 600; color: #333;">Başlık</label>
+                {{ form.title }}
+                {% for error in form.title.errors %}
+                    <span style="color: #d00000; font-size: 13px;">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="{{ form.body.id_for_label }}" style="font-weight: 600; color: #333;">Mesaj</label>
+                {{ form.body }}
+                {% for error in form.body.errors %}
+                    <span style="color: #d00000; font-size: 13px;">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="{{ form.course.id_for_label }}" style="font-weight: 600; color: #333;">İlgili Ders (opsiyonel)</label>
+                {{ form.course }}
+                <span style="color: #8a8a8a; font-size: 13px;">Boş bırakılırsa duyuru tüm öğrencilere gider.</span>
+                {% for error in form.course.errors %}
+                    <span style="color: #d00000; font-size: 13px;">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="{{ form.attachment.id_for_label }}" style="font-weight: 600; color: #333;">Dosya Eki (opsiyonel)</label>
+                {{ form.attachment }}
+                {% if ann.attachment %}
+                    <p style="font-size: 13px; color: #666; margin-top: 5px;">Mevcut dosya: <a href="{{ ann.attachment.url }}" target="_blank">{{ ann.attachment.name }}</a></p>
+                {% endif %}
+                {% for error in form.attachment.errors %}
+                    <span style="color: #d00000; font-size: 13px;">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px;">
+                {{ form.pinned }}
+                <label for="{{ form.pinned.id_for_label }}" style="font-weight: 600; color: #333;">Sabit Duyuru</label>
+            </div>
+
+            <button type="submit"
+                    style="padding: 14px 0; border: none; border-radius: 12px; background: linear-gradient(120deg,#1db954,#1aa34a); color: white; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 15px 25px rgba(29,185,84,0.25);">
+                Değişiklikleri Kaydet
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

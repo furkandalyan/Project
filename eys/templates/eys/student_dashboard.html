@@ -151,7 +151,11 @@
             <div style="border:1px solid #f0f0f0; border-radius:12px; padding:18px; background:#fcfcfc;">
                 <p style="margin:0; color:#1db954; font-size:13px; font-weight:600;">{{ card.meta }}</p>
                 <h4 style="margin:6px 0 6px 0;">{{ card.title }}</h4>
-                <p style="margin:0; color:#666;">{{ card.body }}</p>
+                <div style="margin:0; color:#666;">{{ card.body|safe }}</div>
+                {% if card.attachment %}
+                    <a href="{{ card.attachment.url }}" target="_blank" style="display: inline-block; margin-top: 10px; font-size: 13px; color: #2459c3; text-decoration: none; font-weight: 600;">📎 Eki İndir</a>
+                {% endif %}
+                <a href="{% url 'announcement_detail' card.id %}" style="display: inline-block; margin-top: 10px; font-size: 13px; color: #1db954; text-decoration: none; font-weight: 600;">Yorumları Gör →</a>
                 {% if card.course_label %}
                     <p style="margin:10px 0 0 0; color:#999; font-size:13px;">{{ card.course_label }}</p>
                 {% endif %}

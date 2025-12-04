@@ -12,9 +12,10 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
-from .models import Course, LearningOutcome, Exam, ExamLOWeight, Announcement, ExamResult
-from .forms import LOForm, ExamForm, ExamLOWeightForm, AnnouncementForm, ProfileUpdateForm
+from .models import Course, LearningOutcome, Exam, ExamLOWeight, Announcement, ExamResult, AnnouncementComment
+from .forms import LOForm, ExamForm, ExamLOWeightForm, AnnouncementForm, ProfileUpdateForm, CommentForm
 
 DAY_LABELS = [
     "Pazartesi",
@@ -223,8 +224,10 @@ def student_dashboard(request):
         )
         announcement_cards.append(
             {
+                "id": ann.id,
                 "title": ann.title,
                 "body": ann.body,
+                "attachment": ann.attachment,
                 "meta": f"{author_name} • {created_label}",
                 "course_label": f"{ann.course.code} · {ann.course.name}"
                 if ann.course
@@ -234,10 +237,12 @@ def student_dashboard(request):
     if not announcement_cards:
         announcement_cards = [
             {
+                "id": None,
                 "title": "Henüz duyuru yok",
                 "meta": "Takipte kal",
                 "body": "Öğretim elemanlarınız duyuru paylaştığında burada göreceksin.",
                 "course_label": "",
+                "attachment": None,
             }
         ]
 
@@ -356,6 +361,7 @@ def student_announcements(request):
                 "id": ann.id,
                 "title": ann.title,
                 "body": ann.body,
+                "attachment": ann.attachment,
                 "course_label": f"{ann.course.code} · {ann.course.name}" if ann.course else "Genel Duyuru",
                 "timestamp": timestamp,
                 "author_name": author_name,
@@ -524,7 +530,7 @@ def teacher_create_announcement(request):
         return redirect("home")
 
     if request.method == "POST":
-        form = AnnouncementForm(request.POST, user=request.user)
+        form = AnnouncementForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             ann = form.save(commit=False)
             ann.author = request.user
@@ -749,8 +755,10 @@ def teacher_dashboard(request):
         )
         announcement_cards.append(
             {
+                "id": ann.id,
                 "title": ann.title,
                 "body": ann.body,
+                "attachment": ann.attachment,
                 "meta": f"{author_name} • {created_label}",
                 "course_label": f"{ann.course.code} · {ann.course.name}"
                 if ann.course
@@ -812,8 +820,10 @@ def course_detail(request, course_id):
         initials = "".join([part[0] for part in author_name.split()[:2]]).upper() if author_name else "?"
         announcement_cards.append(
             {
+                "id": ann.id,
                 "title": ann.title,
                 "body": ann.body,
+                "attachment": ann.attachment,
                 "author": author_name,
                 "initials": initials,
                 "timestamp": created_local.strftime("%d.%m.%Y · %H:%M"),
@@ -1168,3 +1178,117 @@ def teacher_calendar_ics(request):
     resp = HttpResponse(content, content_type="text/calendar")
     resp["Content-Disposition"] = "attachment; filename=teacher-calendar.ics"
     return resp
+
+@login_required
+def edit_announcement(request, ann_id):
+    ann = get_object_or_404(Announcement, id=ann_id)
+    if ann.author != request.user:
+        messages.error(request, "Bu duyuruyu düzenleme yetkiniz yok.")
+        return redirect("teacher_dashboard")
+    
+    if request.method == "POST":
+        form = AnnouncementForm(request.POST, request.FILES, instance=ann, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Duyuru başarıyla güncellendi.")
+            return redirect("teacher_dashboard")
+    else:
+        form = AnnouncementForm(instance=ann, user=request.user)
+        
+    return render(request, "eys/edit_announcement.html", {"form": form, "ann": ann})
+
+@login_required
+def delete_announcement(request, ann_id):
+    ann = get_object_or_404(Announcement, id=ann_id)
+    if ann.author != request.user:
+        messages.error(request, "Bu duyuruyu silme yetkiniz yok.")
+        return redirect("teacher_dashboard")
+    
+    if request.method == "POST":
+        ann.delete()
+        messages.success(request, "Duyuru başarıyla silindi.")
+        return redirect("teacher_dashboard")
+    
+    return render(request, "eys/delete_announcement.html", {"ann": ann})
+
+@login_required
+def teacher_announcements(request):
+    if not request.user.role or request.user.role.name not in TEACHER_ROLES:
+        messages.error(request, "Bu sayfaya erişim yetkiniz yok.")
+        return redirect("home")
+
+    announcement_qs = Announcement.objects.filter(author=request.user).select_related("course").order_by("-pinned", "-created_at")
+
+    grouped = defaultdict(list)
+    for ann in announcement_qs:
+        local_created = timezone.localtime(ann.created_at)
+        date_key = local_created.date()
+        month_label = MONTH_LABELS[local_created.month - 1]
+        timestamp = f"{local_created.day} {month_label} {local_created.year} · {local_created.strftime('%H:%M')}"
+        
+        grouped[date_key].append(
+            {
+                "id": ann.id,
+                "title": ann.title,
+                "body": ann.body,
+                "attachment": ann.attachment,
+                "course_label": f"{ann.course.code} · {ann.course.name}" if ann.course else "Genel Duyuru",
+                "timestamp": timestamp,
+                "pinned": ann.pinned,
+            }
+        )
+
+    timeline = []
+    for day in sorted(grouped.keys(), reverse=True):
+        month_label = MONTH_LABELS[day.month - 1]
+        timeline.append(
+            {
+                "date_label": f"{day.day} {month_label} {day.year}",
+                "items": grouped[day],
+            }
+        )
+
+    return render(
+        request,
+        "eys/teacher_announcements.html",
+        {
+            "timeline": timeline,
+            "total_count": announcement_qs.count(),
+        },
+    )
+
+@login_required
+def announcement_detail(request, ann_id):
+    announcement = get_object_or_404(Announcement, id=ann_id)
+    comments = announcement.comments.select_related('author', 'author__role').all()
+
+    # Yetkilendirme: Öğrenciyse, kendi dersi mi veya genel duyuru mu?
+    if request.user.role.name == 'Student':
+        if announcement.course and announcement.course not in request.user.courses_taken.all():
+            messages.error(request, "Bu duyuruyu görüntüleme yetkiniz yok.")
+            return redirect('student_dashboard')
+    
+    # Yetkilendirme: Öğretmense, kendi dersi mi veya kendi duyurusu mu?
+    elif request.user.role.name in TEACHER_ROLES:
+        if announcement.course and announcement.course.instructor != request.user:
+            if announcement.author != request.user:
+                 messages.error(request, "Bu duyuruyu görüntüleme yetkiniz yok.")
+                 return redirect('teacher_dashboard')
+
+    if request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.announcement = announcement
+            new_comment.author = request.user
+            new_comment.save()
+            messages.success(request, "Yorumunuz eklendi.")
+            return redirect('announcement_detail', ann_id=announcement.id)
+    else:
+        comment_form = CommentForm()
+
+    return render(request, 'eys/announcement_detail.html', {
+        'announcement': announcement,
+        'comments': comments,
+        'comment_form': comment_form,
+    })
