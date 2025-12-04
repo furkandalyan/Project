@@ -35,6 +35,15 @@
     </div>
 </div>
 
+{% if user.is_authenticated and course.instructor == user %}
+<div style="text-align:center; margin:-10px 0 25px 0;">
+    <a href="{% url 'teacher_assignment_create' %}?course_id={{ course.id }}"
+       style="display:inline-block; background:#2459c3; color:white; padding:12px 18px; border-radius:10px; text-decoration:none; font-weight:700;">
+        Bu derse ödev ekle
+    </a>
+</div>
+{% endif %}
+
 <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:30px;">
     <div style="background:white; border-radius:18px; padding:28px; box-shadow:0 12px 28px rgba(0,0,0,0.08);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -122,6 +131,40 @@
             {% empty %}
             <p style="color:#999;">Henüz sınav eklenmemiş.</p>
             {% endfor %}
+        </div>
+    </div>
+
+    <div style="background:white; border-radius:18px; padding:28px; box-shadow:0 12px 28px rgba(0,0,0,0.08);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="margin:0;">Materyaller</h2>
+            {% if user.is_authenticated and course.instructor == user %}
+                <a href="{% url 'create_material' %}?course_id={{ course.id }}&next={% url 'course_detail' course.id %}"
+                   style="background:#1db954; padding:10px 18px; color:white; border-radius:8px; text-decoration:none; font-weight:600;">
+                    Materyal Ekle +
+                </a>
+            {% endif %}
+        </div>
+        <div style="margin-top:16px; display:flex; flex-direction:column; gap:10px;">
+            {% if materials_by_week %}
+                {% for week, mats in materials_by_week.items %}
+                    <div style="border:1px solid #eee; border-radius:12px; padding:12px;">
+                        <div style="font-weight:700; margin-bottom:8px;">Hafta {{ week }}</div>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            {% for m in mats %}
+                                <div style="padding:8px; background:#f7f9fc; border-radius:10px;">
+                                    <div style="font-weight:600;">{{ m.title }}</div>
+                                    <div style="color:#555; font-size:14px;">{{ m.description|default:"" }}</div>
+                                    {% if m.attachment %}
+                                        <a href="{{ m.attachment.url }}" style="color:#2459c3;">İndir</a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="color:#777;">Materyal yok.</p>
+            {% endif %}
         </div>
     </div>
 </div>

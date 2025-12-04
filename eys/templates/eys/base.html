@@ -185,10 +185,14 @@
                     <a href="{% url 'student_dashboard' %}" class="brand">Dashboard</a>
                     <a href="{% url 'student_courses' %}">Derslerim</a>
                     <a href="{% url 'student_calendar' %}">Takvimim</a>
+                    <a href="{% url 'student_assignments' %}">Ödevler</a>
+                    <a href="{% url 'student_materials' %}">Materyaller</a>
                     <a href="{% url 'student_announcements' %}">Duyurular</a>
                 {% elif user.role.name == 'Regular Instructor' or user.role.name == 'Advisor Instructor' or user.role.name == 'Head of Department' %}
                     <a href="{% url 'teacher_dashboard' %}" class="brand">Dashboard</a>
                     <a href="{% url 'teacher_courses' %}">Derslerim</a>
+                    <a href="{% url 'teacher_assignments' %}">Ödevler</a>
+                    <a href="{% url 'teacher_materials' %}">Materyaller</a>
                     <a href="{% url 'teacher_announcements' %}">Duyurularım</a>
                     <a href="{% url 'teacher_create_announcement' %}">Duyuru Oluştur</a>
                 {% else %}
@@ -210,15 +214,16 @@
 
         <div class="nav-right">
             {% if user.is_authenticated %}
-                <div class="nav-notify">
-                    <button class="nav-icon" id="notif-toggle" type="button" title="Sistem aktiviteleri">
-                        🔔
-                    </button>
-                </div>
-                <button class="theme-toggle" id="theme-toggle" type="button">🌙</button>
+                <a class="nav-icon" href="{{ nav_notification_target }}" title="Bildirimler">
+                    🔔
+                    {% if nav_notification_count > 0 %}
+                        <span class="badge">{{ nav_notification_count }}</span>
+                    {% endif %}
+                </a>
+                <button class="theme-toggle" id="theme-toggle" type="button">Tema</button>
                 <a href="/logout/" class="primary-btn">Çıkış</a>
             {% else %}
-                <button class="theme-toggle" id="theme-toggle" type="button">🌙</button>
+                <button class="theme-toggle" id="theme-toggle" type="button">Tema</button>
                 <a href="/login/" class="primary-btn">Giriş Yap</a>
             {% endif %}
         </div>

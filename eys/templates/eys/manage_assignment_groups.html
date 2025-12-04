@@ -1,0 +1,36 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:16px;">
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.06);">
+        <h2 style="margin-top:0;">Gruplar - {{ assignment.title }}</h2>
+        <form method="POST" style="display:flex; flex-direction:column; gap:10px;">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" style="align-self:flex-start; background:#2459c3; color:white; padding:10px 16px; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Grup Ekle</button>
+        </form>
+    </div>
+
+    <div style="background:white; padding:18px; border-radius:12px; box-shadow:0 8px 18px rgba(0,0,0,0.06);">
+        <h3 style="margin-top:0;">Mevcut Gruplar</h3>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            {% for g in groups %}
+                <div style="border:1px solid #eee; border-radius:10px; padding:10px 12px;">
+                    <strong>{{ g.name }}</strong>
+                    <div style="font-size:13px; color:#666; margin-top:6px;">
+                        {% if g.members.all %}
+                            {% for m in g.members.all %}
+                                <span style="display:inline-block; padding:4px 8px; background:#f7f9fc; border-radius:8px; margin:2px 4px 2px 0;">{{ m.get_full_name|default:m.username }}</span>
+                            {% endfor %}
+                        {% else %}
+                            Üye yok.
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div style="color:#777;">Henüz grup yok.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

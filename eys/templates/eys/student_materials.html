@@ -1,0 +1,37 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; flex-direction:column; gap:12px; margin-bottom:12px;">
+    <h2 style="margin:0;">Materyaller</h2>
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <label style="font-size:14px; color:#555;">Ders:</label>
+        <select name="course_id" onchange="this.form.submit()" style="padding:10px; border-radius:10px; border:1px solid #e2e2e2;">
+            {% for c in courses %}
+                <option value="{{ c.id }}" {% if selected_course and c.id == selected_course.id %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
+            {% endfor %}
+        </select>
+        <label style="font-size:14px; color:#555;">Hafta:</label>
+        <select name="week" onchange="this.form.submit()" style="padding:10px; border-radius:10px; border:1px solid #e2e2e2;">
+            <option value="">Tümü</option>
+            {% for w in weeks %}
+                <option value="{{ w }}" {% if selected_week == w %}selected{% endif %}>Hafta {{ w }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px;">
+    {% for m in materials %}
+    <div style="background:white; padding:14px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.06);">
+        <div style="font-size:13px; color:#888;">Hafta {{ m.week }}</div>
+        <div style="font-weight:700; font-size:16px; margin:4px 0;">{{ m.title }}</div>
+        <div style="color:#555; font-size:14px;">{{ m.description|default:"" }}</div>
+        {% if m.attachment %}
+            <div style="margin-top:8px;"><a href="{{ m.attachment.url }}" style="color:#2459c3;">Dosyayı indir</a></div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div style="color:#777;">Materyal bulunamadı.</div>
+    {% endfor %}
+</div>
+{% endblock %}

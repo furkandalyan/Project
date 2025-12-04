@@ -1,0 +1,35 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div>
+        <h2 style="margin:0;">Ödevler</h2>
+        <p style="color:#777; margin:4px 0 0;">Derslerine bağlı tüm ödevler</p>
+    </div>
+    <a href="{% url 'teacher_assignment_create' %}" style="background:#1db954; color:white; padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:600;">Yeni Ödev</a>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+    {% for assignment in assignments %}
+    <div style="background:white; border-radius:12px; padding:16px; box-shadow:0 8px 20px rgba(0,0,0,0.06);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-size:13px; color:#888;">{{ assignment.course.code }}</div>
+                <div style="font-weight:700; font-size:16px;">{{ assignment.title }}</div>
+            </div>
+            <a href="{% url 'teacher_assignment_detail' assignment.id %}" style="color:#2459c3; font-weight:600;">Detay</a>
+        </div>
+        <div style="margin-top:10px; color:#555; font-size:14px;">
+            {% if assignment.due_at %}
+                Teslim: {{ assignment.due_at|date:"d.m.Y H:i" }}
+            {% else %}
+                Teslim tarihi yok
+            {% endif %}
+        </div>
+        <div style="margin-top:8px; font-size:13px; color:#777;">Maksimum: {{ assignment.max_score }}</div>
+    </div>
+    {% empty %}
+    <div style="color:#777;">Henüz ödev yok.</div>
+    {% endfor %}
+</div>
+{% endblock %}

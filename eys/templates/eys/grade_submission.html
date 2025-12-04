@@ -1,0 +1,30 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="max-width:520px; margin:0 auto;">
+    <div style="background:white; padding:24px; border-radius:12px; box-shadow:0 10px 24px rgba(0,0,0,0.08);">
+        <h2 style="margin-top:0;">Notlandır</h2>
+        <p style="color:#777; margin-top:4px;">{{ submission.assignment.title }} • {{ submission.student.get_full_name|default:submission.student.username }}</p>
+        <div style="font-size:13px; color:#666; margin-bottom:12px;">
+            {% if submission.file %}
+                <a href="{{ submission.file.url }}" target="_blank" style="color:#2459c3;">Dosyayı aç</a>
+            {% endif %}
+            {% if submission.attachments.all %}
+                <div style="margin-top:6px; font-size:13px; color:#444;">Ekler:
+                {% for att in submission.attachments.all %}
+                    <a href="{{ att.file.url }}" style="color:#2459c3;">v{{ att.version }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                </div>
+            {% endif %}
+            {% if submission.text %}
+                <div style="margin-top:6px; padding:10px; background:#f7f9fc; border-radius:8px;">{{ submission.text }}</div>
+            {% endif %}
+        </div>
+        <form method="POST" style="display:flex; flex-direction:column; gap:12px;">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" style="background:#1db954; color:white; padding:12px 0; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Kaydet</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

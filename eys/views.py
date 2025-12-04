@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 import csv
 import io
+import zipfile
 
 from django.db.models import Avg, Count, Q
 from django.shortcuts import render, redirect, get_object_or_404
@@ -14,8 +15,39 @@ from django.utils import timezone
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
-from .models import Course, LearningOutcome, Exam, ExamLOWeight, Announcement, ExamResult, AnnouncementComment
-from .forms import LOForm, ExamForm, ExamLOWeightForm, AnnouncementForm, ProfileUpdateForm, CommentForm
+from .models import (
+    Course,
+    LearningOutcome,
+    Exam,
+    ExamLOWeight,
+    Announcement,
+    ExamResult,
+    AnnouncementComment,
+    Assignment,
+    Submission,
+    Notification,
+    SubmissionAttachment,
+    AssignmentCriterion,
+    SubmissionCriterionScore,
+    AssignmentGroup,
+    CourseMaterial,
+    AssignmentTemplate,
+)
+from .forms import (
+    LOForm,
+    ExamForm,
+    ExamLOWeightForm,
+    AnnouncementForm,
+    ProfileUpdateForm,
+    CommentForm,
+    AssignmentForm,
+    SubmissionForm,
+    GradeSubmissionForm,
+    AssignmentCriterionForm,
+    AssignmentGroupForm,
+    CourseMaterialForm,
+    AssignmentTemplateForm,
+)
 
 DAY_LABELS = [
     "Pazartesi",
@@ -43,6 +75,18 @@ MONTH_LABELS = [
 ]
 
 TEACHER_ROLES = {"Regular Instructor", "Advisor Instructor", "Head of Department"}
+
+
+def create_notification(user, kind, message, url="", payload=""):
+    if not user:
+        return
+    Notification.objects.create(
+        user=user,
+        kind=kind,
+        message=message[:255],
+        url=url or "",
+        payload=payload or "",
+    )
 
 
 def serialize_exam_for_student(exam, now=None):
@@ -793,6 +837,10 @@ def course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     los = LearningOutcome.objects.filter(course=course).prefetch_related("examloweight_set__exam")
     exams = Exam.objects.filter(course=course).prefetch_related("examloweight_set__learning_outcome")
+    materials = CourseMaterial.objects.filter(course=course).order_by("week", "-created_at")
+    materials_by_week = defaultdict(list)
+    for mat in materials:
+        materials_by_week[mat.week].append(mat)
     instructor = course.instructor
     if instructor:
         instructor_name = instructor.get_full_name() or instructor.username
@@ -889,6 +937,7 @@ def course_detail(request, course_id):
         "exams": exams,
         "announcement_cards": announcement_cards,
         "student_cards": student_cards,
+        "materials_by_week": materials_by_week,
         "upcoming_exam_label": upcoming_exam_label,
         "student_count": course.students.count(),
         "term_label": getattr(course, "term", None) or "Belirtilmedi",
@@ -1282,6 +1331,14 @@ def announcement_detail(request, ann_id):
             new_comment.announcement = announcement
             new_comment.author = request.user
             new_comment.save()
+            if announcement.author and announcement.author != request.user:
+                url = reverse("announcement_detail", args=[announcement.id])
+                create_notification(
+                    announcement.author,
+                    "announcement_comment",
+                    f"{request.user.username} duyuruna yorum yaptı",
+                    url=url,
+                )
             messages.success(request, "Yorumunuz eklendi.")
             return redirect('announcement_detail', ann_id=announcement.id)
     else:
@@ -1292,3 +1349,464 @@ def announcement_detail(request, ann_id):
         'comments': comments,
         'comment_form': comment_form,
     })
+
+
+@login_required
+def teacher_assignments(request):
+    if not request.user.role or request.user.role.name not in TEACHER_ROLES:
+        messages.error(request, "Bu sayfaya erişim yetkiniz yok.")
+        return redirect("home")
+    assignments = (
+        Assignment.objects.filter(course__instructor=request.user)
+        .select_related("course")
+        .order_by("-published_at", "-created_at")
+    )
+    templates = AssignmentTemplate.objects.filter(created_by=request.user)
+    return render(
+        request,
+        "eys/teacher_assignments.html",
+        {"assignments": assignments, "templates": templates},
+    )
+
+
+@login_required
+def teacher_assignment_create(request):
+    if not request.user.role or request.user.role.name not in TEACHER_ROLES:
+        messages.error(request, "Bu sayfaya erişim yetkiniz yok.")
+        return redirect("home")
+
+    initial = {}
+    try:
+        preferred_course_id = int(request.GET.get("course_id"))
+        course = Course.objects.filter(instructor=request.user, id=preferred_course_id).first()
+        if course:
+            initial["course"] = course
+    except (TypeError, ValueError):
+        pass
+    template_id = request.GET.get("template_id")
+    template_obj = None
+    if template_id:
+        template_obj = AssignmentTemplate.objects.filter(id=template_id, created_by=request.user).first()
+        if template_obj:
+            initial.update(
+                {
+                    "title": template_obj.title,
+                    "description": template_obj.description,
+                    "max_score": template_obj.max_score,
+                }
+            )
+
+    if request.method == "POST":
+        form = AssignmentForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.created_by = request.user
+            if not assignment.published_at:
+                assignment.published_at = timezone.now()
+            assignment.save()
+            # Kriterleri şablondan klonla
+            if template_obj:
+                for crit in template_obj.assignmentcriterion_set.all():
+                    AssignmentCriterion.objects.create(
+                        assignment=assignment,
+                        title=crit.title,
+                        max_score=crit.max_score,
+                        order=crit.order,
+                    )
+            for student in assignment.course.students.all():
+                url = reverse("student_assignment_detail", args=[assignment.id])
+                create_notification(
+                    student,
+                    "new_assignment",
+                    f"{assignment.course.code} için yeni ödev: {assignment.title}",
+                    url=url,
+                )
+            messages.success(request, "Ödev kaydedildi.")
+            return redirect("teacher_assignments")
+    else:
+        form = AssignmentForm(user=request.user, initial=initial)
+    return render(request, "eys/teacher_assignment_form.html", {"form": form})
+
+
+@login_required
+def teacher_assignment_detail(request, assignment_id):
+    assignment = get_object_or_404(
+        Assignment.objects.select_related("course", "created_by"),
+        id=assignment_id,
+        course__instructor=request.user,
+    )
+    status_filter = request.GET.get("status", "").strip()
+    submissions_qs = assignment.submissions.select_related("student").prefetch_related("attachments", "criterion_scores__criterion")
+    if status_filter == "pending":
+        submissions_qs = submissions_qs.filter(score__isnull=True)
+    elif status_filter == "graded":
+        submissions_qs = submissions_qs.filter(score__isnull=False)
+    submissions = submissions_qs.order_by("-submitted_at")
+    submitted_count = submissions.count()
+    total_students = assignment.course.students.count()
+    graded_count = submissions.exclude(score__isnull=True).count()
+    average_score = submissions.aggregate(avg=Avg("score"))["avg"] if graded_count else None
+    missing_students = assignment.course.students.exclude(id__in=submissions.values_list("student_id", flat=True))
+    context = {
+        "assignment": assignment,
+        "submissions": submissions,
+        "submitted_count": submitted_count,
+        "total_students": total_students,
+        "graded_count": graded_count,
+        "average_score": average_score,
+        "missing_students": missing_students,
+        "status_filter": status_filter,
+        "criteria": assignment.criteria.all(),
+    }
+    return render(request, "eys/teacher_assignment_detail.html", context)
+
+
+@login_required
+def teacher_materials(request):
+    if not request.user.role or request.user.role.name not in TEACHER_ROLES:
+        messages.error(request, "Bu sayfaya erişim yetkiniz yok.")
+        return redirect("home")
+    materials = (
+        CourseMaterial.objects.filter(course__instructor=request.user)
+        .select_related("course")
+        .order_by("course__code", "week", "-created_at")
+    )
+    return render(
+        request,
+        "eys/teacher_materials.html",
+        {"materials": materials},
+    )
+
+
+@login_required
+def create_material(request):
+    if not request.user.role or request.user.role.name not in TEACHER_ROLES:
+        messages.error(request, "Bu sayfaya erişim yetkiniz yok.")
+        return redirect("home")
+    initial = {}
+    try:
+        cid = int(request.GET.get("course_id"))
+        course = Course.objects.filter(instructor=request.user, id=cid).first()
+        if course:
+            initial["course"] = course
+            last_week = CourseMaterial.objects.filter(course=course).order_by("-week").first()
+            if last_week:
+                initial["week"] = last_week.week
+    except (TypeError, ValueError):
+        pass
+    if request.method == "POST":
+        form = CourseMaterialForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            mat = form.save(commit=False)
+            mat.created_by = request.user
+            mat.save()
+            messages.success(request, "Materyal eklendi.")
+            next_url = request.GET.get("next")
+            if next_url:
+                return redirect(next_url)
+            return redirect("teacher_materials")
+    else:
+        form = CourseMaterialForm(user=request.user, initial=initial)
+    return render(request, "eys/create_material.html", {"form": form})
+
+
+@login_required
+def student_materials(request):
+    if not request.user.role or request.user.role.name != "Student":
+        messages.error(request, "Bu sayfaya erişim yetkiniz yok.")
+        return redirect("home")
+    courses = list(request.user.courses_taken.all())
+    if not courses:
+        return render(request, "eys/student_materials.html", {"courses": [], "materials": []})
+    try:
+        selected_course_id = int(request.GET.get("course_id", courses[0].id))
+    except ValueError:
+        selected_course_id = courses[0].id
+    selected_course = None
+    for c in courses:
+        if c.id == selected_course_id:
+            selected_course = c
+            break
+    if selected_course is None:
+        selected_course = courses[0]
+    materials_qs = CourseMaterial.objects.filter(course=selected_course).order_by("week", "-created_at")
+    weeks = sorted({m.week for m in materials_qs})
+    try:
+        selected_week = int(request.GET.get("week")) if request.GET.get("week") else None
+    except ValueError:
+        selected_week = None
+    if selected_week:
+        materials_qs = materials_qs.filter(week=selected_week)
+    return render(
+        request,
+        "eys/student_materials.html",
+        {
+            "courses": courses,
+            "selected_course": selected_course,
+            "weeks": weeks,
+            "selected_week": selected_week,
+            "materials": materials_qs,
+        },
+    )
+
+
+@login_required
+def grade_submission(request, submission_id):
+    submission = get_object_or_404(
+        Submission.objects.select_related("assignment", "assignment__course"),
+        id=submission_id,
+    )
+    if submission.assignment.course.instructor != request.user:
+        messages.error(request, "Bu teslimi notlama yetkiniz yok.")
+        return redirect("home")
+
+    criteria = list(submission.assignment.criteria.all())
+    existing_scores = {
+        sc.criterion_id: sc for sc in SubmissionCriterionScore.objects.filter(submission=submission)
+    }
+    if request.method == "POST":
+        form = GradeSubmissionForm(request.POST, instance=submission, criteria=criteria)
+        if form.is_valid():
+            graded = form.save(commit=False)
+            graded.graded_by = request.user
+            graded.graded_at = timezone.now()
+            graded.save()
+            # Kriter bazlı puanları kaydet
+            for crit in criteria:
+                score_val = form.cleaned_data.get(f"criterion_{crit.id}")
+                feedback_val = form.cleaned_data.get(f"criterion_{crit.id}_feedback")
+                if score_val is None:
+                    continue
+                SubmissionCriterionScore.objects.update_or_create(
+                    submission=submission,
+                    criterion=crit,
+                    defaults={"score": score_val, "feedback": feedback_val or ""},
+                )
+            url = reverse("student_assignment_detail", args=[submission.assignment.id])
+            create_notification(
+                submission.student,
+                "submission_graded",
+                f"{submission.assignment.title} ödevin notlandı",
+                url=url,
+            )
+            messages.success(request, "Puan güncellendi.")
+            return redirect("teacher_assignment_detail", assignment_id=submission.assignment.id)
+    else:
+        form = GradeSubmissionForm(instance=submission, criteria=criteria, existing_scores=existing_scores)
+    return render(
+        request,
+        "eys/grade_submission.html",
+        {"form": form, "submission": submission, "criteria": criteria},
+    )
+
+
+@login_required
+def student_assignments(request):
+    if not request.user.role or request.user.role.name != "Student":
+        messages.error(request, "Bu sayfaya erişim yetkiniz yok.")
+        return redirect("home")
+    assignments_qs = Assignment.objects.filter(course__students=request.user, published_at__isnull=False).select_related("course").distinct()
+    submission_map = {
+        sub.assignment_id: sub
+        for sub in Submission.objects.filter(assignment__in=assignments_qs, student=request.user)
+    }
+    upcoming = []
+    past = []
+    now = timezone.now()
+    for assignment in assignments_qs:
+        assignment.user_submission = submission_map.get(assignment.id)
+        assignment.status_label = "Teslim edilmedi"
+        if assignment.user_submission:
+            if assignment.user_submission.score is not None:
+                assignment.status_label = "Notlandı"
+            else:
+                assignment.status_label = "Teslim edildi"
+        target_list = upcoming if (assignment.due_at and assignment.due_at >= now) else past
+        target_list.append(assignment)
+    upcoming = sorted(upcoming, key=lambda a: a.due_at or now)
+    past = sorted(past, key=lambda a: a.due_at or now, reverse=True)
+    return render(request, "eys/student_assignments.html", {"upcoming": upcoming, "past": past})
+
+
+@login_required
+def student_assignment_detail(request, assignment_id):
+    assignment = get_object_or_404(
+        Assignment.objects.select_related("course", "created_by"),
+        id=assignment_id,
+        course__students=request.user,
+    )
+    submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
+    user_groups = assignment.groups.filter(members=request.user)
+    initial_group = user_groups.first() if user_groups.exists() else None
+
+    if request.method == "POST":
+        form = SubmissionForm(request.POST, request.FILES, instance=submission)
+        if form.is_valid():
+            submission_obj = form.save(commit=False)
+            submission_obj.assignment = assignment
+            submission_obj.student = request.user
+            if assignment.is_group:
+                submission_obj.group = initial_group
+            now = timezone.now()
+            if assignment.due_at and now > assignment.due_at:
+                messages.error(request, "Son teslim tarihi geçtiği için gönderilemedi.")
+                return redirect("student_assignment_detail", assignment_id=assignment.id)
+            submission_obj.version = (submission.version + 1) if submission else 1
+            submission_obj.save()
+            # Çoklu dosya ekleri
+            files = request.FILES.getlist("attachments")
+            for f in files:
+                SubmissionAttachment.objects.create(
+                    submission=submission_obj,
+                    file=f,
+                    version=submission_obj.version,
+                )
+            if assignment.course.instructor:
+                url = reverse("teacher_assignment_detail", args=[assignment.id])
+                create_notification(
+                    assignment.course.instructor,
+                    "submission_received",
+                    f"{request.user.username} {assignment.title} ödevini teslim etti",
+                    url=url,
+                )
+            messages.success(request, "Gönderimin kaydedildi.")
+            return redirect("student_assignment_detail", assignment_id=assignment.id)
+    else:
+        form = SubmissionForm(instance=submission)
+
+    return render(
+        request,
+        "eys/student_assignment_detail.html",
+        {
+            "assignment": assignment,
+            "submission": submission,
+            "form": form,
+            "user_group": initial_group if assignment.is_group else None,
+        },
+    )
+
+
+@login_required
+def notifications(request):
+    notifs = Notification.objects.filter(user=request.user).order_by("-created_at")
+    return render(
+        request,
+        "eys/notifications.html",
+        {"notifications": notifs},
+    )
+
+
+@login_required
+def mark_notification_read(request, notif_id):
+    notif = get_object_or_404(Notification, id=notif_id, user=request.user)
+    if not notif.is_read:
+        notif.is_read = True
+        notif.read_at = timezone.now()
+        notif.save(update_fields=["is_read", "read_at"])
+    if notif.url:
+        return redirect(notif.url)
+    return redirect("notifications")
+
+
+@login_required
+def mark_all_notifications_read(request):
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True, read_at=timezone.now())
+    return redirect("notifications")
+
+
+@login_required
+def manage_assignment_criteria(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id, course__instructor=request.user)
+    if request.method == "POST":
+        form = AssignmentCriterionForm(request.POST)
+        if form.is_valid():
+            crit = form.save(commit=False)
+            crit.assignment = assignment
+            crit.save()
+            messages.success(request, "Kriter eklendi.")
+            return redirect("manage_assignment_criteria", assignment_id=assignment.id)
+    else:
+        form = AssignmentCriterionForm()
+    criteria = assignment.criteria.all()
+    return render(
+        request,
+        "eys/manage_assignment_criteria.html",
+        {"assignment": assignment, "form": form, "criteria": criteria},
+    )
+
+
+@login_required
+def manage_assignment_groups(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id, course__instructor=request.user)
+    students_qs = assignment.course.students.all()
+    if request.method == "POST":
+        form = AssignmentGroupForm(request.POST, students_qs=students_qs)
+        if form.is_valid():
+            group = form.save(commit=False)
+            group.assignment = assignment
+            group.save()
+            form.save_m2m()
+            messages.success(request, "Grup kaydedildi.")
+            return redirect("manage_assignment_groups", assignment_id=assignment.id)
+    else:
+        form = AssignmentGroupForm(students_qs=students_qs)
+    groups = assignment.groups.prefetch_related("members")
+    return render(
+        request,
+        "eys/manage_assignment_groups.html",
+        {"assignment": assignment, "form": form, "groups": groups},
+    )
+
+
+@login_required
+def send_assignment_reminders(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id, course__instructor=request.user)
+    submitted_ids = assignment.submissions.values_list("student_id", flat=True)
+    missing_students = assignment.course.students.exclude(id__in=submitted_ids)
+    count = 0
+    for student in missing_students:
+        url = reverse("student_assignment_detail", args=[assignment.id])
+        create_notification(
+            student,
+            "assignment_due",
+            f"{assignment.title} ödevini teslim etmen gerekiyor.",
+            url=url,
+        )
+        count += 1
+    messages.success(request, f"Hatırlatma gönderildi ({count} öğrenci).")
+    return redirect("teacher_assignment_detail", assignment_id=assignment.id)
+
+
+@login_required
+def export_submissions_csv(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id, course__instructor=request.user)
+    submissions = assignment.submissions.select_related("student")
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="assignment-{assignment_id}-submissions.csv"'
+    writer = csv.writer(response)
+    writer.writerow(["Öğrenci", "Kullanıcı adı", "Puan", "Geri bildirim", "Gönderim Tarihi"])
+    for sub in submissions:
+        writer.writerow([
+            sub.student.get_full_name() or sub.student.username,
+            sub.student.username,
+            sub.score or "",
+            (sub.feedback or "").replace("\n", " "),
+            timezone.localtime(sub.submitted_at).strftime("%d.%m.%Y %H:%M"),
+        ])
+    return response
+
+
+@login_required
+def export_submissions_zip(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id, course__instructor=request.user)
+    submissions = assignment.submissions.prefetch_related("attachments", "student")
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as zf:
+        for sub in submissions:
+            for att in sub.attachments.all():
+                filename = f"{sub.student.username}_v{att.version}_{att.file.name.split('/')[-1]}"
+                with att.file.open("rb") as f:
+                    zf.writestr(filename, f.read())
+    resp = HttpResponse(buffer.getvalue(), content_type="application/zip")
+    resp["Content-Disposition"] = f'attachment; filename="assignment-{assignment_id}-submissions.zip"'
+    return resp

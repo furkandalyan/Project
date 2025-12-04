@@ -1,0 +1,32 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div>
+        <h2 style="margin:0;">Bildirimler</h2>
+        <p style="color:#777; margin:4px 0 0;">Duyuru, ödev ve yorum hareketleri</p>
+    </div>
+    <a href="{% url 'mark_all_notifications_read' %}" style="color:#2459c3; font-weight:600;">Tümünü okundu işaretle</a>
+</div>
+
+<div style="display:flex; flex-direction:column; gap:10px;">
+    {% for notif in notifications %}
+    <div style="background:white; padding:14px 16px; border-radius:12px; box-shadow:0 8px 18px rgba(0,0,0,0.06); display:flex; justify-content:space-between; align-items:center; {% if not notif.is_read %}border-left:4px solid #1db954;{% endif %}">
+        <div>
+            <div style="font-weight:700;">{{ notif.message }}</div>
+            <div style="color:#777; font-size:13px;">{{ notif.kind }} • {{ notif.created_at|date:"d.m.Y H:i" }}</div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+            {% if notif.url %}
+                <a href="{{ notif.url }}" style="color:#2459c3; font-weight:600;">Git</a>
+            {% endif %}
+            {% if not notif.is_read %}
+                <a href="{% url 'mark_notification_read' notif.id %}" style="color:#1db954; font-weight:600;">Okundu</a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div style="color:#777;">Bildirim yok.</div>
+    {% endfor %}
+</div>
+{% endblock %}

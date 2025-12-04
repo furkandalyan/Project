@@ -1,0 +1,15 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="max-width:640px; margin:0 auto;">
+    <div style="background:white; padding:26px; border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,0.08);">
+        <h2 style="margin-top:0;">Materyal Ekle</h2>
+        <p style="color:#777;">Ders ve hafta seçerek materyal yükleyin.</p>
+        <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:12px;">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" style="background:#1db954; color:white; padding:12px 0; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Kaydet</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

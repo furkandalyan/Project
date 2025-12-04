@@ -1,0 +1,62 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:16px;">
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 8px 22px rgba(0,0,0,0.06);">
+        <div style="font-size:13px; color:#888;">{{ assignment.course.code }}</div>
+        <h2 style="margin:6px 0;">{{ assignment.title }}</h2>
+        <div style="color:#555; font-size:14px; margin-bottom:8px;">
+            {% if assignment.due_at %}Teslim: {{ assignment.due_at|date:"d.m.Y H:i" }}{% else %}Teslim tarihi yok{% endif %}
+            • Maks: {{ assignment.max_score }}
+        </div>
+        <div style="color:#444;">{{ assignment.description|default:"Açıklama yok." }}</div>
+        {% if assignment.attachment %}
+            <div style="margin-top:10px;"><a href="{{ assignment.attachment.url }}" style="color:#2459c3;">Ödev dosyasını indir</a></div>
+        {% endif %}
+        {% if assignment.is_group %}
+            <div style="margin-top:10px; padding:10px; background:#f7f9fc; border-radius:8px; color:#555;">
+                Grup ödevi.
+                {% if user_group %}
+                    Grubun: {{ user_group.name }}
+                {% else %}
+                    Gruplandırma için öğretmeninle iletişime geç.
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 8px 22px rgba(0,0,0,0.06);">
+        <h3 style="margin-top:0;">Teslimim</h3>
+        {% if submission %}
+            <div style="margin-bottom:12px; font-size:14px; color:#555;">
+                Gönderim: {{ submission.submitted_at|date:"d.m.Y H:i" }} |
+                Durum:
+                {% if submission.score %}Notlandı ({{ submission.score }})
+                {% else %}Teslim Edildi{% endif %}
+                {% if submission.feedback %}<br/>Geribildirim: {{ submission.feedback }}{% endif %}
+            </div>
+            {% if submission.file %}
+                <div><a href="{{ submission.file.url }}" style="color:#2459c3;">Gönderdiğin dosyayı indir</a></div>
+            {% endif %}
+            {% if submission.attachments.all %}
+                <div style="margin-top:6px; font-size:13px; color:#444;">Ekler:
+                    {% for att in submission.attachments.all %}
+                        <a href="{{ att.file.url }}" style="color:#2459c3;">v{{ att.version }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if submission.text %}
+                <div style="margin-top:8px; padding:10px; background:#f7f9fc; border-radius:8px;">{{ submission.text }}</div>
+            {% endif %}
+        {% else %}
+            <p style="color:#777;">Henüz teslim yapmadın.</p>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:12px; margin-top:14px;">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" style="background:#2459c3; color:white; padding:12px 0; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Gönder / Güncelle</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
