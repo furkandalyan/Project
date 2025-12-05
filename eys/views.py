@@ -837,10 +837,14 @@ def course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     los = LearningOutcome.objects.filter(course=course).prefetch_related("examloweight_set__exam")
     exams = Exam.objects.filter(course=course).prefetch_related("examloweight_set__learning_outcome")
-    materials = CourseMaterial.objects.filter(course=course).order_by("week", "-created_at")
-    materials_by_week = defaultdict(list)
-    for mat in materials:
-        materials_by_week[mat.week].append(mat)
+    materials_qs = CourseMaterial.objects.filter(course=course).order_by("week", "-created_at")
+    weeks = sorted({m.week for m in materials_qs})
+    try:
+        selected_week = int(request.GET.get("week")) if request.GET.get("week") else None
+    except ValueError:
+        selected_week = None
+    if selected_week:
+        materials_qs = materials_qs.filter(week=selected_week)
     instructor = course.instructor
     if instructor:
         instructor_name = instructor.get_full_name() or instructor.username
@@ -937,7 +941,9 @@ def course_detail(request, course_id):
         "exams": exams,
         "announcement_cards": announcement_cards,
         "student_cards": student_cards,
-        "materials_by_week": materials_by_week,
+        "materials": materials_qs,
+        "weeks": weeks,
+        "selected_week": selected_week,
         "upcoming_exam_label": upcoming_exam_label,
         "student_count": course.students.count(),
         "term_label": getattr(course, "term", None) or "Belirtilmedi",
@@ -1197,6 +1203,21 @@ def teacher_calendar_ics(request):
         exams_filter["course_id__in"] = selected_course_ids
     exams_qs = Exam.objects.filter(**exams_filter).select_related("course").order_by("scheduled_at")
 
+    include_assignments = request.GET.get("include_assignments") == "1"
+    assignments_qs = []
+    if include_assignments:
+        assign_filter = {"due_at__isnull": False, "course__in": courses}
+        try:
+            if start_raw:
+                assign_filter["due_at__date__gte"] = date.fromisoformat(start_raw)
+            if end_raw:
+                assign_filter["due_at__date__lte"] = date.fromisoformat(end_raw)
+        except ValueError:
+            pass
+        if selected_course_ids:
+            assign_filter["course_id__in"] = selected_course_ids
+        assignments_qs = Assignment.objects.filter(**assign_filter).select_related("course").order_by("due_at")
+
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -1219,6 +1240,25 @@ def teacher_calendar_ics(request):
             f"DTSTART:{start_utc.strftime('%Y%m%dT%H%M%SZ')}",
             f"DTEND:{end_utc.strftime('%Y%m%dT%H%M%SZ')}",
             f"SUMMARY:{summary}",
+            f"DESCRIPTION:{description}\\nURL:{url}",
+            "END:VEVENT",
+        ])
+    for a in assignments_qs:
+        if not a.due_at:
+            continue
+        start_utc = timezone.localtime(a.due_at, timezone.utc)
+        end_utc = start_utc + timedelta(hours=1)
+        uid = f"assignment-{a.id}@eys"
+        summary = f"{a.course.code} - {a.title}"
+        description = (a.description or "").replace("\n", "\\n")
+        url = reverse("teacher_assignment_detail", args=[a.id])
+        lines.extend([
+            "BEGIN:VEVENT",
+            f"UID:{uid}",
+            f"DTSTAMP:{now.strftime('%Y%m%dT%H%M%SZ')}",
+            f"DTSTART:{start_utc.strftime('%Y%m%dT%H%M%SZ')}",
+            f"DTEND:{end_utc.strftime('%Y%m%dT%H%M%SZ')}",
+            f"SUMMARY:Ödev - {summary}",
             f"DESCRIPTION:{description}\\nURL:{url}",
             "END:VEVENT",
         ])
@@ -1445,7 +1485,23 @@ def teacher_assignment_detail(request, assignment_id):
     submitted_count = submissions.count()
     total_students = assignment.course.students.count()
     graded_count = submissions.exclude(score__isnull=True).count()
-    average_score = submissions.aggregate(avg=Avg("score"))["avg"] if graded_count else None
+    avg_score = submissions.aggregate(avg=Avg("score"))["avg"] if graded_count else None
+    scores = list(submissions.exclude(score__isnull=True).values_list("score", flat=True))
+    min_score = min(scores) if scores else None
+    max_score = max(scores) if scores else None
+    median_score = None
+    std_score = None
+    if scores:
+        sorted_scores = sorted(scores)
+        n = len(sorted_scores)
+        mid = n // 2
+        if n % 2 == 0:
+            median_score = (sorted_scores[mid - 1] + sorted_scores[mid]) / 2
+        else:
+            median_score = sorted_scores[mid]
+        mean_val = float(avg_score) if avg_score is not None else 0
+        variance = sum((float(s) - mean_val) ** 2 for s in sorted_scores) / n
+        std_score = variance ** 0.5
     missing_students = assignment.course.students.exclude(id__in=submissions.values_list("student_id", flat=True))
     context = {
         "assignment": assignment,
@@ -1453,7 +1509,11 @@ def teacher_assignment_detail(request, assignment_id):
         "submitted_count": submitted_count,
         "total_students": total_students,
         "graded_count": graded_count,
-        "average_score": average_score,
+        "average_score": avg_score,
+        "min_score": min_score,
+        "max_score": max_score,
+        "median_score": median_score,
+        "std_score": std_score,
         "missing_students": missing_students,
         "status_filter": status_filter,
         "criteria": assignment.criteria.all(),

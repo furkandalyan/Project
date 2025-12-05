@@ -14,6 +14,7 @@ urlpatterns = [
     path('student/profile/', views.student_profile, name='student_profile'),
     path('student/assignments/', views.student_assignments, name='student_assignments'),
     path('student/assignment/<int:assignment_id>/', views.student_assignment_detail, name='student_assignment_detail'),
+    path('student/materials/', views.student_materials, name='student_materials'),
 
     path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
     path('teacher/announcements/', views.teacher_announcements, name='teacher_announcements'),
@@ -32,9 +33,7 @@ urlpatterns = [
     path('teacher/assignment/<int:assignment_id>/export-zip/', views.export_submissions_zip, name='export_submissions_zip'),
     path('teacher/materials/', views.teacher_materials, name='teacher_materials'),
     path('teacher/materials/new/', views.create_material, name='create_material'),
-    path('student/materials/', views.student_materials, name='student_materials'),
-    path('submission/<int:submission_id>/grade/', views.grade_submission, name='grade_submission'),
-    
+
     path('announcement/<int:ann_id>/', views.announcement_detail, name='announcement_detail'),
     path('notifications/', views.notifications, name='notifications'),
     path('notifications/<int:notif_id>/read/', views.mark_notification_read, name='mark_notification_read'),
@@ -51,5 +50,5 @@ urlpatterns = [
     path('teacher/exam/<int:exam_id>/', views.exam_detail, name='exam_detail'),
     path('teacher/exam/<int:exam_id>/add-lo-weight/', views.add_exam_lo_weight, name='add_exam_lo_weight'),
     path('teacher/exam/<int:exam_id>/grades/', views.manage_exam_scores, name='manage_exam_scores'),
-    path('teacher/exam/<int:exam_id>/grades/csv/', views.export_exam_scores_csv, name='export_exam_scores_csv'),
+    path('submission/<int:submission_id>/grade/', views.grade_submission, name='grade_submission'),
 ]

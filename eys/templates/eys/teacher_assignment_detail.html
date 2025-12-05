@@ -15,6 +15,9 @@
         <div>Teslim: {{ submitted_count }}</div>
         <div>Notlanan: {{ graded_count }}</div>
         <div>Ortalama: {% if average_score %}{{ average_score|floatformat:1 }}{% else %}-{% endif %}</div>
+        <div>Median: {% if median_score %}{{ median_score|floatformat:1 }}{% else %}-{% endif %}</div>
+        <div>Min / Max: {% if min_score %}{{ min_score|floatformat:1 }} / {{ max_score|floatformat:1 }}{% else %}-{% endif %}</div>
+        <div>Std Sapma: {% if std_score %}{{ std_score|floatformat:1 }}{% else %}-{% endif %}</div>
     </div>
 </div>
 

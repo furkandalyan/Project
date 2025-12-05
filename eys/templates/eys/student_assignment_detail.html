@@ -54,9 +54,30 @@
 
         <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:12px; margin-top:14px;">
             {% csrf_token %}
+            <div id="dropzone" style="border:2px dashed #cbd5e1; border-radius:10px; padding:14px; text-align:center; color:#64748b; cursor:pointer;">
+                Dosyaları buraya sürükle ya da tıkla
+            </div>
             {{ form.as_p }}
             <button type="submit" style="background:#2459c3; color:white; padding:12px 0; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Gönder / Güncelle</button>
         </form>
     </div>
 </div>
+<script>
+(function() {
+    const dz = document.getElementById("dropzone");
+    const fileInput = document.querySelector('input[type="file"][name="attachments"]');
+    if (!dz || !fileInput) return;
+    dz.addEventListener("click", () => fileInput.click());
+    dz.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dz.style.borderColor = "#2459c3";
+    });
+    dz.addEventListener("dragleave", () => dz.style.borderColor = "#cbd5e1");
+    dz.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dz.style.borderColor = "#cbd5e1";
+        fileInput.files = e.dataTransfer.files;
+    });
+})();
+</script>
 {% endblock %}

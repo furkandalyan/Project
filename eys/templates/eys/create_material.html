@@ -7,9 +7,30 @@
         <p style="color:#777;">Ders ve hafta seçerek materyal yükleyin.</p>
         <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:12px;">
             {% csrf_token %}
+            <div id="mat-dropzone" style="border:2px dashed #cbd5e1; border-radius:10px; padding:14px; text-align:center; color:#64748b; cursor:pointer;">
+                Dosyayı buraya sürükle ya da tıkla
+            </div>
             {{ form.as_p }}
             <button type="submit" style="background:#1db954; color:white; padding:12px 0; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Kaydet</button>
         </form>
     </div>
 </div>
+<script>
+(function() {
+    const dz = document.getElementById("mat-dropzone");
+    const fileInput = document.querySelector('input[type="file"][name="attachment"]');
+    if (!dz || !fileInput) return;
+    dz.addEventListener("click", () => fileInput.click());
+    dz.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dz.style.borderColor = "#2459c3";
+    });
+    dz.addEventListener("dragleave", () => dz.style.borderColor = "#cbd5e1");
+    dz.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dz.style.borderColor = "#cbd5e1";
+        fileInput.files = e.dataTransfer.files;
+    });
+})();
+</script>
 {% endblock %}
