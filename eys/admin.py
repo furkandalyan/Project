@@ -1,6 +1,16 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Role, User, Course, Exam, LearningOutcome, ExamLOWeight, Announcement, ExamResult
+from .models import (
+    Role,
+    User,
+    Course,
+    CourseThreshold,
+    Exam,
+    LearningOutcome,
+    ExamLOWeight,
+    Announcement,
+    ExamResult,
+)
 
 class CustomUserAdmin(UserAdmin):
     model = User
@@ -25,6 +35,7 @@ class CustomUserAdmin(UserAdmin):
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Role)
 admin.site.register(Course)
+admin.site.register(CourseThreshold)
 admin.site.register(Exam)
 admin.site.register(LearningOutcome)
 admin.site.register(ExamLOWeight)

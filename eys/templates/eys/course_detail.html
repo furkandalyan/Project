@@ -33,6 +33,23 @@
             <strong style="font-size:22px;">{{ exams|length }}</strong>
         </div>
     </div>
+    <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+        <div style="background:#f7f9fc; border:1px solid #eef0f4; border-radius:12px; padding:12px 14px; min-width:280px;">
+            <p style="margin:0; font-size:13px; color:#7a7a7a;">Not Bantları (öğretmen tanımlı)</p>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:6px; font-weight:600;">
+                <span style="color:#1db954;">İstikrarlı ≥ {{ threshold.stable_min }}</span>
+                <span style="color:#ffb347;">Takipte ≥ {{ threshold.watch_min }}</span>
+                <span style="color:#ff6b6b;">Destek &lt; {{ threshold.watch_min }}</span>
+                <span style="color:#2459c3;">Geçme ≥ {{ threshold.pass_min }}</span>
+            </div>
+        </div>
+        {% if user.is_authenticated and course.instructor == user %}
+            <a href="{% url 'edit_course_threshold' course.id %}"
+               style="display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #1db954; color:#1db954; text-decoration:none; font-weight:600;">
+                Puan bantlarını düzenle
+            </a>
+        {% endif %}
+    </div>
 </div>
 
 {% if user.is_authenticated and course.instructor == user %}
@@ -236,8 +253,9 @@
                     data-last-login="{{ student.last_login }}"
                     data-joined="{{ student.date_joined }}"
                     data-course-load="{{ student.course_load }}"
-                    data-progress="{{ student.activity_score }}"
+                    data-score="{{ student.average_score }}"
                     data-status-color="{{ student.status_color }}"
+                    data-pass="{{ student.pass_label }}"
                     data-upcoming="{{ student.upcoming_exam }}"
                     style="border:1px solid #f0f0f0; border-radius:12px; padding:14px; display:flex; align-items:center; gap:14px; background:#fff; cursor:pointer; text-align:left;">
                 <div style="width:46px; height:46px; border-radius:50%; background:#f3fff6; display:flex; align-items:center; justify-content:center; font-weight:600; color:#1db954;">
@@ -247,7 +265,10 @@
                     <strong style="display:block;">{{ student.name }}</strong>
                     <span style="font-size:13px; color:#8a8a8a;">{{ student.email }}</span>
                 </div>
-                <span style="font-size:13px; color:#7a7a7a;">{{ student.status }}</span>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                    <span style="font-size:13px; color:#7a7a7a;">{{ student.status }}</span>
+                    <span style="font-size:12px; color:#2459c3;">Ort. {{ student.average_score }} / Geçme {{ student.pass_min }}</span>
+                </div>
             </button>
             {% empty %}
             <p style="color:#999;">Bu derse kayıtlı öğrenci bulunmuyor.</p>
@@ -273,6 +294,7 @@
                     <div id="detail-progress" style="height:10px; border-radius:999px; width:0%; background:#1db954;"></div>
                 </div>
                 <span id="detail-status" style="font-size:13px; font-weight:600;"></span>
+                <span id="detail-pass" style="font-size:12px; color:#2459c3; display:block; margin-top:4px;"></span>
             </div>
             <div style="margin-top:18px; display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px;">
                 <div style="background:#f9f9f9; border-radius:12px; padding:12px;">
@@ -495,10 +517,13 @@ function closeExamModal() {
         document.getElementById("detail-last-login").textContent = item.dataset.lastLogin;
         document.getElementById("detail-course-load").textContent = item.dataset.courseLoad;
         document.getElementById("detail-upcoming").textContent = item.dataset.upcoming;
-        document.getElementById("detail-progress").style.width = item.dataset.progress + "%";
+        const scoreVal = parseFloat(item.dataset.score);
+        const safeScore = isNaN(scoreVal) ? 0 : scoreVal;
+        document.getElementById("detail-progress").style.width = safeScore + "%";
         document.getElementById("detail-progress").style.background = item.dataset.statusColor;
         document.getElementById("detail-status").textContent = item.dataset.status;
         document.getElementById("detail-status").style.color = item.dataset.statusColor;
+        document.getElementById("detail-pass").textContent = item.dataset.pass;
         emptyPane.style.display = "none";
         detailPane.style.display = "block";
     }

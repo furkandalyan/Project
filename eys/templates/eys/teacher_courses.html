@@ -1,35 +1,48 @@
 {% extends "eys/base.html" %}
 
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-    <div>
-        <h1 style="margin:0;">Derslerim</h1>
-        <p style="color:#888;">Tüm dersleriniz, özet istatistikleriyle birlikte burada.</p>
-    </div>
-</div>
-
-<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px;">
-    {% for c in courses %}
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.08); display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-            <p style="margin:0; color:#9b9b9b;">{{ c.code }}</p>
-            <h3 style="margin:5px 0 10px 0;">{{ c.name }}</h3>
-            <div style="display:flex; flex-direction:column; gap:6px; font-size:14px;">
-                <span>Öğrenciler: {{ c.students.count }}</span>
-                <span>LO Sayısı: {{ c.learningoutcome_set.count }}</span>
-                <span>Sınav Sayısı: {{ c.exam_set.count }}</span>
+<div style="display:flex; flex-direction:column; gap:18px;">
+    <!-- Hero -->
+    <div style="background:linear-gradient(120deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2); position:relative; overflow:hidden;">
+        <div style="position:absolute; inset:0; background:radial-gradient(circle at 15% 20%, rgba(255,255,255,0.1), transparent 40%), radial-gradient(circle at 80% 30%, rgba(255,255,255,0.12), transparent 45%);"></div>
+        <div style="position:relative; display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:center;">
+            <div>
+                <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Eğitmen Paneli</p>
+                <h1 style="margin:6px 0 4px 0;">Derslerim</h1>
+                <p style="margin:0; opacity:0.8;">Tüm dersleriniz, özet istatistikleri ve hızlı aksiyonlar burada.</p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <div style="background:rgba(255,255,255,0.1); padding:10px 14px; border-radius:12px; text-align:center; min-width:120px;">
+                    <p style="margin:0; font-size:12px; opacity:0.8;">Toplam Ders</p>
+                    <strong style="font-size:20px;">{{ courses|length }}</strong>
+                </div>
             </div>
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
-            <span style="color:#aaa; font-size:13px;">Son güncelleme: -</span>
-            <a href="/teacher/course/{{ c.id }}/"
-               style="background:#1db954; color:white; padding:8px 14px; border-radius:6px; text-decoration:none; font-weight:600;">
-                Görüntüle →
-            </a>
-        </div>
     </div>
-    {% empty %}
-    <p>Henüz ders atanmamış.</p>
-    {% endfor %}
+
+    <!-- Courses grid -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px;">
+        {% for c in courses %}
+        <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 16px 40px rgba(0,0,0,0.08); display:flex; flex-direction:column; gap:12px; border:1px solid #eef2f7;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                <div>
+                    <p style="margin:0; color:#6b7280; letter-spacing:0.04em; text-transform:uppercase; font-size:12px;">{{ c.code }}</p>
+                    <h3 style="margin:6px 0 4px 0;">{{ c.name }}</h3>
+                </div>
+                <span style="padding:6px 10px; border-radius:999px; background:#f8fafc; color:#0f172a; font-size:12px;">{{ c.students.count }} öğrenci</span>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; font-size:13px; color:#0f172a;">
+                <span style="padding:8px 10px; border-radius:10px; background:#f1f5f9;">LO: {{ c.learningoutcome_set.count }}</span>
+                <span style="padding:8px 10px; border-radius:10px; background:#f1f5f9;">Sınav: {{ c.exam_set.count }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <span style="color:#94a3b8; font-size:12px;">Son güncelleme: -</span>
+                <a href="/teacher/course/{{ c.id }}/" style="padding:10px 14px; border-radius:12px; background:#0f172a; color:white; text-decoration:none; font-weight:700;">Detaya git</a>
+            </div>
+        </div>
+        {% empty %}
+        <p style="color:#6b7280;">Henüz ders atanmamış.</p>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

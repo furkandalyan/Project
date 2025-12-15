@@ -1,61 +1,69 @@
 {% extends "eys/base.html" %}
 
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:15px; margin-bottom:25px;">
-    <div>
-        <p style="margin:0; color:#9a9a9a;">Oluşturduğun tüm duyuruları buradan yönet</p>
-        <h1 style="margin:5px 0 0 0;">📣 Duyurularım</h1>
+<div style="display:flex; flex-direction:column; gap:18px;">
+    <!-- Hero -->
+    <div style="background:linear-gradient(120deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2); position:relative; overflow:hidden;">
+        <div style="position:absolute; inset:0; background:radial-gradient(circle at 18% 22%, rgba(255,255,255,0.1), transparent 40%), radial-gradient(circle at 82% 30%, rgba(255,255,255,0.12), transparent 45%);"></div>
+        <div style="position:relative; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;">
+            <div>
+                <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Eğitmen Paneli</p>
+                <h1 style="margin:6px 0 4px 0;">Duyurularım</h1>
+                <p style="margin:0; opacity:0.8;">Oluşturduğun tüm duyurular ve hızlı aksiyonlar.</p>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <span style="padding:10px 12px; border-radius:12px; background:rgba(255,255,255,0.1);">Toplam {{ total_count }} duyuru</span>
+                <a href="{% url 'teacher_create_announcement' %}" style="padding:12px 16px; border-radius:12px; background:white; color:#0f172a; text-decoration:none; font-weight:700; box-shadow:0 10px 25px rgba(0,0,0,0.15);">
+                    + Yeni Duyuru
+                </a>
+            </div>
+        </div>
     </div>
-    <div style="display:flex; align-items:center; gap:12px;">
-        <div style="color:#555; font-size:14px;">Toplam {{ total_count }} duyuru</div>
-        <a href="{% url 'teacher_create_announcement' %}" style="background:#1db954; color:white; padding:10px 18px; border-radius:10px; text-decoration:none; font-weight:600;">Yeni Duyuru Oluştur</a>
-    </div>
-</div>
 
-<div style="background:white; border-radius:18px; padding:28px; box-shadow:0 20px 45px rgba(0,0,0,0.08);">
-    {% if timeline %}
-        <div style="position:relative; padding-left:25px;">
-            <div style="position:absolute; left:10px; top:0; bottom:0; width:2px; background:linear-gradient(180deg, #1db954, #bee9cd);"></div>
-            {% for group in timeline %}
-                <div style="margin-bottom:30px;">
-                    <div style="margin-bottom:16px; font-weight:600; color:#1db954;">{{ group.date_label }}</div>
-                    {% for item in group.items %}
-                        <div style="display:flex; gap:15px; margin-bottom:18px;">
-                            <div style="width:42px; height:42px; border-radius:50%; background:#f0f0f0; color:#333; display:flex; align-items:center; justify-content:center; font-weight:600;">
-                                {% if item.pinned %}📌{% else %}📣{% endif %}
-                            </div>
-                            <div style="flex:1;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                                    <div>
-                                        <h3 style="margin:0;">{{ item.title }}</h3>
-                                        <p style="margin:4px 0; color:#666; font-size:13px;">{{ item.course_label }}</p>
+    <!-- Timeline -->
+    <div style="background:white; border-radius:18px; padding:24px; box-shadow:0 18px 45px rgba(0,0,0,0.08);">
+        {% if timeline %}
+            <div style="position:relative; padding-left:28px;">
+                <div style="position:absolute; left:12px; top:0; bottom:0; width:2px; background:linear-gradient(180deg, #2563eb, #a5b4fc);"></div>
+                {% for group in timeline %}
+                    <div style="margin-bottom:26px;">
+                        <div style="margin-bottom:12px; font-weight:700; color:#2563eb; font-size:14px;">{{ group.date_label }}</div>
+                        {% for item in group.items %}
+                            <div style="display:flex; gap:14px; margin-bottom:18px;">
+                                <div style="width:44px; height:44px; border-radius:50%; background:#f1f5f9; color:#0f172a; display:flex; align-items:center; justify-content:center; font-weight:700; box-shadow:0 6px 16px rgba(0,0,0,0.08);">
+                                    {% if item.pinned %}📌{% else %}📝{% endif %}
+                                </div>
+                                <div style="flex:1; background:#f8fafc; border-radius:14px; border:1px solid #eef2f7; padding:12px 14px; box-shadow:0 8px 20px rgba(0,0,0,0.04);">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                                        <div>
+                                            <h3 style="margin:0;">{{ item.title }}</h3>
+                                            <p style="margin:4px 0; color:#64748b; font-size:13px;">{{ item.course_label }}</p>
+                                        </div>
+                                        <span style="color:#94a3b8; font-size:12px;">{{ item.timestamp }}</span>
                                     </div>
-                                    <span style="color:#999; font-size:13px;">{{ item.timestamp }}</span>
-                                </div>
-                                <div style="background:#f8f8f8; padding:14px 16px; border-radius:12px; margin-top:10px;">
-                                    <div style="margin:0; white-space:pre-line;">{{ item.body|safe }}</div>
+                                    <div style="margin-top:10px; color:#0f172a; white-space:pre-line;">{{ item.body|safe }}</div>
                                     {% if item.attachment %}
-                                        <a href="{{ item.attachment.url }}" target="_blank" style="display: inline-block; margin-top: 10px; font-size: 13px; color: #2459c3; text-decoration: none; font-weight: 600;">📎 Eki İndir</a>
+                                        <a href="{{ item.attachment.url }}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:13px; color:#2563eb; text-decoration:none; font-weight:600;">📎 Eki indir</a>
                                     {% endif %}
-                                </div>
-                                <div style="margin-top: 12px; display: flex; gap: 12px; align-items: center;">
-                                    <a href="{% url 'announcement_detail' item.id %}" style="font-size: 13px; color: #1db954; text-decoration: none; font-weight: 600;">Yorumlar</a>
-                                    <a href="{% url 'edit_announcement' item.id %}" style="font-size: 13px; color: #2459c3; text-decoration: none; font-weight: 600;">Düzenle</a>
-                                    <a href="{% url 'delete_announcement' item.id %}" style="font-size: 13px; color: #d9534f; text-decoration: none; font-weight: 600;">Sil</a>
-                                    {% if item.pinned %}
-                                        <span style="background:#fff0da; color:#b86a00; padding:4px 10px; border-radius:999px; font-size:12px; font-weight: 500;">Sabitlenmiş</span>
-                                    {% endif %}
+                                    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                                        <a href="{% url 'announcement_detail' item.id %}" style="padding:8px 10px; border-radius:10px; background:#e0f2fe; color:#0f172a; text-decoration:none; font-size:13px; font-weight:600;">Yorumlar</a>
+                                        <a href="{% url 'edit_announcement' item.id %}" style="padding:8px 10px; border-radius:10px; background:#eef2ff; color:#1d4ed8; text-decoration:none; font-size:13px; font-weight:600;">Düzenle</a>
+                                        <a href="{% url 'delete_announcement' item.id %}" style="padding:8px 10px; border-radius:10px; background:#fef2f2; color:#b91c1c; text-decoration:none; font-size:13px; font-weight:600;">Sil</a>
+                                        {% if item.pinned %}
+                                            <span style="padding:6px 10px; border-radius:999px; background:#fff7ed; color:#9a3412; font-size:12px; font-weight:600;">Sabitlenmiş</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div style="text-align:center; color:#a0a0a0; padding:60px 0;">
-            Henüz hiç duyuru oluşturmadın. "Yeni Duyuru Oluştur" butonuna tıklayarak ilk duyurunu paylaşabilirsin.
-        </div>
-    {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align:center; color:#94a3b8; padding:60px 0;">
+                Henüz duyuru oluşturmadın. “Yeni Duyuru” ile başla.
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

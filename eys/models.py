@@ -43,6 +43,28 @@ class Course(models.Model):
     def __str__(self):
         return f"{self.code} - {self.name}"
 
+
+class CourseThreshold(models.Model):
+    course = models.OneToOneField(Course, on_delete=models.CASCADE, related_name="threshold")
+    stable_min = models.DecimalField(max_digits=5, decimal_places=2, default=80)
+    watch_min = models.DecimalField(max_digits=5, decimal_places=2, default=65)
+    pass_min = models.DecimalField(max_digits=5, decimal_places=2, default=60)
+
+    class Meta:
+        verbose_name = "Course Threshold"
+        verbose_name_plural = "Course Thresholds"
+
+    def __str__(self):
+        return f"{self.course.code} thresholds"
+
+    def as_dict(self):
+        return {
+            "stable_min": float(self.stable_min),
+            "watch_min": float(self.watch_min),
+            "pass_min": float(self.pass_min),
+        }
+
+
 class Exam(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)

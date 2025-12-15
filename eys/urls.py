@@ -44,6 +44,7 @@ urlpatterns = [
 
     path('teacher/courses/', views.teacher_courses, name='teacher_courses'),
     path('teacher/course/<int:course_id>/', views.course_detail, name='course_detail'),
+    path('teacher/course/<int:course_id>/thresholds/', views.edit_course_threshold, name='edit_course_threshold'),
 
     path('teacher/course/<int:course_id>/add-lo/', views.add_lo, name='add_lo'),
     path('teacher/course/<int:course_id>/add-exam/', views.add_exam, name='add_exam'),

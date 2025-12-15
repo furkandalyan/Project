@@ -1,88 +1,116 @@
 {% extends "eys/base.html" %}
 
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-    <div>
-        <div style="color:#888; font-size:13px;">{{ assignment.course.code }}</div>
-        <h2 style="margin:4px 0;">{{ assignment.title }}</h2>
-        <div style="color:#555; font-size:14px;">
-            {% if assignment.due_at %}Teslim: {{ assignment.due_at|date:"d.m.Y H:i" }}{% else %}Teslim tarihi yok{% endif %}
-            • Maks: {{ assignment.max_score }}
+<div style="display:flex; flex-direction:column; gap:16px;">
+    <!-- Hero -->
+    <div style="background:linear-gradient(115deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 24px 55px rgba(0,0,0,0.22); position:relative; overflow:hidden;">
+        <div style="position:absolute; inset:0; background:radial-gradient(circle at 20% 20%, rgba(255,255,255,0.12), transparent 40%), radial-gradient(circle at 80% 30%, rgba(255,255,255,0.08), transparent 45%);"></div>
+        <div style="position:relative; display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; align-items:flex-start;">
+            <div>
+                <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.9;">{{ assignment.course.code }}</p>
+                <h1 style="margin:4px 0 6px 0;">{{ assignment.title }}</h1>
+                <p style="margin:0; opacity:0.8; max-width:620px;">{% if assignment.description %}{{ assignment.description }}{% else %}Açıklama yok.{% endif %}</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px; min-width:240px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <span style="background:rgba(255,255,255,0.14); padding:8px 12px; border-radius:10px; font-weight:700;">Max {{ assignment.max_score }}</span>
+                    <span style="background:rgba(255,255,255,0.14); padding:8px 12px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">⏰ {% if assignment.due_at %}{{ assignment.due_at|date:"d.m.Y H:i" }}{% else %}Teslim tarihi yok{% endif %}</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:8px;">
+                    <div style="background:rgba(255,255,255,0.08); padding:10px; border-radius:10px; text-align:center;">
+                        <p style="margin:0; font-size:12px; opacity:0.8;">Öğrenci</p>
+                        <strong>{{ total_students }}</strong>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.08); padding:10px; border-radius:10px; text-align:center;">
+                        <p style="margin:0; font-size:12px; opacity:0.8;">Teslim</p>
+                        <strong>{{ submitted_count }}</strong>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.08); padding:10px; border-radius:10px; text-align:center;">
+                        <p style="margin:0; font-size:12px; opacity:0.8;">Notlanan</p>
+                        <strong>{{ graded_count }}</strong>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div style="text-align:right; font-size:13px; color:#666;">
-        <div>Öğrenci: {{ total_students }}</div>
-        <div>Teslim: {{ submitted_count }}</div>
-        <div>Notlanan: {{ graded_count }}</div>
-        <div>Ortalama: {% if average_score %}{{ average_score|floatformat:1 }}{% else %}-{% endif %}</div>
-        <div>Median: {% if median_score %}{{ median_score|floatformat:1 }}{% else %}-{% endif %}</div>
-        <div>Min / Max: {% if min_score %}{{ min_score|floatformat:1 }} / {{ max_score|floatformat:1 }}{% else %}-{% endif %}</div>
-        <div>Std Sapma: {% if std_score %}{{ std_score|floatformat:1 }}{% else %}-{% endif %}</div>
-    </div>
-</div>
 
-<div style="background:white; padding:18px; border-radius:12px; box-shadow:0 8px 22px rgba(0,0,0,0.06);">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-        <h3 style="margin:0;">Teslimler</h3>
-        <div style="display:flex; gap:8px;">
-            <a href="?status=" style="font-size:13px; color:{% if not status_filter %}#2459c3{% else %}black{% endif %};">Hepsi</a>
-            <a href="?status=pending" style="font-size:13px; color:{% if status_filter == 'pending' %}#2459c3{% else %}black{% endif %};">Beklemede</a>
-            <a href="?status=graded" style="font-size:13px; color:{% if status_filter == 'graded' %}#2459c3{% else %}black{% endif %};">Notlandı</a>
+    <!-- Actions -->
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="{% url 'export_submissions_zip' assignment.id %}" style="padding:10px 14px; border-radius:12px; background:#0f172a; color:white; text-decoration:none;">ZIP indir</a>
+        <a href="{% url 'export_submissions_csv' assignment.id %}" style="padding:10px 14px; border-radius:12px; background:#e2e8f0; color:#0f172a; text-decoration:none;">CSV aktar</a>
+        <a href="{% url 'send_assignment_reminders' assignment.id %}" style="padding:10px 14px; border-radius:12px; background:#fde68a; color:#92400e; text-decoration:none;">Hatırlat</a>
+        <a href="{% url 'manage_assignment_criteria' assignment.id %}" style="padding:10px 14px; border-radius:12px; background:#dbeafe; color:#1d4ed8; text-decoration:none;">Rubrik düzenle</a>
+        <a href="{% url 'manage_assignment_groups' assignment.id %}" style="padding:10px 14px; border-radius:12px; background:#e0f2fe; color:#0369a1; text-decoration:none;">Grupları yönet</a>
+    </div>
+
+    <!-- Stats + filters -->
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; background:white; border-radius:14px; padding:12px; box-shadow:0 12px 32px rgba(0,0,0,0.06);">
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <div style="padding:10px 12px; border-radius:10px; background:#f8fafc;">Ortalama: {% if average_score %}{{ average_score|floatformat:1 }}{% else %}-{% endif %}</div>
+            <div style="padding:10px 12px; border-radius:10px; background:#f8fafc;">Median: {% if median_score %}{{ median_score|floatformat:1 }}{% else %}-{% endif %}</div>
+            <div style="padding:10px 12px; border-radius:10px; background:#f8fafc;">Min / Max: {% if min_score %}{{ min_score|floatformat:1 }} / {{ max_score|floatformat:1 }}{% else %}-{% endif %}</div>
+            <div style="padding:10px 12px; border-radius:10px; background:#f8fafc;">Std Sapma: {% if std_score %}{{ std_score|floatformat:1 }}{% else %}-{% endif %}</div>
+        </div>
+        <div style="margin-left:auto; display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="?status=" style="padding:8px 12px; border-radius:10px; text-decoration:none; font-size:13px; {% if not status_filter %}background:#0f172a; color:white;{% else %}background:#f1f5f9; color:#0f172a;{% endif %}">Hepsi</a>
+            <a href="?status=pending" style="padding:8px 12px; border-radius:10px; text-decoration:none; font-size:13px; {% if status_filter == 'pending' %}background:#0f172a; color:white;{% else %}background:#f1f5f9; color:#0f172a;{% endif %}">Beklemede</a>
+            <a href="?status=graded" style="padding:8px 12px; border-radius:10px; text-decoration:none; font-size:13px; {% if status_filter == 'graded' %}background:#0f172a; color:white;{% else %}background:#f1f5f9; color:#0f172a;{% endif %}">Notlandı</a>
         </div>
     </div>
-    <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="{% url 'export_submissions_zip' assignment.id %}" style="font-size:13px; color:#2459c3;">Tüm teslimleri ZIP indir</a>
-        <a href="{% url 'export_submissions_csv' assignment.id %}" style="font-size:13px; color:#2459c3;">CSV dışa aktar</a>
-        <a href="{% url 'send_assignment_reminders' assignment.id %}" style="font-size:13px; color:#2459c3;">Teslim etmeyenlere hatırlat</a>
-        <a href="{% url 'manage_assignment_criteria' assignment.id %}" style="font-size:13px; color:#2459c3;">Rubrik düzenle</a>
-        <a href="{% url 'manage_assignment_groups' assignment.id %}" style="font-size:13px; color:#2459c3;">Grupları yönet</a>
+
+    <!-- Submissions table -->
+    <div style="background:white; border-radius:14px; box-shadow:0 14px 36px rgba(0,0,0,0.06); overflow:hidden;">
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; min-width:680px;">
+                <thead>
+                    <tr style="background:#f8fafc; text-align:left;">
+                        <th style="padding:12px;">Öğrenci</th>
+                        <th style="padding:12px;">Durum</th>
+                        <th style="padding:12px;">Puan</th>
+                        <th style="padding:12px;">Ekler / İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in submissions %}
+                    <tr style="border-top:1px solid #eef2f7;">
+                        <td style="padding:12px; font-weight:600;">{{ sub.student.get_full_name|default:sub.student.username }}</td>
+                        <td style="padding:12px;">
+                            {% if sub.score %}
+                                <span style="padding:6px 10px; border-radius:999px; background:#e0fbea; color:#065f46; font-size:12px;">Notlandı</span>
+                            {% else %}
+                                <span style="padding:6px 10px; border-radius:999px; background:#fff7ed; color:#9a3412; font-size:12px;">Teslim Edildi</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding:12px; font-weight:700;">{% if sub.score %}{{ sub.score }}{% else %}-{% endif %}</td>
+                        <td style="padding:12px; font-size:13px; color:#0f172a;">
+                            {% if sub.attachments.all %}
+                                <div style="margin-bottom:6px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                                    <span style="font-weight:600; color:#475569;">Ekler:</span>
+                                    {% for att in sub.attachments.all %}
+                                        <a href="{{ att.file.url }}" style="color:#2563eb;">v{{ att.version }}</a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <a href="{% url 'grade_submission' sub.id %}" style="display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:10px; background:#0f172a; color:white; text-decoration:none; font-weight:600;">Notla / Güncelle</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" style="padding:14px; color:#6b7280; text-align:center;">Henüz teslim yok.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div style="overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse;">
-            <thead>
-                <tr style="background:#f7f9fc; text-align:left;">
-                    <th style="padding:10px;">Öğrenci</th>
-                    <th style="padding:10px;">Durum</th>
-                    <th style="padding:10px;">Puan</th>
-                    <th style="padding:10px;">İşlem</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for sub in submissions %}
-                <tr style="border-top:1px solid #eee;">
-                    <td style="padding:10px;">{{ sub.student.get_full_name|default:sub.student.username }}</td>
-                    <td style="padding:10px; color:#555;">
-                        {% if sub.score %}Notlandı
-                        {% else %}Teslim Edildi{% endif %}
-                    </td>
-                    <td style="padding:10px;">{% if sub.score %}{{ sub.score }}{% else %}-{% endif %}</td>
-                    <td style="padding:10px;">
-                        {% if sub.attachments.all %}
-                            <div style="font-size:12px; color:#666;">Ekler:
-                                {% for att in sub.attachments.all %}
-                                    <a href="{{ att.file.url }}" style="color:#2459c3;">v{{ att.version }}</a>{% if not forloop.last %}, {% endif %}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <a href="{% url 'grade_submission' sub.id %}" style="color:#2459c3; font-weight:600;">Notla / Güncelle</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4" style="padding:12px; color:#777;">Henüz teslim yok.</td></tr>
+
+    {% if missing_students %}
+    <div style="background:white; border-radius:14px; padding:14px; box-shadow:0 12px 30px rgba(0,0,0,0.06);">
+        <h4 style="margin:0 0 10px 0;">Teslim etmeyenler ({{ missing_students|length }})</h4>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            {% for s in missing_students %}
+                <span style="padding:8px 12px; border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc; font-size:13px;">{{ s.get_full_name|default:s.username }}</span>
             {% endfor %}
-            </tbody>
-        </table>
+        </div>
     </div>
+    {% endif %}
 </div>
-
-{% if missing_students %}
-<div style="background:white; padding:16px; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.05); margin-top:16px;">
-    <h4 style="margin-top:0;">Teslim etmeyenler ({{ missing_students|length }})</h4>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        {% for s in missing_students %}
-            <span style="padding:6px 10px; border:1px solid #eee; border-radius:8px; font-size:13px;">{{ s.get_full_name|default:s.username }}</span>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
 {% endblock %}

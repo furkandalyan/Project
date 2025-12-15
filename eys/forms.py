@@ -4,6 +4,7 @@ from ckeditor.widgets import CKEditorWidget
 
 from .models import (
     Course,
+    CourseThreshold,
     LearningOutcome,
     Exam,
     ExamLOWeight,
@@ -52,6 +53,31 @@ class ExamLOWeightForm(forms.ModelForm):
     class Meta:
         model = ExamLOWeight
         fields = ["learning_outcome", "weight"]
+
+
+class CourseThresholdForm(forms.ModelForm):
+    class Meta:
+        model = CourseThreshold
+        fields = ["stable_min", "watch_min", "pass_min"]
+        labels = {
+            "stable_min": "İstikrarlı alt sınırı",
+            "watch_min": "Takipte alt sınırı",
+            "pass_min": "Geçme eşiği",
+        }
+        help_texts = {
+            "stable_min": "Bu puan ve üzeri öğrenciler İstikrarlı sayılır.",
+            "watch_min": "Bu puan ve üzeri (İstikrarlı altı) öğrenciler Takipte sayılır.",
+            "pass_min": "Bu puan ve üzeri öğrenciler dersi geçer olarak işaretlenir.",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        base_style = "width:100%; padding:10px 12px; border:1px solid #e2e2e2; border-radius:10px; font-size:15px;"
+        for name, field in self.fields.items():
+            field.widget.attrs["style"] = base_style
+            field.widget.attrs["step"] = "0.01"
+            field.widget.attrs["min"] = "0"
+            field.widget.attrs["max"] = "100"
 
 
 class AnnouncementForm(forms.ModelForm):

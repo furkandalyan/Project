@@ -17,6 +17,7 @@ from django.contrib.auth.decorators import login_required
 
 from .models import (
     Course,
+    CourseThreshold,
     LearningOutcome,
     Exam,
     ExamLOWeight,
@@ -47,6 +48,7 @@ from .forms import (
     AssignmentGroupForm,
     CourseMaterialForm,
     AssignmentTemplateForm,
+    CourseThresholdForm,
 )
 
 DAY_LABELS = [
@@ -87,6 +89,18 @@ def create_notification(user, kind, message, url="", payload=""):
         url=url or "",
         payload=payload or "",
     )
+
+
+def get_course_threshold(course):
+    threshold, _ = CourseThreshold.objects.get_or_create(
+        course=course,
+        defaults={
+            "stable_min": 80,
+            "watch_min": 65,
+            "pass_min": 60,
+        },
+    )
+    return threshold
 
 
 def serialize_exam_for_student(exam, now=None):
@@ -833,6 +847,27 @@ def teacher_courses(request):
     )
     return render(request, "eys/teacher_courses.html", {"courses": courses})
 
+@login_required
+def edit_course_threshold(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    if course.instructor != request.user:
+        messages.error(request, "Bu ders için puan bantlarını sadece dersten sorumlu öğretim elemanı düzenleyebilir.")
+        return redirect("course_detail", course_id=course.id)
+    threshold = get_course_threshold(course)
+    if request.method == "POST":
+        form = CourseThresholdForm(request.POST, instance=threshold)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Puan bantları güncellendi.")
+            return redirect("course_detail", course_id=course.id)
+    else:
+        form = CourseThresholdForm(instance=threshold)
+    return render(
+        request,
+        "eys/edit_course_threshold.html",
+        {"form": form, "course": course},
+    )
+
 def course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     los = LearningOutcome.objects.filter(course=course).prefetch_related("examloweight_set__exam")
@@ -849,13 +884,13 @@ def course_detail(request, course_id):
     if instructor:
         instructor_name = instructor.get_full_name() or instructor.username
     else:
-        instructor_name = "Atanmadı"
+        instructor_name = "Atanmad?"
     now = timezone.now()
     upcoming_exam_obj = (
         exams.filter(scheduled_at__isnull=False, scheduled_at__gte=now).order_by("scheduled_at").first()
     )
     upcoming_exam_label = (
-        timezone.localtime(upcoming_exam_obj.scheduled_at).strftime("%d.%m.%Y · %H:%M")
+        timezone.localtime(upcoming_exam_obj.scheduled_at).strftime("%d.%m.%Y ?? %H:%M")
         if upcoming_exam_obj
         else "Tarih bekleniyor"
     )
@@ -878,9 +913,12 @@ def course_detail(request, course_id):
                 "attachment": ann.attachment,
                 "author": author_name,
                 "initials": initials,
-                "timestamp": created_local.strftime("%d.%m.%Y · %H:%M"),
+                "timestamp": created_local.strftime("%d.%m.%Y ?? %H:%M"),
             }
         )
+
+    threshold = get_course_threshold(course)
+    threshold_values = threshold.as_dict()
 
     student_qs = (
         course.students.all()
@@ -888,35 +926,46 @@ def course_detail(request, course_id):
         .annotate(course_load=Count("courses_taken", distinct=True))
         .order_by("first_name", "last_name", "username")
     )
-    past_exam_count = exams.filter(scheduled_at__lt=now).count()
-    total_exams = exams.count()
+    exam_results = ExamResult.objects.filter(exam__course=course).select_related("student")
+    results_by_student = defaultdict(list)
+    for res in exam_results:
+        try:
+            results_by_student[res.student_id].append(float(res.score))
+        except (TypeError, ValueError):
+            continue
     student_cards = []
     for student in student_qs:
         full_name = student.get_full_name() or student.username
         initials = "".join([part[0] for part in full_name.split()[:2]]).upper() if full_name else student.username[:2].upper()
         last_login = (
-            timezone.localtime(student.last_login).strftime("%d.%m.%Y · %H:%M")
+            timezone.localtime(student.last_login).strftime("%d.%m.%Y ?? %H:%M")
             if student.last_login
-            else "Henüz giriş yapmadı"
+            else "Hen?z giri? yapmad?"
         )
         date_joined = timezone.localtime(student.date_joined).strftime("%d.%m.%Y")
-        activity_score = 50
-        if student.last_login and student.last_login >= now - timedelta(days=7):
-            activity_score += 15
-        activity_score += min(15, student.course_load * 3)
-        if total_exams:
-            completion_ratio = past_exam_count / total_exams
-            activity_score += int(completion_ratio * 20)
-        activity_score = min(100, activity_score)
-        if activity_score >= 80:
-            status = "İstikrarlı"
+        scores = results_by_student.get(student.id, [])
+        average_score = round(sum(scores) / len(scores), 2) if scores else None
+        score_for_status = average_score if average_score is not None else 0
+
+        if score_for_status >= threshold_values["stable_min"]:
+            status = "?stikrarl?"
             status_color = "#1db954"
-        elif activity_score >= 65:
+        elif score_for_status >= threshold_values["watch_min"]:
             status = "Takipte"
             status_color = "#ffb347"
         else:
             status = "Destek Gerekli"
             status_color = "#ff6b6b"
+
+        if average_score is None:
+            pass_label = "Hen?z not yok"
+            display_score = "-"
+        elif average_score >= threshold_values["pass_min"]:
+            pass_label = "Ge?iyor"
+            display_score = f"{average_score}"
+        else:
+            pass_label = "Ge?emeyebilir"
+            display_score = f"{average_score}"
 
         student_cards.append(
             {
@@ -928,9 +977,11 @@ def course_detail(request, course_id):
                 "last_login": last_login,
                 "date_joined": date_joined,
                 "course_load": student.course_load,
-                "activity_score": activity_score,
+                "average_score": display_score,
                 "status": status,
                 "status_color": status_color,
+                "pass_label": pass_label,
+                "pass_min": threshold_values["pass_min"],
                 "upcoming_exam": upcoming_exam_label,
             }
         )
@@ -948,6 +999,7 @@ def course_detail(request, course_id):
         "student_count": course.students.count(),
         "term_label": getattr(course, "term", None) or "Belirtilmedi",
         "instructor_name": instructor_name,
+        "threshold": threshold,
     }
     return render(request, "eys/course_detail.html", context)
 

@@ -1,65 +1,118 @@
 {% extends "eys/base.html" %}
 
 {% block content %}
-<div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:16px;">
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 8px 22px rgba(0,0,0,0.06);">
-        <div style="font-size:13px; color:#888;">{{ assignment.course.code }}</div>
-        <h2 style="margin:6px 0;">{{ assignment.title }}</h2>
-        <div style="color:#555; font-size:14px; margin-bottom:8px;">
-            {% if assignment.due_at %}Teslim: {{ assignment.due_at|date:"d.m.Y H:i" }}{% else %}Teslim tarihi yok{% endif %}
-            • Maks: {{ assignment.max_score }}
-        </div>
-        <div style="color:#444;">{{ assignment.description|default:"Açıklama yok." }}</div>
-        {% if assignment.attachment %}
-            <div style="margin-top:10px;"><a href="{{ assignment.attachment.url }}" style="color:#2459c3;">Ödev dosyasını indir</a></div>
-        {% endif %}
-        {% if assignment.is_group %}
-            <div style="margin-top:10px; padding:10px; background:#f7f9fc; border-radius:8px; color:#555;">
-                Grup ödevi.
-                {% if user_group %}
-                    Grubun: {{ user_group.name }}
-                {% else %}
-                    Gruplandırma için öğretmeninle iletişime geç.
+<div style="max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:18px;">
+    <div style="background:linear-gradient(120deg,#1f3b73,#1c8dd9); border-radius:18px; color:white; padding:24px; box-shadow:0 22px 55px rgba(0,0,0,0.18); position:relative; overflow:hidden;">
+        <div style="position:absolute; inset:0; background:radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 45%), radial-gradient(circle at 80% 30%, rgba(255,255,255,0.12), transparent 40%);"></div>
+        <div style="position:relative; display:flex; flex-wrap:wrap; gap:14px; align-items:flex-start; justify-content:space-between;">
+            <div>
+                <div style="font-size:13px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.9;">{{ assignment.course.code }}</div>
+                <h1 style="margin:6px 0 4px 0;">{{ assignment.title }}</h1>
+                <p style="margin:0; opacity:0.85;">{{ assignment.description|default:"Açıklama yok." }}</p>
+                {% if assignment.attachment %}
+                    <a href="{{ assignment.attachment.url }}" style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:8px 12px; border-radius:10px; background:rgba(255,255,255,0.12); color:white; text-decoration:none;">
+                        📎 Ödev dosyasını indir
+                    </a>
                 {% endif %}
             </div>
-        {% endif %}
+            <div style="display:flex; flex-direction:column; gap:8px; min-width:220px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <span style="background:rgba(255,255,255,0.15); padding:8px 12px; border-radius:12px; font-weight:700;">Max {{ assignment.max_score }}</span>
+                    <span style="background:rgba(255,255,255,0.15); padding:8px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:6px;">
+                        ⏰ {% if assignment.due_at %}{{ assignment.due_at|date:"d.m.Y H:i" }}{% else %}Teslim tarihi yok{% endif %}
+                    </span>
+                </div>
+                {% if assignment.is_group %}
+                    <div style="background:rgba(255,255,255,0.12); padding:10px 12px; border-radius:12px; font-size:13px;">
+                        Grup ödevi —
+                        {% if user_group %}
+                            Grubun: <strong>{{ user_group.name }}</strong>
+                        {% else %}
+                            Gruplandirma için öğretmeninle iletişime geç.
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 8px 22px rgba(0,0,0,0.06);">
-        <h3 style="margin-top:0;">Teslimim</h3>
-        {% if submission %}
-            <div style="margin-bottom:12px; font-size:14px; color:#555;">
-                Gönderim: {{ submission.submitted_at|date:"d.m.Y H:i" }} |
-                Durum:
-                {% if submission.score %}Notlandı ({{ submission.score }})
-                {% else %}Teslim Edildi{% endif %}
-                {% if submission.feedback %}<br/>Geribildirim: {{ submission.feedback }}{% endif %}
+    <div style="display:grid; grid-template-columns:2fr 1.4fr; gap:16px; align-items:start; flex-wrap:wrap;">
+        <div style="background:white; border-radius:16px; padding:18px; box-shadow:0 16px 40px rgba(0,0,0,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <h3 style="margin:0;">Teslimin</h3>
+                {% if submission %}
+                    <span style="padding:6px 10px; border-radius:999px; background:#f1f5f9; color:#0f172a; font-size:12px;">
+                        {% if submission.score %}Notlandı ({{ submission.score }}){% else %}Teslim Edildi{% endif %}
+                    </span>
+                {% else %}
+                    <span style="padding:6px 10px; border-radius:999px; background:#fff1f2; color:#b91c1c; font-size:12px;">Henüz teslim yok</span>
+                {% endif %}
             </div>
-            {% if submission.file %}
-                <div><a href="{{ submission.file.url }}" style="color:#2459c3;">Gönderdiğin dosyayı indir</a></div>
+
+            {% if submission %}
+                <div style="margin:12px 0; padding:12px; border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc; display:flex; flex-direction:column; gap:6px; font-size:14px;">
+                    <div><strong>Gönderim:</strong> {{ submission.submitted_at|date:"d.m.Y H:i" }}</div>
+                    {% if submission.feedback %}<div><strong>Geribildirim:</strong> {{ submission.feedback }}</div>{% endif %}
+                    {% if submission.file %}
+                        <div><a href="{{ submission.file.url }}" style="color:#2563eb;">Ana dosyayı indir</a></div>
+                    {% endif %}
+                    {% if submission.attachments.all %}
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                            <strong>Ekler:</strong>
+                            {% for att in submission.attachments.all %}
+                                <a href="{{ att.file.url }}" style="color:#2563eb;">v{{ att.version }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if submission.text %}
+                        <div style="padding:10px; border-radius:10px; background:white; border:1px dashed #cbd5e1;">{{ submission.text }}</div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p style="color:#6b7280; margin:12px 0;">Henüz teslim yapmadın. Dosya yükleyip formu göndererek teslim oluştur.</p>
             {% endif %}
-            {% if submission.attachments.all %}
-                <div style="margin-top:6px; font-size:13px; color:#444;">Ekler:
-                    {% for att in submission.attachments.all %}
-                        <a href="{{ att.file.url }}" style="color:#2459c3;">v{{ att.version }}</a>{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
+
+            <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+                {% csrf_token %}
+                <div id="dropzone" style="border:2px dashed #cbd5e1; border-radius:12px; padding:16px; text-align:center; color:#475569; cursor:pointer; background:#f8fafc;">
+                    📂 Dosyalarını buraya sürükle ya da tıkla
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    {{ form.as_p }}
+                </div>
+                <button type="submit" style="background:#0f172a; color:white; padding:12px 0; border:none; border-radius:12px; font-weight:700; cursor:pointer;">
+                    Gönder / Güncelle
+                </button>
+            </form>
+        </div>
+
+        <div style="background:white; border-radius:16px; padding:16px; box-shadow:0 16px 40px rgba(0,0,0,0.08); display:flex; flex-direction:column; gap:12px;">
+            <h4 style="margin:0;">Durum</h4>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;">
+                <div style="padding:12px; border-radius:12px; border:1px solid #e2e8f0; background:#f8fafc;">
+                    <p style="margin:0; font-size:13px; color:#64748b;">Teslim tarihi</p>
+                    <strong>{% if assignment.due_at %}{{ assignment.due_at|date:"d.m.Y H:i" }}{% else %}Belirtilmedi{% endif %}</strong>
+                </div>
+                <div style="padding:12px; border-radius:12px; border:1px solid #e2e8f0; background:#f8fafc;">
+                    <p style="margin:0; font-size:13px; color:#64748b;">Son gönderim</p>
+                    <strong>{% if submission %}{{ submission.submitted_at|date:"d.m.Y H:i" }}{% else %}-{% endif %}</strong>
+                </div>
+                <div style="padding:12px; border-radius:12px; border:1px solid #e2e8f0; background:#f8fafc;">
+                    <p style="margin:0; font-size:13px; color:#64748b;">Puan</p>
+                    <strong>{% if submission and submission.score %}{{ submission.score }} / {{ assignment.max_score }}{% else %}-{% endif %}</strong>
+                </div>
+            </div>
+            {% if assignment.criteria.all %}
+                <div style="margin-top:6px;">
+                    <p style="margin:0 0 6px 0; font-size:13px; color:#64748b;">Kriterler</p>
+                    <ul style="margin:0; padding-left:18px; color:#0f172a;">
+                        {% for c in assignment.criteria.all %}
+                            <li>{{ c.title }} ({{ c.max_score }} puan)</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             {% endif %}
-            {% if submission.text %}
-                <div style="margin-top:8px; padding:10px; background:#f7f9fc; border-radius:8px;">{{ submission.text }}</div>
-            {% endif %}
-        {% else %}
-            <p style="color:#777;">Henüz teslim yapmadın.</p>
-        {% endif %}
-
-        <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:12px; margin-top:14px;">
-            {% csrf_token %}
-            <div id="dropzone" style="border:2px dashed #cbd5e1; border-radius:10px; padding:14px; text-align:center; color:#64748b; cursor:pointer;">
-                Dosyaları buraya sürükle ya da tıkla
-            </div>
-            {{ form.as_p }}
-            <button type="submit" style="background:#2459c3; color:white; padding:12px 0; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Gönder / Güncelle</button>
-        </form>
+        </div>
     </div>
 </div>
 <script>
@@ -70,7 +123,7 @@
     dz.addEventListener("click", () => fileInput.click());
     dz.addEventListener("dragover", (e) => {
         e.preventDefault();
-        dz.style.borderColor = "#2459c3";
+        dz.style.borderColor = "#2563eb";
     });
     dz.addEventListener("dragleave", () => dz.style.borderColor = "#cbd5e1");
     dz.addEventListener("drop", (e) => {
