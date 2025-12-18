@@ -1,127 +1,125 @@
 ﻿{% extends "eys/base.html" %}
 
 {% block content %}
-<div style="background:white; padding:30px; border-radius:14px; box-shadow:0 15px 40px rgba(0,0,0,0.1); margin-bottom:30px;">
-    <h2 style="font-size:32px; margin-bottom:10px;">Hoş geldin {{ request.user.get_full_name|default:request.user.username }} 👋</h2>
-    <p style="font-size:18px; color:#666;">Bugünkü özetin hazır. Derslerine ve önemli araçlara tek tıkla ulaş.</p>
-    <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:20px;">
-        <a href="/teacher/courses/" style="background:#1db954; color:white; padding:12px 20px; border-radius:8px; text-decoration:none; font-weight:600;">📚 Derslerim</a>
-        <a href="/teacher/courses/" style="background:#1f1f1f; color:white; padding:12px 20px; border-radius:8px; text-decoration:none; font-weight:600;">🔗 Exam – LO Yönetimi</a>
-        <a href="/teacher/calendar/" style="background:#1db9e0; color:white; padding:12px 20px; border-radius:8px; text-decoration:none; font-weight:600;">📅 Takvim</a>
-        <a href="/teacher/announcements/new/" style="background:#fff0da; color:#b86a00; padding:12px 20px; border-radius:8px; text-decoration:none; font-weight:600;">📣 Duyuru Oluştur</a>
+<div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="background:linear-gradient(120deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Egitmen Paneli</p>
+        <h1 style="margin:6px 0 4px 0;">Hos geldin {{ request.user.get_full_name|default:request.user.username }}</h1>
+        <p style="margin:0; opacity:0.8;">Derslerini, notlari ve duyurulari tek yerden yurut.</p>
     </div>
-</div>
 
-<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; margin-bottom:30px;">
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
-        <p style="margin:0; color:#999;">📚 Dersler</p>
-        <h3 style="margin:5px 0 0 0; font-size:28px;">{{ course_count }}</h3>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px;">
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">Ders</p>
+            <h3 style="margin:6px 0 0 0;">{{ course_count }}</h3>
+        </div>
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">LO</p>
+            <h3 style="margin:6px 0 0 0;">{{ lo_total }}</h3>
+        </div>
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">Sinav</p>
+            <h3 style="margin:6px 0 0 0;">{{ exam_total }}</h3>
+        </div>
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">LO Baglantisi</p>
+            <h3 style="margin:6px 0 0 0;">{{ connection_total }}</h3>
+        </div>
     </div>
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
-        <p style="margin:0; color:#999;">🗂 LO'lar</p>
-        <h3 style="margin:5px 0 0 0; font-size:28px;">{{ lo_total }}</h3>
-    </div>
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
-        <p style="margin:0; color:#999;">📝 Sınavlar</p>
-        <h3 style="margin:5px 0 0 0; font-size:28px;">{{ exam_total }}</h3>
-    </div>
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
-        <p style="margin:0; color:#999;">🔗 LO Bağlantıları</p>
-        <h3 style="margin:5px 0 0 0; font-size:28px;">{{ connection_total }}</h3>
-    </div>
-</div>
 
-<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px;">
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-        <h3 style="margin-top:0;">Derslerim</h3>
-        <p style="color:#666;">Ders iceriklerini duzenle ve ogrencilerini yonet.</p>
-        <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Panele Git</a>
-    </div>
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-        <h3 style="margin-top:0;">Learning Outcome Yonetimi</h3>
-        <p style="color:#666;">LO ekle, guncelle ve sinavlara bagla.</p>
-        <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Islemleri Gor</a>
-    </div>
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-        <h3 style="margin-top:0;">Not Girisi</h3>
-        <p style="color:#666;">Sinav / odev notlarini tek ekrandan gir ve guncelle.</p>
-        <a href="/teacher/assignments/" style="color:#1db954; font-weight:600;">Not paneline git</a>
-    </div>
-    <div style="background:white; padding:20px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-        <h3 style="margin-top:0;">Exam - LO Baglantilari</h3>
-        <p style="color:#666;">Sinavlar ve LO yuzdelerini tek ekrandan kontrol et.</p>
-        <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Baglantilari Yonet</a>
-    </div>
-</div>
-<div style="display:grid; grid-template-columns:2fr 1fr; gap:24px; margin-top:30px; align-items:start;">
-    <div style="background:white; padding:22px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-            <h3 style="margin:0;">📅 Yaklaşan Sınavlar</h3>
-            <a href="/teacher/courses/" style="font-size:13px; color:#1db954; font-weight:600;">Tümünü Gör →</a>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
+        <div style="background:white; padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Derslerim</h3>
+            <p style="color:#666;">Ders iceriklerini duzenle ve ogrencilerini yonet.</p>
+            <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Panele git</a>
         </div>
-        {% if upcoming_exams %}
-        <div style="margin-top:16px; display:flex; flex-direction:column; gap:14px;">
-            {% for exam in upcoming_exams %}
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; background:#fcfcfc; border:1px solid #f0f0f0; padding:14px 16px; border-radius:12px;">
-                <div>
-                    <strong style="display:block;">{{ exam.name }}</strong>
-                    <span style="color:#666; font-size:13px; display:inline-flex; align-items:center; gap:8px;">
-                        <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:{{ exam.course_color }};"></span>
-                        {{ exam.course_code }} · {{ exam.course_name }}
-                    </span>
-                    {% if exam.type_label %}
-                        <span style="display:inline-block; margin-top:6px; background:#eef4ff; color:#2459c3; padding:4px 10px; border-radius:999px; font-size:12px;">{{ exam.type_label }}</span>
-                    {% endif %}
-                </div>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="background:#e5f7ee; color:#1d7c4a; padding:6px 10px; border-radius:999px; font-size:12px;">{{ exam.display_label }}</span>
-                    {% if exam.status == 'soon' %}
-                        <span style="background:#fff0da; color:#b86a00; padding:6px 10px; border-radius:999px; font-size:12px;">Bu Hafta</span>
-                    {% elif exam.status == 'future' %}
-                        <span style="background:#eeeeee; color:#555; padding:6px 10px; border-radius:999px; font-size:12px;">Yaklaşıyor</span>
-                    {% endif %}
-                    <a href="{% url 'exam_detail' exam.id %}" style="color:#1db954; font-weight:600; font-size:13px;">Detay →</a>
-                    <a href="{% url 'manage_exam_scores' exam.id %}" style="color:#1f1f1f; font-weight:600; font-size:13px;">Not Gir →</a>
-                </div>
+        <div style="background:white; padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Learning Outcome</h3>
+            <p style="color:#666;">LO ekle, guncelle, sinavlara bagla.</p>
+            <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Islemleri gor</a>
+        </div>
+        <div style="background:white; padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Not Girisi</h3>
+            <p style="color:#666;">Sinav / odev notlarini tek ekrandan gir.</p>
+            <a href="/teacher/assignments/" style="color:#1db954; font-weight:600;">Not paneline git</a>
+        </div>
+        <div style="background:white; padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Exam - LO</h3>
+            <p style="color:#666;">Sinavlar ve LO yuzdelerini yonet.</p>
+            <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Baglantilari yonet</a>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:20px; align-items:start;">
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <h3 style="margin:0;">Yaklasan Sinavlar</h3>
+                <a href="/teacher/courses/" style="font-size:13px; color:#1db954; font-weight:600;">Tumunu gor</a>
             </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div style="margin-top:16px; border:1px dashed #e5e5e5; border-radius:12px; padding:18px; text-align:center; color:#8a8a8a;">
-            Henüz planlanmış bir sınav yok.
-        </div>
-        {% endif %}
-    </div>
-    <div style="background:white; padding:22px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
-        <h3 style="margin-top:0;">📣 Son Duyurular</h3>
-        {% if announcement_cards %}
-        <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
-            {% for card in announcement_cards %}
-            <div style="border:1px solid #f0f0f0; border-radius:12px; padding:14px 16px; background:#fcfcfc;">
-                <p style="margin:0; color:#1db954; font-size:12px; font-weight:600;">{{ card.meta }}</p>
-                <h4 style="margin:6px 0 6px 0;">{{ card.title }}</h4>
-                <div style="margin:0; color:#666;">{{ card.body|safe }}</div>
-                {% if card.attachment %}
-                    <a href="{{ card.attachment.url }}" target="_blank" style="display: inline-block; margin-top: 10px; font-size: 13px; color: #2459c3; text-decoration: none; font-weight: 600;">📎 Eki İndir</a>
-                {% endif %}
-                {% if card.course_label %}
-                    <p style="margin:10px 0 0 0; color:#999; font-size:12px;">{{ card.course_label }}</p>
-                {% endif %}
-                <div style="margin-top: 12px; display: flex; gap: 8px;">
-                    <a href="{% url 'announcement_detail' card.id %}" style="font-size: 12px; color: #1db954; text-decoration: none;">Yorumlar</a>
-                    <a href="{% url 'edit_announcement' card.id %}" style="font-size: 12px; color: #2459c3; text-decoration: none;">Düzenle</a>
-                    <a href="{% url 'delete_announcement' card.id %}" style="font-size: 12px; color: #d9534f; text-decoration: none;">Sil</a>
+            {% if upcoming_exams %}
+            <div style="margin-top:14px; display:flex; flex-direction:column; gap:12px;">
+                {% for exam in upcoming_exams %}
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; background:#fcfcfc; border:1px solid #f0f0f0; padding:12px 14px; border-radius:12px;">
+                    <div>
+                        <strong style="display:block;">{{ exam.name }}</strong>
+                        <span style="color:#666; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
+                            <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:{{ exam.course_color }};"></span>
+                            {{ exam.course_code }} - {{ exam.course_name }}
+                        </span>
+                        {% if exam.type_label %}
+                            <span style="display:inline-block; margin-top:6px; background:#eef4ff; color:#2459c3; padding:4px 10px; border-radius:999px; font-size:12px;">{{ exam.type_label }}</span>
+                        {% endif %}
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <span style="background:#e5f7ee; color:#1d7c4a; padding:6px 10px; border-radius:999px; font-size:12px;">{{ exam.display_label }}</span>
+                        {% if exam.status == 'soon' %}
+                            <span style="background:#fff0da; color:#b86a00; padding:6px 10px; border-radius:999px; font-size:12px;">Bu hafta</span>
+                        {% elif exam.status == 'future' %}
+                            <span style="background:#eeeeee; color:#555; padding:6px 10px; border-radius:999px; font-size:12px;">Yaklasiyor</span>
+                        {% endif %}
+                        <a href="{% url 'exam_detail' exam.id %}" style="color:#1db954; font-weight:600; font-size:13px;">Detay -></a>
+                        <a href="{% url 'manage_exam_scores' exam.id %}" style="color:#1f1f1f; font-weight:600; font-size:13px;">Not gir -></a>
+                        <a href="{% url 'send_exam_reminders' exam.id %}" style="color:#2459c3; font-weight:600; font-size:13px;">Hatirlat</a>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
+            {% else %}
+            <div style="margin-top:14px; border:1px dashed #e5e5e5; border-radius:12px; padding:16px; text-align:center; color:#8a8a8a;">
+                Henuz planlanmis sinav yok.
+            </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div style="border:1px dashed #e5e5e5; border-radius:12px; padding:18px; text-align:center; color:#8a8a8a;">
-            Henüz duyuru yok.
+
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Son Duyurular</h3>
+            {% if announcement_cards %}
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                {% for card in announcement_cards %}
+                <div style="border:1px solid #f0f0f0; border-radius:12px; padding:12px 14px; background:#fcfcfc;">
+                    <p style="margin:0; color:#1db954; font-size:12px; font-weight:600;">{{ card.meta }}</p>
+                    <h4 style="margin:6px 0 6px 0;">{{ card.title }}</h4>
+                    <div style="margin:0; color:#666;">{{ card.body|safe }}</div>
+                    {% if card.attachment %}
+                        <a href="{{ card.attachment.url }}" target="_blank" style="display:inline-block; margin-top:8px; font-size:13px; color:#2459c3; text-decoration:none; font-weight:600;">Eki indir</a>
+                    {% endif %}
+                    {% if card.course_label %}
+                        <p style="margin:8px 0 0 0; color:#999; font-size:12px;">{{ card.course_label }}</p>
+                    {% endif %}
+                    <div style="margin-top:8px; display:flex; gap:8px; font-size:12px;">
+                        <a href="{% url 'announcement_detail' card.id %}" style="color:#1db954; text-decoration:none;">Yorumlar</a>
+                        <a href="{% url 'edit_announcement' card.id %}" style="color:#2459c3; text-decoration:none;">Duzenle</a>
+                        <a href="{% url 'delete_announcement' card.id %}" style="color:#d9534f; text-decoration:none;">Sil</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="border:1px dashed #e5e5e5; border-radius:12px; padding:16px; text-align:center; color:#8a8a8a; margin-top:10px;">
+                Henuz duyuru yok.
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}
-
-

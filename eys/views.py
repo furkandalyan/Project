@@ -1871,6 +1871,7 @@ def manage_assignment_groups(request, assignment_id):
 
 
 @login_required
+@login_required
 def send_assignment_reminders(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id, course__instructor=request.user)
     submitted_ids = assignment.submissions.values_list("student_id", flat=True)
@@ -1881,15 +1882,36 @@ def send_assignment_reminders(request, assignment_id):
         create_notification(
             student,
             "assignment_due",
-            f"{assignment.title} ödevini teslim etmen gerekiyor.",
+            f"{assignment.title} ?devini teslim etmen gerekiyor.",
             url=url,
         )
         count += 1
-    messages.success(request, f"Hatırlatma gönderildi ({count} öğrenci).")
+    messages.success(request, f"Hatirlatma gonderildi ({count} ogrenci).")
     return redirect("teacher_assignment_detail", assignment_id=assignment.id)
 
 
 @login_required
+def send_exam_reminders(request, exam_id):
+    exam = get_object_or_404(Exam, id=exam_id, course__instructor=request.user)
+    students = exam.course.students.all()
+    count = 0
+    for student in students:
+        url = reverse("exam_detail", args=[exam.id])
+        if exam.scheduled_at:
+            date_label = timezone.localtime(exam.scheduled_at).strftime("%d.%m.%Y %H:%M")
+        else:
+            date_label = "Belirtilmedi"
+        message = f"{exam.course.code} - {exam.name} sinavin yaklasiyor. Tarih: {date_label}"
+        create_notification(
+            student,
+            "exam_reminder",
+            message,
+            url=url,
+        )
+        count += 1
+    messages.success(request, f"Sinav hatirlatmasi gonderildi ({count} ogrenci).")
+    return redirect("teacher_dashboard")
+
 def export_submissions_csv(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id, course__instructor=request.user)
     submissions = assignment.submissions.select_related("student")

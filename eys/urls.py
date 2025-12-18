@@ -31,6 +31,8 @@ urlpatterns = [
     path('teacher/assignment/<int:assignment_id>/remind/', views.send_assignment_reminders, name='send_assignment_reminders'),
     path('teacher/assignment/<int:assignment_id>/export-csv/', views.export_submissions_csv, name='export_submissions_csv'),
     path('teacher/assignment/<int:assignment_id>/export-zip/', views.export_submissions_zip, name='export_submissions_zip'),
+    path('teacher/exam/<int:exam_id>/remind/', views.send_exam_reminders, name='send_exam_reminders'),
+    path('teacher/exam/<int:exam_id>/export-scores/', views.export_exam_scores_csv, name='export_exam_scores_csv'),
     path('teacher/materials/', views.teacher_materials, name='teacher_materials'),
     path('teacher/materials/new/', views.create_material, name='create_material'),
 

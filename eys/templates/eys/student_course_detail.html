@@ -1,132 +1,113 @@
 {% extends "eys/base.html" %}
 
 {% block content %}
+<div style="display:flex; flex-direction:column; gap:18px;">
+    <!-- Hero -->
+    <div style="background:linear-gradient(120deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Ogrenci modu</p>
+        <h1 style="margin:6px 0 4px 0;">{{ course.name }} <span style="font-size:18px; opacity:0.8;">({{ course.code }})</span></h1>
+        <p style="margin:0; opacity:0.8;">Dersin LO ve sinav baglantilarini, notlarini burada gor.</p>
+    </div>
 
-<div style="background:white; padding:30px; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.08); margin-bottom:30px;">
-    <h1 style="font-size:34px; margin:0 0 5px 0;">{{ course.name }} <span style="font-size:22px; color:#9c9c9c;">({{ course.code }})</span></h1>
-    <p style="color:#6c6c6c; font-size:16px;">Ders Detayı (Öğrenci modu)</p>
-    <hr style="border:none; border-top:1px solid #ececec; margin:20px 0;">
-    <div style="display:flex; flex-wrap:wrap; gap:20px;">
-        <div style="background:#f7f7f7; padding:15px 25px; border-radius:12px; min-width:180px;">
-            <p style="margin:0; color:#7a7a7a; font-size:13px;">Öğretim Elemanı</p>
+    <!-- Summary -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px;">
+        <div style="background:white; padding:14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999; font-size:12px;">Ogretim Elemani</p>
             <strong style="font-size:18px;">{{ instructor_name }}</strong>
         </div>
-        <div style="background:#f7f7f7; padding:15px 25px; border-radius:12px; min-width:150px;">
-            <p style="margin:0; color:#7a7a7a; font-size:13px;">Dönem</p>
+        <div style="background:white; padding:14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999; font-size:12px;">Donem</p>
             <strong style="font-size:18px;">{{ term_label }}</strong>
         </div>
-        <div style="background:#f7f7f7; padding:15px 25px; border-radius:12px; min-width:150px;">
-            <p style="margin:0; color:#7a7a7a; font-size:13px;">Öğrenci Sayısı</p>
+        <div style="background:white; padding:14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999; font-size:12px;">Ogrenci</p>
             <strong style="font-size:18px;">{{ student_count }}</strong>
         </div>
-        <div style="background:#f7f7f7; padding:15px 25px; border-radius:12px; min-width:150px;">
-            <p style="margin:0; color:#7a7a7a; font-size:13px;">LO / Sınav</p>
+        <div style="background:white; padding:14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999; font-size:12px;">LO / Sinav</p>
             <strong style="font-size:18px;">{{ los|length }} / {{ exams|length }}</strong>
         </div>
     </div>
-</div>
 
-<div style="display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap;">
-
-    <div style="flex:1; min-width:300px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2>Learning Outcomes</h2>
-        </div>
-        <div style="margin-top:20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:15px;">
+    <!-- LO - Exam connections -->
+    <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 14px 36px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">LO - Sinav Baglantilari</h3>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
             {% for lo in los %}
-            <div onclick="openLOModal('lo-detail-{{ lo.id }}')"
-                 style="background:white; padding:20px; border-radius:10px; box-shadow:0 0 8px rgba(0,0,0,0.1); cursor:pointer;">
-                <h3 style="margin:0;">LO {{ lo.id }}</h3>
-                <p style="margin:8px 0 0 0; color:#999;">{{ lo.title }}</p>
-                {% if lo.student_score %}
-                    <p style="margin:6px 0 0 0; color:#1db954; font-weight:600;">Puanın: {{ lo.student_score }}</p>
-                {% endif %}
-            </div>
-            <div id="lo-detail-{{ lo.id }}" style="display:none;">
-                <h3>LO {{ lo.id }} – {{ lo.title }}</h3>
-                <p><strong>İçerik:</strong> {{ lo.description|default:"Henüz açıklama girilmemiş." }}</p>
-                <p><strong>Bağlı Olduğu Sınavlar:</strong></p>
-                <ul style="padding-left:18px; margin-top:8px;">
+            <div style="padding:12px; border:1px solid #eef2f7; border-radius:12px; background:#f8fafc; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div style="font-weight:700; color:#0f172a;">LO {{ lo.id }}: {{ lo.title }}</div>
+                <span style="color:#94a3b8;">-></span>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     {% for w in lo.examloweight_set.all %}
-                        <li>{{ w.exam.name }} – %{{ w.weight }}</li>
+                        <span style="padding:6px 10px; border-radius:10px; background:#e0f2fe; color:#0f172a; font-size:12px;">{{ w.exam.name }} (%{{ w.weight }})</span>
                     {% empty %}
-                        <li>Henüz herhangi bir sınava bağlı değil.</li>
+                        <span style="color:#94a3b8; font-size:12px;">Bagli sinav yok</span>
                     {% endfor %}
-                </ul>
+                </div>
                 {% if lo.student_score %}
-                    <p><strong>LO Puanın:</strong> {{ lo.student_score }}</p>
-                {% else %}
-                    <p><strong>LO Puanın:</strong> Henüz hesaplanmadı.</p>
+                    <span style="margin-left:auto; padding:6px 10px; border-radius:10px; background:#e0fbea; color:#065f46; font-size:12px;">LO notun: {{ lo.student_score }}</span>
                 {% endif %}
             </div>
             {% empty %}
-            <p>Henüz LO eklenmemiş.</p>
+            <p style="color:#6b7280;">Henuz LO eklenmemis.</p>
             {% endfor %}
         </div>
     </div>
 
-    <div style="flex:1; min-width:300px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2>Sınavlar</h2>
-        </div>
-
-        {% if exam_cards %}
-        <div style="margin-top:20px; border-left:3px solid #1db954; padding-left:20px; display:flex; flex-direction:column; gap:20px;">
-            {% for exam in exam_cards %}
-            <div style="position:relative; padding-left:25px; background:white; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08); padding:18px 20px; margin-left:-20px;">
-                <span style="position:absolute; left:-36px; top:24px; width:16px; height:16px; border-radius:50%; background:#1db954; box-shadow:0 0 0 6px rgba(29,185,84,0.15);"></span>
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap;">
-                    <div>
-                        <a href="{% url 'exam_detail' exam.id %}" style="font-size:18px; font-weight:600; color:#1f1f1f; text-decoration:none;">
-                            {{ exam.name }}
-                        </a>
-                        <p style="font-size:14px; color:#666; margin:6px 0 0 0;">{{ exam.description|default:"Açıklama eklenmedi." }}</p>
-                    </div>
-                    {% if exam.status == 'past' %}
-                        <span style="font-size:12px; background:#eeeeee; color:#555; padding:4px 12px; border-radius:999px;">Tamamlandı</span>
-                    {% elif exam.status == 'soon' %}
-                        <span style="font-size:12px; background:#fff0da; color:#b86a00; padding:4px 12px; border-radius:999px;">Bu Hafta</span>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px;">
+        <!-- LO cards -->
+        <div style="background:white; border-radius:14px; padding:16px; box-shadow:0 14px 36px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Learning Outcomes</h3>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:10px;">
+                {% for lo in los %}
+                <div style="background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #eef2f7;">
+                    <p style="margin:0; color:#6b7280; font-size:12px;">LO {{ lo.id }}</p>
+                    <strong style="display:block; margin:4px 0;">{{ lo.title }}</strong>
+                    {% if lo.student_score %}
+                        <div style="font-size:12px; color:#065f46;">Notun: {{ lo.student_score }}</div>
                     {% else %}
-                        <span style="font-size:12px; background:#e5f7ee; color:#1d7c4a; padding:4px 12px; border-radius:999px;">Yaklaşıyor</span>
+                        <div style="font-size:12px; color:#94a3b8;">Notun hesaplanmadi</div>
                     {% endif %}
                 </div>
-                <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; font-size:14px; color:#555;">
-                    <span>Planlanan Tarih: {{ exam.display_label }}</span>
-                    <span>Ders: {{ exam.course_code }}</span>
-                    {% if exam.score %}
-                        <span style="font-weight:600; color:#1db954;">Notun: {{ exam.score }}</span>
-                    {% endif %}
-                </div>
+                {% empty %}
+                <p style="color:#6b7280;">Henuz LO eklenmemis.</p>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
-        {% else %}
-            <p style="margin-top:20px; color:#999;">Henüz sınav eklenmemiş.</p>
-        {% endif %}
+
+        <!-- Exams -->
+        <div style="background:white; border-radius:14px; padding:16px; box-shadow:0 14px 36px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Sinavlar</h3>
+            {% if exam_cards %}
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+                {% for exam in exam_cards %}
+                <div style="border:1px solid #eef2f7; border-radius:12px; padding:12px; background:#f8fafc;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <div>
+                            <a href="{% url 'exam_detail' exam.id %}" style="font-weight:700; color:#0f172a; text-decoration:none;">{{ exam.name }}</a>
+                            <div style="font-size:12px; color:#94a3b8;">{{ exam.display_label }}</div>
+                        </div>
+                        {% if exam.score %}
+                            <span style="padding:6px 10px; border-radius:10px; background:#e0fbea; color:#065f46; font-size:12px;">Notun: {{ exam.score }}</span>
+                        {% endif %}
+                    </div>
+                    <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; font-size:12px; color:#475569;">
+                        <span>Ders: {{ exam.course_code }}</span>
+                        {% if exam.status == 'past' %}
+                            <span style="padding:4px 8px; border-radius:8px; background:#e5e7eb; color:#374151;">Tamamlandi</span>
+                        {% elif exam.status == 'soon' %}
+                            <span style="padding:4px 8px; border-radius:8px; background:#fff0da; color:#b86a00;">Bu hafta</span>
+                        {% else %}
+                            <span style="padding:4px 8px; border-radius:8px; background:#e0f2fe; color:#0369a1;">Yaklasiyor</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color:#6b7280;">Henuz sinav eklenmemis.</p>
+            {% endif %}
+        </div>
     </div>
-
 </div>
-
-<div id="loModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-    <div style="width:420px; background:white; padding:20px; border-radius:10px; margin:100px auto;">
-        <div id="loModalContent"></div>
-        <button onclick="closeLOModal()"
-                style="margin-top:20px; background:#1db954; padding:10px 20px; border:none; border-radius:6px; color:white;">
-            Kapat
-        </button>
-    </div>
-</div>
-
-<script>
-function openLOModal(contentId) {
-    var html = document.getElementById(contentId).innerHTML;
-    document.getElementById("loModalContent").innerHTML = html;
-    document.getElementById("loModal").style.display = "block";
-}
-function closeLOModal() {
-    document.getElementById("loModal").style.display = "none";
-}
-</script>
-
 {% endblock %}
-

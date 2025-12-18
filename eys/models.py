@@ -307,6 +307,7 @@ class Notification(models.Model):
         ("submission_received", "Submission Received"),
         ("submission_graded", "Submission Graded"),
         ("announcement_comment", "Announcement Comment"),
+        ("exam_reminder", "Exam Reminder"),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
