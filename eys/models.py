@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.db.models import Sum
 from django.contrib.auth.models import AbstractUser
 
 
@@ -71,6 +73,73 @@ class ExamLOWeight(models.Model):
 
     def __str__(self):
         return f"{self.exam.name} → {self.learning_outcome.title} (%{self.weight})"
+
+
+class ProgramOutcome(models.Model):
+    code = models.CharField(max_length=20, unique=True)  # e.g. PO1
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.code} - {self.title}"
+
+
+class LOPOWeight(models.Model):
+    learning_outcome = models.ForeignKey(LearningOutcome, on_delete=models.CASCADE, related_name="po_weights")
+    program_outcome = models.ForeignKey(ProgramOutcome, on_delete=models.CASCADE, related_name="lo_weights")
+    weight = models.FloatField(help_text="Contribution percentage of this Learning Outcome to the Program Outcome (0-100).")
+
+    class Meta:
+        unique_together = ("learning_outcome", "program_outcome")
+
+    def __str__(self):
+        return f"{self.learning_outcome} → {self.program_outcome} (%{self.weight})"
+
+    def clean(self):
+        """
+        Enforce the 100% rule per ProgramOutcome:
+        The sum of all weights for a given ProgramOutcome must be exactly 100%.
+        """
+        if self.program_outcome is None:
+            return
+
+        # Current total for this ProgramOutcome excluding this row
+        existing_total = (
+            LOPOWeight.objects
+            .filter(program_outcome=self.program_outcome)
+            .exclude(pk=self.pk)
+            .aggregate(total=Sum("weight"))
+            .get("total") or 0
+        )
+
+        new_total = existing_total + (self.weight or 0)
+
+        # Allow a tiny epsilon for floating point summation
+        if abs(new_total - 100.0) > 1e-6:
+            raise ValidationError({
+                "weight": f"The total weight for {self.program_outcome} must be exactly 100. "
+                          f"Current total with this change would be {new_total:.2f}."
+            })
+
+    def calculate_po_score(self, lo_scores):
+        """
+        Helper to calculate PO score using this ProgramOutcome's LO weights and given LO scores.
+        lo_scores: dict mapping LearningOutcome id (or instance) to numeric score.
+        PO_Score = Σ(LO_Score × Weight/100)
+        """
+        # Normalize keys to LearningOutcome IDs
+        normalized_scores = {}
+        for key, value in lo_scores.items():
+            if isinstance(key, LearningOutcome):
+                normalized_scores[key.id] = float(value)
+            else:
+                normalized_scores[int(key)] = float(value)
+
+        total = 0.0
+        for mapping in LOPOWeight.objects.filter(program_outcome=self.program_outcome):
+            lo_score = normalized_scores.get(mapping.learning_outcome_id, 0.0)
+            total += lo_score * (mapping.weight / 100.0)
+        return total
 
 
 class ExamResult(models.Model):
