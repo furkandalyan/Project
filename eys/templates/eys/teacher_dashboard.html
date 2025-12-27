@@ -2,12 +2,66 @@
 
 {% block content %}
 <div style="display:flex; flex-direction:column; gap:18px;">
-    <div style="background:linear-gradient(120deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
-        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Egitmen Paneli</p>
+    {% if department_stats %}
+    <!-- BÖLÜM BAŞKANI ÖZEL PANELI -->
+    <div
+        style="background:linear-gradient(135deg, #1e1e2f 0%, #3e3e5e 100%); color:white; border-radius:18px; padding:24px; box-shadow:0 15px 35px rgba(0,0,0,0.2); border: 2px solid #ffd700;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+                <span
+                    style="background:#ffd700; color:#000; padding:4px 10px; border-radius:6px; font-weight:700; font-size:11px; letter-spacing:1px; text-transform:uppercase;">Admin</span>
+                <h2 style="margin:12px 0 6px 0; color:#ffd700;">Bölüm Başkanı Paneli</h2>
+                <p style="margin:0; opacity:0.8;">Bölüm genelindeki akademik durumu buradan takip edebilirsiniz.</p>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:32px; font-weight:700;">{{ department_stats.all_courses_count }}</div>
+                <div style="font-size:12px; opacity:0.7;">Toplam Ders</div>
+            </div>
+        </div>
+
+        <div
+            style="margin-top:24px; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
+            <div style="background:rgba(255,255,255,0.1); padding:16px; border-radius:12px; backdrop-filter:blur(5px);">
+                <!-- Icon Removed -->
+                <strong style="display:block; font-size:18px; margin:4px 0;">{{ department_stats.total_instructors }}</strong>
+                <span style="font-size:12px; opacity:0.7;">Akademik Personel</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.1); padding:16px; border-radius:12px; backdrop-filter:blur(5px);">
+                <!-- Icon Removed -->
+                <strong style="display:block; font-size:18px; margin:4px 0;">%{{ department_stats.average_score }}</strong>
+                <span style="font-size:12px; opacity:0.7;">Genel Başarı Ort.</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.1); padding:16px; border-radius:12px; backdrop-filter:blur(5px);">
+                <!-- Icon Removed -->
+                <strong style="display:block; font-size:18px; margin:4px 0;">{{ department_stats.critical_course_count }}</strong>
+                <span style="font-size:12px; opacity:0.7;">Kritik Ders</span>
+            </div>
+        </div>
+
+        <div style="margin-top:24px;">
+            <h4 style="margin:0 0 12px 0; font-size:14px; opacity:0.9;">Son Açılan Dersler</h4>
+            <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:5px;">
+                {% for course in department_stats.recent_courses %}
+                <span
+                    style="background:rgba(0,0,0,0.3); padding:6px 12px; border-radius:8px; font-size:13px; border:1px solid rgba(255,255,255,0.1); white-space:nowrap;">
+                    {{ course.code }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- EĞİTMEN PANELİ -->
+    <div
+        style="background:linear-gradient(120deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Egitmen
+            Paneli</p>
         <h1 style="margin:6px 0 4px 0;">Hos geldin {{ request.user.get_full_name|default:request.user.username }}</h1>
         <p style="margin:0; opacity:0.8;">Derslerini, notlari ve duyurulari tek yerden yurut.</p>
     </div>
 
+    <!-- MAIN DASHBOARD METRICS -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px;">
         <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
             <p style="margin:0; color:#999;">Ders</p>
@@ -27,26 +81,131 @@
         </div>
     </div>
 
+    <!-- QUICK ACTIONS toolbar -->
+    <!-- Sadece Normal Egitmenler icin (Bolum Baskani degilse) -->
+    {% if not department_stats %}
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="{% url 'teacher_create_announcement' %}"
+            style="display:flex; align-items:center; gap:8px; background:#1db954; color:white; padding:12px 20px; border-radius:12px; text-decoration:none; font-weight:600; box-shadow:0 4px 12px rgba(29, 185, 84, 0.3); transition:transform 0.2s;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Yeni Duyuru Ekle
+        </a>
+
+        <a href="{% url 'teacher_courses' %}"
+            style="display:flex; align-items:center; gap:8px; background:white; color:#333; padding:12px 20px; border-radius:12px; text-decoration:none; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.05); border:1px solid #eee; transition:transform 0.2s;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            Sınav / Not Oluştur (Derse Git)
+        </a>
+
+        <a href="{% url 'teacher_assignments' %}"
+            style="display:flex; align-items:center; gap:8px; background:white; color:#333; padding:12px 20px; border-radius:12px; text-decoration:none; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.05); border:1px solid #eee; transition:transform 0.2s;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="12" y1="18" x2="12" y2="12"></line>
+                <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+            Ödev Ver
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- STATS CARDS -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
-        <div style="background:white; padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-            <h3 style="margin-top:0;">Derslerim</h3>
-            <p style="color:#666;">Ders iceriklerini duzenle ve ogrencilerini yonet.</p>
-            <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Panele git</a>
+        <div
+            style="background:white; padding:20px; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.05); border:1px solid #f0f0f0;">
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+                <div>
+                    <h3 style="margin:0 0 6px 0; font-size:16px;">Derslerim</h3>
+                    <p style="margin:0; color:#666; font-size:13px; line-height:1.4;">Ders içeriklerini düzenle ve
+                        öğrencilerini yönet.</p>
+                </div>
+                <div style="background:#eefdf3; color:#1db954; padding:8px; border-radius:10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                </div>
+            </div>
+            <a href="{% url 'teacher_courses' %}"
+                style="display:inline-block; margin-top:16px; color:#1db954; font-weight:600; font-size:14px; text-decoration:none;">Panele
+                git →</a>
         </div>
-        <div style="background:white; padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-            <h3 style="margin-top:0;">Learning Outcome</h3>
-            <p style="color:#666;">LO ekle, guncelle, sinavlara bagla.</p>
-            <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Islemleri gor</a>
+
+        <div
+            style="background:white; padding:20px; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.05); border:1px solid #f0f0f0;">
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+                <div>
+                    <h3 style="margin:0 0 6px 0; font-size:16px;">Sınavlar & Notlar</h3>
+                    <p style="margin:0; color:#666; font-size:13px; line-height:1.4;">Vize/Final notlarını gir veya
+                        düzenle.</p>
+                </div>
+                <div style="background:#eff4ff; color:#2459c3; padding:8px; border-radius:10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+            </div>
+            <a href="{% url 'teacher_courses' %}"
+                style="display:inline-block; margin-top:16px; color:#2459c3; font-weight:600; font-size:14px; text-decoration:none;">Notları
+                yönet →</a>
         </div>
-        <div style="background:white; padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-            <h3 style="margin-top:0;">Not Girisi</h3>
-            <p style="color:#666;">Sinav / odev notlarini tek ekrandan gir.</p>
-            <a href="/teacher/assignments/" style="color:#1db954; font-weight:600;">Not paneline git</a>
+
+        <div
+            style="background:white; padding:20px; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.05); border:1px solid #f0f0f0;">
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+                <div>
+                    <h3 style="margin:0 0 6px 0; font-size:16px;">Ödevler</h3>
+                    <p style="margin:0; color:#666; font-size:13px; line-height:1.4;">Ödev ver ve teslimleri puanla.</p>
+                </div>
+                <div style="background:#fff0da; color:#b86a00; padding:8px; border-radius:10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    </svg>
+                </div>
+            </div>
+            <a href="{% url 'teacher_assignments' %}"
+                style="display:inline-block; margin-top:16px; color:#b86a00; font-weight:600; font-size:14px; text-decoration:none;">Ödev
+                paneli →</a>
         </div>
-        <div style="background:white; padding:18px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-            <h3 style="margin-top:0;">Exam - LO</h3>
-            <p style="color:#666;">Sinavlar ve LO yuzdelerini yonet.</p>
-            <a href="/teacher/courses/" style="color:#1db954; font-weight:600;">Baglantilari yonet</a>
+
+        <div
+            style="background:white; padding:20px; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.05); border:1px solid #f0f0f0;">
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+                <div>
+                    <h3 style="margin:0 0 6px 0; font-size:16px;">Analizler</h3>
+                    <p style="margin:0; color:#666; font-size:13px; line-height:1.4;">LO başarı oranlarını ve sınıf
+                        durumunu incele.</p>
+                </div>
+                <div style="background:#f3e8ff; color:#7d5fff; padding:8px; border-radius:10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                </div>
+            </div>
+            <a href="{% url 'teacher_courses' %}"
+                style="display:inline-block; margin-top:16px; color:#7d5fff; font-weight:600; font-size:14px; text-decoration:none;">Raporlar
+                →</a>
         </div>
     </div>
 
@@ -59,33 +218,44 @@
             {% if upcoming_exams %}
             <div style="margin-top:14px; display:flex; flex-direction:column; gap:12px;">
                 {% for exam in upcoming_exams %}
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; background:#fcfcfc; border:1px solid #f0f0f0; padding:12px 14px; border-radius:12px;">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; gap:12px; background:#fcfcfc; border:1px solid #f0f0f0; padding:12px 14px; border-radius:12px;">
                     <div>
                         <strong style="display:block;">{{ exam.name }}</strong>
                         <span style="color:#666; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
-                            <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:{{ exam.course_color }};"></span>
+                            <span
+                                style="display:inline-block; width:10px; height:10px; border-radius:50%; background:{{ exam.course_color }};"></span>
                             {{ exam.course_code }} - {{ exam.course_name }}
                         </span>
                         {% if exam.type_label %}
-                            <span style="display:inline-block; margin-top:6px; background:#eef4ff; color:#2459c3; padding:4px 10px; border-radius:999px; font-size:12px;">{{ exam.type_label }}</span>
+                        <span
+                            style="display:inline-block; margin-top:6px; background:#eef4ff; color:#2459c3; padding:4px 10px; border-radius:999px; font-size:12px;">{{ exam.type_label }}</span>
                         {% endif %}
                     </div>
                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <span style="background:#e5f7ee; color:#1d7c4a; padding:6px 10px; border-radius:999px; font-size:12px;">{{ exam.display_label }}</span>
+                        <span
+                            style="background:#e5f7ee; color:#1d7c4a; padding:6px 10px; border-radius:999px; font-size:12px;">{{ exam.display_label }}</span>
                         {% if exam.status == 'soon' %}
-                            <span style="background:#fff0da; color:#b86a00; padding:6px 10px; border-radius:999px; font-size:12px;">Bu hafta</span>
+                        <span
+                            style="background:#fff0da; color:#b86a00; padding:6px 10px; border-radius:999px; font-size:12px;">Bu
+                            hafta</span>
                         {% elif exam.status == 'future' %}
-                            <span style="background:#eeeeee; color:#555; padding:6px 10px; border-radius:999px; font-size:12px;">Yaklasiyor</span>
+                        <span
+                            style="background:#eeeeee; color:#555; padding:6px 10px; border-radius:999px; font-size:12px;">Yaklasiyor</span>
                         {% endif %}
-                        <a href="{% url 'exam_detail' exam.id %}" style="color:#1db954; font-weight:600; font-size:13px;">Detay -></a>
-                        <a href="{% url 'manage_exam_scores' exam.id %}" style="color:#1f1f1f; font-weight:600; font-size:13px;">Not gir -></a>
-                        <a href="{% url 'send_exam_reminders' exam.id %}" style="color:#2459c3; font-weight:600; font-size:13px;">Hatirlat</a>
+                        <a href="{% url 'exam_detail' exam.id %}"
+                            style="color:#1db954; font-weight:600; font-size:13px;">Detay -></a>
+                        <a href="{% url 'manage_exam_scores' exam.id %}"
+                            style="color:#1f1f1f; font-weight:600; font-size:13px;">Not gir -></a>
+                        <a href="{% url 'send_exam_reminders' exam.id %}"
+                            style="color:#2459c3; font-weight:600; font-size:13px;">Hatirlat</a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div style="margin-top:14px; border:1px dashed #e5e5e5; border-radius:12px; padding:16px; text-align:center; color:#8a8a8a;">
+            <div
+                style="margin-top:14px; border:1px dashed #e5e5e5; border-radius:12px; padding:16px; text-align:center; color:#8a8a8a;">
                 Henuz planlanmis sinav yok.
             </div>
             {% endif %}
@@ -101,21 +271,27 @@
                     <h4 style="margin:6px 0 6px 0;">{{ card.title }}</h4>
                     <div style="margin:0; color:#666;">{{ card.body|safe }}</div>
                     {% if card.attachment %}
-                        <a href="{{ card.attachment.url }}" target="_blank" style="display:inline-block; margin-top:8px; font-size:13px; color:#2459c3; text-decoration:none; font-weight:600;">Eki indir</a>
+                    <a href="{{ card.attachment.url }}" target="_blank"
+                        style="display:inline-block; margin-top:8px; font-size:13px; color:#2459c3; text-decoration:none; font-weight:600;">Eki
+                        indir</a>
                     {% endif %}
                     {% if card.course_label %}
-                        <p style="margin:8px 0 0 0; color:#999; font-size:12px;">{{ card.course_label }}</p>
+                    <p style="margin:8px 0 0 0; color:#999; font-size:12px;">{{ card.course_label }}</p>
                     {% endif %}
                     <div style="margin-top:8px; display:flex; gap:8px; font-size:12px;">
-                        <a href="{% url 'announcement_detail' card.id %}" style="color:#1db954; text-decoration:none;">Yorumlar</a>
-                        <a href="{% url 'edit_announcement' card.id %}" style="color:#2459c3; text-decoration:none;">Duzenle</a>
-                        <a href="{% url 'delete_announcement' card.id %}" style="color:#d9534f; text-decoration:none;">Sil</a>
+                        <a href="{% url 'announcement_detail' card.id %}"
+                            style="color:#1db954; text-decoration:none;">Yorumlar</a>
+                        <a href="{% url 'edit_announcement' card.id %}"
+                            style="color:#2459c3; text-decoration:none;">Duzenle</a>
+                        <a href="{% url 'delete_announcement' card.id %}"
+                            style="color:#d9534f; text-decoration:none;">Sil</a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div style="border:1px dashed #e5e5e5; border-radius:12px; padding:16px; text-align:center; color:#8a8a8a; margin-top:10px;">
+            <div
+                style="border:1px dashed #e5e5e5; border-radius:12px; padding:16px; text-align:center; color:#8a8a8a; margin-top:10px;">
                 Henuz duyuru yok.
             </div>
             {% endif %}

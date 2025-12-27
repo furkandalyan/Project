@@ -6,14 +6,18 @@ import csv
 import io
 import zipfile
 
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, Q, Max, Prefetch
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.http import HttpResponse, JsonResponse
+from django.contrib.auth import authenticate, login, get_user_model, logout
 from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from requests import delete
+
+User = get_user_model()
 
 from .models import (
     Course,
@@ -164,19 +168,33 @@ def serialize_exam_for_student(exam, now=None):
 
 def user_login(request):
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "").strip()
+        
         user = authenticate(request, username=username, password=password)
+        
         if user is not None:
             login(request, user)
-            if user.role.name == "Student":
+            
+            # Role Check
+            if not user.role:
+                 messages.error(request, "Bu kullanıcının yetki rolü atanmamış.")
+                 return render(request, "eys/login.html", {"hide_navbar": True})
+                 
+            role_name = user.role.name
+            if role_name == "Student":
                 return redirect("student_dashboard")
-            if user.role.name in ["Regular Instructor", "Advisor Instructor", "Head of Department"]:
+            elif role_name in ["Regular Instructor", "Advisor Instructor", "Head of Department"]:
                 return redirect("teacher_dashboard")
-            if user.role.name == "Student Affairs":
+            elif role_name == "Student Affairs":
                 return redirect("affairs_dashboard")
+            else:
+                messages.error(request, f"Bilinmeyen rol: {role_name}. Lütfen yöneticiyle iletişime geçin.")
+                # Yine de login kalsın mı? Güvenlik gereği logout yapılabilir.
+                # logout(request)
         else:
-            print("LOGIN FAILED:", username, password)
+            messages.error(request, "Kullanıcı adı veya parola hatalı.")
+            
     return render(request, "eys/login.html", {"hide_navbar": True})
 
 def user_logout(request):
@@ -778,7 +796,9 @@ def export_exam_scores_csv(request, exam_id):
     return resp
 
 def teacher_dashboard(request):
-    courses = Course.objects.filter(instructor=request.user)
+    if not request.user.is_authenticated:
+        return redirect("user_login")
+    courses = Course.objects.filter(instructor_id=request.user.id)
     course_ids = courses.values_list("id", flat=True)
     lo_total = LearningOutcome.objects.filter(course_id__in=course_ids).count()
     exam_total = Exam.objects.filter(course_id__in=course_ids).count()
@@ -824,6 +844,35 @@ def teacher_dashboard(request):
             }
         )
 
+    # Bölüm Başkanı için Ekstra Veriler
+    department_stats = None
+    if request.user.role and request.user.role.name == "Head of Department":
+        # 1. Akademik Personel Sayısı
+        total_instructors = User.objects.filter(role__name__in=["Regular Instructor", "Advisor Instructor"]).count()
+        
+        # 2. Genel Başarı Ortalaması
+        agg = ExamResult.objects.aggregate(avg_score=Avg("score"))
+        avg_score = agg.get("avg_score") or 0
+        
+        # 3. Kritik Dersler (Ortalaması 50'nin altında olanlar)
+        critical_count = 0
+        all_courses = Course.objects.all()
+        # Son eklenen 5 ders
+        recent_courses = all_courses.order_by('-id')[:5]
+        
+        for crs in all_courses:
+            c_avg = ExamResult.objects.filter(exam__course=crs).aggregate(a=Avg("score")).get("a")
+            if c_avg and c_avg < 50:
+                critical_count += 1
+
+        department_stats = {
+            "all_courses_count": all_courses.count(),
+            "total_instructors": total_instructors,
+            "average_score": round(avg_score, 1),
+            "critical_course_count": critical_count,
+            "recent_courses": recent_courses,
+        }
+
     return render(
         request,
         "eys/teacher_dashboard.html",
@@ -834,11 +883,27 @@ def teacher_dashboard(request):
             "connection_total": connection_total,
             "upcoming_exams": upcoming_exams,
             "announcement_cards": announcement_cards,
+            "department_stats": department_stats,  # Yeni eklenen veri
         },
     )
 
+@login_required
 def affairs_dashboard(request):
-    return render(request, "eys/affairs_dashboard.html")
+    # İstatistikler
+    student_count = User.objects.filter(role__name='Student').count()
+    teacher_count = User.objects.filter(role__name__in=TEACHER_ROLES).count()
+    course_count = Course.objects.count()
+    
+    # Son Duyurular (Global olanlar veya hepsi)
+    recent_announcements = Announcement.objects.all().order_by('-created_at')[:5]
+    
+    context = {
+        'student_count': student_count,
+        'teacher_count': teacher_count,
+        'course_count': course_count,
+        'recent_announcements': recent_announcements,
+    }
+    return render(request, "eys/affairs_dashboard.html", context)
 
 def teacher_courses(request):
     courses = (

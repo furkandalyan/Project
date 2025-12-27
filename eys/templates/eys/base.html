@@ -1,269 +1,590 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
+
 <head>
-    <title>EYS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EYS - Eğitim Yönetim Sistemi</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-color: #f4f7f9;
-            --text-color: #1f1f1f;
-            --card-bg: #ffffff;
-            --navbar-bg: #1f1f1f;
-            --navbar-link: #e0e0e0;
+            --bg-color: #f0f2f5;
+            --sidebar-bg: #ffffff;
+            --sidebar-width: 260px;
+            --text-color: #1a1c23;
             --accent: #1db954;
-            --muted: #9a9a9a;
+            --accent-hover: #1ed760;
+            --border-color: #e4e4e7;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
+            padding: 0;
             background: var(--bg-color);
             color: var(--text-color);
-            transition: background 0.3s, color 0.3s;
-        }
-
-        .navbar {
-            background: var(--navbar-bg);
-            padding: 12px 4vw;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            grid-gap: 24px;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-left {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .nav-left a {
-            color: var(--navbar-link);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-
-        .nav-left a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-        }
-        
-        .nav-left a.brand {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
-        }
-
-        .nav-center {
+        /* --- LOADING ANIMATION --- */
+        #page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
             display: flex;
             justify-content: center;
+            align-items: center;
+            transition: opacity 0.4s ease;
         }
 
-        .nav-search {
-            width: 100%;
-            max-width: 480px;
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-color);
+            text-decoration: none;
             display: flex;
             align-items: center;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 4px;
+            gap: 10px;
+            margin-bottom: 40px;
         }
 
-        .nav-search input {
+        .brand span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
             flex: 1;
-            border: none;
-            background: transparent;
-            color: #fefefe;
-            padding: 10px 14px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #52525b;
+            /* Zinc 600 */
+            text-decoration: none;
+            font-weight: 500;
             font-size: 15px;
-            outline: none;
+            transition: all 0.2s ease;
         }
 
-        .nav-search input::placeholder {
-            color: rgba(255,255,255,0.7);
+        .nav-link:hover {
+            background: #f4f4f5;
+            color: var(--text-color);
         }
 
-        .nav-search button {
-            border: none;
-            background: var(--accent);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
+        .nav-link.active {
+            background: #ecfdf5;
+            /* Emerald 50 */
+            color: var(--accent);
             font-weight: 600;
-            transition: background-color 0.2s;
-        }
-        .nav-search button:hover {
-            background-color: #1aa34a;
         }
 
-        .nav-right {
+        .nav-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .user-profile {
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .nav-icon {
-            position: relative;
+        .avatar {
             width: 40px;
             height: 40px;
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
             border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            color: white;
             display: flex;
-            justify-content: center;
             align-items: center;
-            text-decoration: none;
-            transition: background-color 0.2s;
-        }
-        .nav-icon:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .nav-icon .badge {
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            background: #ff5c5c;
+            justify-content: center;
             color: white;
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 999px;
-            border: 2px solid var(--navbar-bg);
+            font-weight: bold;
+            font-size: 16px;
         }
 
-        .nav-right .primary-btn {
+        /* --- MAIN CONTENT --- */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - var(--sidebar-width));
+            /* Prevent overflow */
+        }
+
+        .top-header {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            /* Glassmorphism Header */
+            background: rgba(240, 242, 245, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .search-bar {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            width: 300px;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s;
+        }
+
+        .search-bar:focus-within {
+            box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
+            border-color: var(--accent);
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            margin-left: 8px;
+            color: var(--text-color);
+        }
+
+        .content-container {
+            padding: 30px 40px;
+            flex: 1;
+        }
+
+        /* --- GLASSMORPHISM CARDS --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-md);
+            border-radius: 16px;
+            padding: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Global kartların varsayılan görünümü için override */
+        .card,
+        div[style*="background:white"],
+        div[style*="background: white"] {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(12px);
+            border: 1px solid white !important;
+            box-shadow: var(--shadow-md) !important;
+            border-radius: 16px !important;
+        }
+
+        /* --- UTILS --- */
+        .btn-primary {
             background: var(--accent);
             color: white;
-            padding: 10px 18px;
+            padding: 10px 20px;
             border-radius: 8px;
             text-decoration: none;
-            font-weight: 600;
-            transition: filter 0.2s;
-        }
-        .nav-right .primary-btn:hover {
-            filter: brightness(1.1);
-        }
-
-        .container {
-            width: 80%;
-            margin: 40px auto;
-        }
-        
-        .theme-toggle {
-            border: 1px solid rgba(255,255,255,0.2);
-            background: transparent;
-            color: white;
-            border-radius: 8px;
-            padding: 10px 16px;
+            font-weight: 500;
+            border: none;
             cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-        .theme-toggle:hover {
-            background-color: rgba(255,255,255,0.1);
+            transition: background 0.2s;
         }
 
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .badge {
+            background: #ff4757;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        /* Toast Messages */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--accent);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-{% if not hide_navbar %}
-    <div class="navbar">
-        <div class="nav-left">
+    {% block body_content %}
+    <!-- LOADING SCREEN -->
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    {% if not hide_navbar %}
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="/" class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+            EYS
+        </a>
+
+        <nav class="nav-links">
             {% if user.is_authenticated and user.role %}
-                {% if user.role.name == 'Student' %}
-                    <a href="{% url 'student_dashboard' %}" class="brand">Dashboard</a>
-                    <a href="{% url 'student_courses' %}">Derslerim</a>
-                    <a href="{% url 'student_calendar' %}">Takvimim</a>
-                    <a href="{% url 'student_assignments' %}">Ödevler</a>
-                    <a href="{% url 'student_materials' %}">Materyaller</a>
-                    <a href="{% url 'student_announcements' %}">Duyurular</a>
-                {% elif user.role.name == 'Regular Instructor' or user.role.name == 'Advisor Instructor' or user.role.name == 'Head of Department' %}
-                    <a href="{% url 'teacher_dashboard' %}" class="brand">Dashboard</a>
-                    <a href="{% url 'teacher_courses' %}">Derslerim</a>
-                    <a href="{% url 'teacher_assignments' %}">Ödevler</a>
-                    <a href="{% url 'teacher_materials' %}">Materyaller</a>
-                    <a href="{% url 'teacher_announcements' %}">Duyurularım</a>
-                    <a href="{% url 'teacher_create_announcement' %}">Duyuru Oluştur</a>
-                {% else %}
-                    <a href="/" class="brand">Ana Sayfa</a>
-                {% endif %}
+
+            <!-- ÖĞRENCİ MENÜSÜ -->
+            {% if user.role.name == 'Student' %}
+            <a href="{% url 'student_dashboard' %}"
+                class="nav-link {% if request.path == '/student/dashboard/' %}active{% endif %}">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                Dashboard
+            </a>
+            <a href="{% url 'student_courses' %}" class="nav-link">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                Derslerim
+            </a>
+            <a href="{% url 'student_calendar' %}" class="nav-link">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                Takvim
+            </a>
+            <a href="{% url 'student_assignments' %}" class="nav-link">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+                Ödevler
+            </a>
+            <a href="{% url 'student_announcements' %}" class="nav-link">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                Duyurular
+            </a>
+
+            <!-- ÖĞRETMEN & YÖNETİCİ MENÜSÜ -->
+            {% elif user.role.name in 'Regular Instructor,Advisor Instructor,Head of Department' %}
+            <a href="{% url 'teacher_dashboard' %}"
+                class="nav-link {% if request.path == '/teacher/dashboard/' %}active{% endif %}">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                Dashboard
+            </a>
+            {% if user.role.name != 'Head of Department' %}
+            <a href="{% url 'teacher_courses' %}" class="nav-link">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                Ders Yönetimi
+            </a>
+            <a href="{% url 'teacher_assignments' %}" class="nav-link">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Ödevler & Notlar
+            </a>
+            {% endif %}
+            <a href="{% url 'teacher_announcements' %}" class="nav-link">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Duyurularım
+            </a>
+
+            {% if user.role.name == 'Head of Department' %}
+            <div style="margin-top:10px; padding-top:10px; border-top:1px solid #eee;">
+                <span
+                    style="font-size:11px; color:#999; padding-left:14px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Yönetim</span>
+                <a href="#" class="nav-link" style="color:#b8860b;">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path>
+                    </svg>
+                    Bölüm Paneli
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- ÖĞRENCİ İŞLERİ MENÜSÜ -->
+            {% elif user.role.name == 'Student Affairs' %}
+            <a href="{% url 'affairs_dashboard' %}" class="nav-link active">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="2" x2="12" y2="6"></line>
+                    <line x1="12" y1="18" x2="12" y2="22"></line>
+                    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                    <line x1="2" y1="12" x2="6" y2="12"></line>
+                    <line x1="18" y1="12" x2="22" y2="12"></line>
+                    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+                </svg>
+                Genel Bakış
+            </a>
+            <a href="{% url 'admin:eys_user_add' %}" class="nav-link" target="_blank">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                Kullanıcı Ekle
+            </a>
+            <a href="{% url 'admin:eys_course_add' %}" class="nav-link" target="_blank">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                Ders Aç
+            </a>
+            {% endif %}
+
             {% else %}
-                 <a href="/" class="brand">Ana Sayfa</a>
+            <a href="/" class="nav-link">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Ana Sayfa
+            </a>
+            <a href="/login/" class="nav-link">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                Giriş Yap
+            </a>
             {% endif %}
-        </div>
+        </nav>
 
-        <div class="nav-center">
-            {% if user.is_authenticated %}
-            <form class="nav-search" method="get" action="{% url 'global_search' %}">
-                <input type="text" name="q" placeholder="Ders, sınav veya duyuru ara..." value="{{ request.GET.q|default:'' }}">
-                <button type="submit">Ara</button>
+        {% if user.is_authenticated %}
+        <div class="user-profile">
+            <div class="avatar">
+                {{ user.first_name|first|default:user.username|first|upper }}
+            </div>
+            <div style="flex:1;">
+                <div style="font-weight:600; font-size:14px;">{{ user.get_full_name|default:user.username }}</div>
+                <div style="font-size:12px; color:#666;">{{ user.role.name }}</div>
+            </div>
+            <a href="/logout/" title="Çıkış" style="color:#ef4444; background:none; border:none; cursor:pointer;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </a>
+        </div>
+        {% endif %}
+    </aside>
+    {% endif %}
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-wrapper">
+
+        {% if not hide_navbar and user.is_authenticated %}
+        <header class="top-header">
+            <!-- Global Search -->
+            <form class="search-bar" method="get" action="{% url 'global_search' %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" style="color:#999;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" name="q" placeholder="Genel arama yap..." value="{{ request.GET.q|default:'' }}">
             </form>
-            {% endif %}
-        </div>
 
-        <div class="nav-right">
-            {% if user.is_authenticated %}
-                <a class="nav-icon" href="{{ nav_notification_target }}" title="Bildirimler">
-                    🔔
+            <div style="display:flex; gap:15px; align-items:center;">
+                <a href="{{ nav_notification_target }}"
+                    style="position:relative; text-decoration:none; color:var(--text-color);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
                     {% if nav_notification_count > 0 %}
-                        <span class="badge">{{ nav_notification_count }}</span>
+                    <span class="badge">{{ nav_notification_count }}</span>
                     {% endif %}
                 </a>
-                <button class="theme-toggle" id="theme-toggle" type="button">Tema</button>
-                <a href="/logout/" class="primary-btn">Çıkış</a>
-            {% else %}
-                <button class="theme-toggle" id="theme-toggle" type="button">Tema</button>
-                <a href="/login/" class="primary-btn">Giriş Yap</a>
+            </div>
+        </header>
+        {% endif %}
+
+        <main class="content-container">
+            {% if messages %}
+            <div id="toast-container">
+                {% for message in messages %}
+                <div class="toast">{{ message }}</div>
+                {% endfor %}
+            </div>
             {% endif %}
-        </div>
+
+            {% block content %}{% endblock %}
+        </main>
     </div>
-{% endif %}
 
-{% block page_wrapper %}
-    <div class="container">
-        {% block content %}{% endblock %}
-    </div>
-{% endblock page_wrapper %}
+    <!-- SCRIPTS -->
+    <script>
+        // Loading Animation Control
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                var loader = document.getElementById('page-loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(function () {
+                        loader.style.display = 'none';
+                    }, 400);
+                }
+            }, 500); // 0.5s suni gecikme (animasyonun tadı çıksın diye)
+        });
 
-
-{% if messages %}
-<div id="toast-container">
-    {% for message in messages %}
-    <div class="toast">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-
-<script>
-(function() {
-    const toggle = document.getElementById("theme-toggle");
-    if (!toggle) return;
-    const stored = localStorage.getItem("eys-theme");
-    if (stored === "dark") {
-        document.body.classList.add("dark-mode");
-        toggle.textContent = "☀️";
-    } else {
-        toggle.textContent = "🌙";
-    }
-    toggle.addEventListener("click", function() {
-        document.body.classList.toggle("dark-mode");
-        const isDark = document.body.classList.contains("dark-mode");
-        toggle.textContent = isDark ? "☀️" : "🌙";
-        localStorage.setItem("eys-theme", isDark ? "dark" : "light");
-    });
-})();
-</script>
-
+        // Sayfa geçişlerinde loading göster
+        document.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                if (link.hostname === window.location.hostname && !link.target && !link.href.includes('#')) {
+                    var loader = document.getElementById('page-loader');
+                    if (loader) {
+                        loader.style.display = 'flex';
+                        setTimeout(function () { loader.style.opacity = '1'; }, 10);
+                    }
+                }
+            });
+        });
+    </script>
+    {% endblock %}
 </body>
+
 </html>

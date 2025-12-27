@@ -1,7 +1,243 @@
 {% extends "eys/base.html" %}
 
 {% block content %}
-<h2>Hoş geldin {{ request.user.username }} ({{ request.user.role.name }})</h2>
+<style>
+    .dashboard-header {
+        margin-bottom: 30px;
+    }
 
-<p style="margin-top:20px; font-size:18px;">Öğrenci ve ders yönetim işlemlerini buradan yapabilirsiniz.</p>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+    }
+
+    .stat-info h3 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+
+    .stat-info p {
+        margin: 4px 0 0;
+        color: #666;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    /* Renk Temaları */
+    .theme-blue {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .theme-green {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .theme-purple {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid #f0f0f0;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
+    }
+
+    .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        color: #495057;
+        text-decoration: none;
+        transition: all 0.2s;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .action-btn:hover {
+        background: white;
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .action-icon {
+        font-size: 24px;
+    }
+
+    .announcement-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ann-item {
+        padding: 12px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border-left: 3px solid var(--accent);
+    }
+
+    .ann-title {
+        font-weight: 600;
+        color: #333;
+        display: block;
+        margin-bottom: 4px;
+        text-decoration: none;
+    }
+
+    .ann-date {
+        font-size: 12px;
+        color: #888;
+    }
+</style>
+
+<div class="dashboard-header">
+    <h1>Hoş Geldiniz, {{ request.user.first_name }}</h1>
+    <p style="color: #666;">Yönetim paneli üzerinden okul istatistiklerini görüntüleyebilir ve yönetimsel işlemleri
+        gerçekleştirebilirsiniz.</p>
+</div>
+
+<!-- İstatistik Kartları -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon theme-blue">
+            <!-- Icon Removed -->
+        </div>
+        <div class="stat-info">
+            <h3>{{ student_count }}</h3>
+            <p>Toplam Öğrenci</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon theme-green">
+            <!-- Icon Removed -->
+        </div>
+        <div class="stat-info">
+            <h3>{{ teacher_count }}</h3>
+            <p>Akademik Personel</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon theme-purple">
+            <!-- Icon Removed -->
+        </div>
+        <div class="stat-info">
+            <h3>{{ course_count }}</h3>
+            <p>Aktif Ders</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-grid">
+    <!-- Sol Kolon: Hızlı İşlemler -->
+    <div class="section-card">
+        <div class="section-header">
+            <h3 class="section-title">Hızlı İşlemler</h3>
+        </div>
+        <div class="action-buttons">
+            <a href="{% url 'admin:eys_user_add' %}" class="action-btn" target="_blank">
+                <span>Kullanıcı Ekle</span>
+            </a>
+            <a href="{% url 'teacher_create_announcement' %}" class="action-btn">
+                <span>Duyuru Yayınla</span>
+            </a>
+            <a href="{% url 'admin:eys_course_add' %}" class="action-btn" target="_blank">
+                <span>Ders Aç</span>
+            </a>
+            <a href="{% url 'admin:index' %}" class="action-btn" target="_blank">
+                <span>Django Admin</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Sağ Kolon: Son Duyurular -->
+    <div class="section-card">
+        <div class="section-header">
+            <h3 class="section-title">Son Duyurular</h3>
+            <a href="#" style="font-size:13px; color:var(--accent);">Tümü</a>
+        </div>
+        <div class="announcement-list">
+            {% for ann in recent_announcements %}
+            <div class="ann-item">
+                <a href="{% url 'announcement_detail' ann.id %}" class="ann-title">{{ ann.title }}</a>
+                <span class="ann-date">{{ ann.created_at|date:"d M Y, H:i" }}</span>
+            </div>
+            {% empty %}
+            <p style="color:#999; text-align:center; padding:20px;">Henüz duyuru yok.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 {% endblock %}
