@@ -84,24 +84,6 @@
 
 ---
 
-### 🐍 Django Nedir?
-
-**Django**, Python programlama dili ile yazılmış ücretsiz ve açık kaynaklı bir web framework'üdür. "Batteries included" (piller dahil) felsefesiyle gelir, yani web geliştirme için ihtiyacınız olan çoğu araç hazır olarak gelir.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    NEDEN DJANGO?                             │
-├─────────────────────────────────────────────────────────────┤
-│  ✅ Hızlı geliştirme - Az kod, çok iş                       │
-│  ✅ Güvenlik - SQL injection, XSS koruması dahil            │
-│  ✅ Ölçeklenebilir - Instagram, Pinterest kullanıyor        │
-│  ✅ Geniş topluluk - Çok sayıda kaynak ve destek            │
-│  ✅ Admin paneli - Otomatik yönetim arayüzü                 │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
 ### 🏗️ MTV Mimari Deseni (Model-Template-View)
 
 Django, **MTV** (Model-Template-View) desenini kullanır. Bu, MVC'nin (Model-View-Controller) Django versiyonudur.
@@ -584,7 +566,7 @@ python manage.py runserver
 
 ## 💡 Gelecekte Eklenebilecek Özellikler
 
-> Bu bölüm, projeyi geliştirmek isteyenler için fikir vermek amacıyla hazırlanmıştır.
+> Bu bölüm, projeyi geliştirmek için fikir vermek amacıyla hazırlanmıştır.
 
 ### ⭐ Kolay Seviye (Başlangıç için ideal)
 
