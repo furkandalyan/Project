@@ -578,6 +578,8 @@ python manage.py runserver
 | **Ders Arama** | 1 saat | Ders ismine göre arama | Django ORM `filter(name__icontains=...)` |
 | **Son Görüntülenenler** | 2 saat | Son bakılan sayfaların listesi | Session kullanarak kaydetme |
 
+//
+
 ---
 
 ### ⭐⭐ Orta Seviye (Biraz tecrübe gerektirir)
