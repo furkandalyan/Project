@@ -31,6 +31,11 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+import sys
+print("=" * 80, file=sys.stderr)
+print("DEBUG: future/settings.py is being loaded", file=sys.stderr)
+print("=" * 80, file=sys.stderr)
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,6 +46,9 @@ INSTALLED_APPS = [
     'eys',
     'ckeditor',
 ]
+
+print(f"DEBUG: INSTALLED_APPS = {INSTALLED_APPS}", file=sys.stderr)
+print(f"DEBUG: 'eys' in INSTALLED_APPS = {'eys' in INSTALLED_APPS}", file=sys.stderr)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -127,3 +135,19 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'eys.User'
+print(f"DEBUG: AUTH_USER_MODEL = {AUTH_USER_MODEL}", file=sys.stderr)
+
+# Try to import the User model to verify it's accessible
+try:
+    from django.apps import apps
+    UserModel = apps.get_model('eys.User')
+    print(f"DEBUG: User model retrieved via apps.get_model: {UserModel}", file=sys.stderr)
+    print(f"DEBUG: User model db_table: {UserModel._meta.db_table}", file=sys.stderr)
+except Exception as e:
+    print(f"DEBUG ERROR: Failed to get User model: {e}", file=sys.stderr)
+    import traceback
+    traceback.print_exc(file=sys.stderr)
+
+print("=" * 80, file=sys.stderr)
+print("DEBUG: future/settings.py loading complete", file=sys.stderr)
+print("=" * 80, file=sys.stderr)
