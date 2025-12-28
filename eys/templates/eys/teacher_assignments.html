@@ -3,7 +3,7 @@
 {% block content %}
 <div style="display:flex; flex-direction:column; gap:18px;">
     <!-- Hero -->
-    <div style="background:linear-gradient(120deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2); position:relative; overflow:hidden;">
+    <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2); position:relative; overflow:hidden;">
         <div style="position:absolute; inset:0; background:radial-gradient(circle at 18% 22%, rgba(255,255,255,0.1), transparent 40%), radial-gradient(circle at 82% 30%, rgba(255,255,255,0.12), transparent 45%);"></div>
         <div style="position:relative; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;">
             <div>
@@ -27,7 +27,7 @@
                     <h3 style="margin:6px 0 4px 0;">{{ assignment.title }}</h3>
                     <p style="margin:0; color:#475569; font-size:13px;">Max {{ assignment.max_score }} puan</p>
                 </div>
-                <a href="{% url 'teacher_assignment_detail' assignment.id %}" style="padding:8px 12px; border-radius:10px; background:#0f172a; color:white; text-decoration:none; font-weight:700;">Detay</a>
+                <a href="{% url 'teacher_assignment_detail' assignment.id %}" style="padding:8px 12px; border-radius:10px; background:#1db954; color:white; text-decoration:none; font-weight:700;">Detay</a>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; font-size:13px; color:#0f172a;">
                 <span style="padding:8px 10px; border-radius:10px; background:#f1f5f9;">Teslim: {% if assignment.due_at %}{{ assignment.due_at|date:"d.m.Y H:i" }}{% else %}Belirtilmedi{% endif %}</span>

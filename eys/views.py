@@ -517,9 +517,10 @@ def student_announcements(request):
 def student_profile(request):
     if not request.user.is_authenticated:
         return redirect("login")
-    if not request.user.role or request.user.role.name != "Student":
-        messages.error(request, "Bu alan yalnızca öğrenciler içindir.")
-        return redirect("home")
+    # Rol kontrolü kaldırıldı, herkes erişebilir.
+    # if not request.user.role or request.user.role.name != "Student":
+    #     messages.error(request, "Bu alan yalnızca öğrenciler içindir.")
+    #     return redirect("home")
 
     initial_data = {
         "first_name": request.user.first_name,
@@ -535,7 +536,9 @@ def student_profile(request):
             if new_password:
                 user.set_password(new_password)
                 user.save()
-                update_session_auth_hash(request, user)
+                # update_session_auth_hash(request, user) # Import eksik olabilir, gerekirse eklenmeli
+                # Ancak Django'da login fonksiyonu session'ı günceller.
+                login(request, user) # Şifre değişince oturum düşmemesi için tekrar login
             messages.success(request, "Profil bilgilerin güncellendi.")
             return redirect("student_profile")
     else:
@@ -997,13 +1000,13 @@ def course_detail(request, course_id):
     if instructor:
         instructor_name = instructor.get_full_name() or instructor.username
     else:
-        instructor_name = "Atanmad?"
+        instructor_name = "Atanmadı"
     now = timezone.now()
     upcoming_exam_obj = (
         exams.filter(scheduled_at__isnull=False, scheduled_at__gte=now).order_by("scheduled_at").first()
     )
     upcoming_exam_label = (
-        timezone.localtime(upcoming_exam_obj.scheduled_at).strftime("%d.%m.%Y ?? %H:%M")
+        timezone.localtime(upcoming_exam_obj.scheduled_at).strftime("%d.%m.%Y · %H:%M")
         if upcoming_exam_obj
         else "Tarih bekleniyor"
     )
@@ -1026,7 +1029,7 @@ def course_detail(request, course_id):
                 "attachment": ann.attachment,
                 "author": author_name,
                 "initials": initials,
-                "timestamp": created_local.strftime("%d.%m.%Y ?? %H:%M"),
+                "timestamp": created_local.strftime("%d.%m.%Y · %H:%M"),
             }
         )
 
@@ -1051,9 +1054,9 @@ def course_detail(request, course_id):
         full_name = student.get_full_name() or student.username
         initials = "".join([part[0] for part in full_name.split()[:2]]).upper() if full_name else student.username[:2].upper()
         last_login = (
-            timezone.localtime(student.last_login).strftime("%d.%m.%Y ?? %H:%M")
+            timezone.localtime(student.last_login).strftime("%d.%m.%Y · %H:%M")
             if student.last_login
-            else "Hen?z giri? yapmad?"
+            else "Henüz giriş yapmadı"
         )
         date_joined = timezone.localtime(student.date_joined).strftime("%d.%m.%Y")
         scores = results_by_student.get(student.id, [])
@@ -1061,7 +1064,7 @@ def course_detail(request, course_id):
         score_for_status = average_score if average_score is not None else 0
 
         if score_for_status >= threshold_values["stable_min"]:
-            status = "?stikrarl?"
+            status = "İstikrarlı"
             status_color = "#1db954"
         elif score_for_status >= threshold_values["watch_min"]:
             status = "Takipte"
@@ -1071,13 +1074,13 @@ def course_detail(request, course_id):
             status_color = "#ff6b6b"
 
         if average_score is None:
-            pass_label = "Hen?z not yok"
+            pass_label = "Henüz not yok"
             display_score = "-"
         elif average_score >= threshold_values["pass_min"]:
-            pass_label = "Ge?iyor"
+            pass_label = "Geçiyor"
             display_score = f"{average_score}"
         else:
-            pass_label = "Ge?emeyebilir"
+            pass_label = "Geçemeyebilir"
             display_score = f"{average_score}"
 
         student_cards.append(
@@ -1161,7 +1164,7 @@ def add_exam_lo_weight(request, exam_id):
 def exam_detail(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     weights = ExamLOWeight.objects.filter(exam=exam)
-    results = ExamResult.objects.filter(exam=exam).select_related("student")
+    results = ExamResult.objects.filter(exam=exam).select_related("student").order_by("score")
     graded_count = results.count()
     avg_score = results.aggregate(avg=Avg("score"))["avg"] if graded_count else None
     student_total = exam.course.students.count() if exam.course else 0

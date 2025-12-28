@@ -4,49 +4,63 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8b8b0679-0856-44d1-a9a6-e348ae561f4a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/kerem" afterDir="false" />
+    <list default="true" id="b462755c-401a-4f89-94a0-cc4c26b61fe9" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/affairs_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/affairs_dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/student_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/student_dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/student_profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/student_profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/teacher_announcements.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/teacher_announcements.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/teacher_assignments.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/teacher_assignments.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/teacher_courses.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/teacher_courses.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/teacher_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/teacher_dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/eys/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
-    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 0
+  &quot;associatedIndex&quot;: 7
 }</component>
-  <component name="ProjectId" id="35U2RKT1EXGDoSj5kRNSdSZNouB" />
-  <component name="ProjectLevelVcsManager">
-    <ConfirmationsSetting value="2" id="Add" />
-  </component>
+  <component name="ProjectId" id="37RdNoUr5Lt0C7Hj9bDZXUysz3R" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/yedek",
-    "last_opened_file_path": "C:/Users/dmffu/PycharmProjects/TurkeyEarthquake",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.android.studio.ml.bot.mainConfigurable",
-    "vue.rearranger.settings.migration": "true"
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "eylulv2",
+    "junie.onboarding.icon.badge.shown": "true",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true"
   }
 }]]></component>
   <component name="RunManager">
-    <configuration name="Project" type="Python.DjangoServer" factoryName="Django server">
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="Project" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -59,56 +73,77 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="launchJavascriptDebuger" value="false" />
-      <option name="port" value="8000" />
-      <option name="host" value="" />
-      <option name="additionalOptions" value="" />
-      <option name="browserUrl" value="" />
-      <option name="runTestServer" value="false" />
-      <option name="runNoReload" value="false" />
-      <option name="useCustomRunCommand" value="false" />
-      <option name="customRunCommand" value="" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <module name="Project" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docs" factoryName="Docutils task">
+      <module name="Project" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="docutils_input_file" value="" />
+      <option name="docutils_output_file" value="" />
+      <option name="docutils_params" value="" />
+      <option name="docutils_task" value="" />
+      <option name="docutils_open_in_browser" value="false" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docs" factoryName="Sphinx task">
+      <module name="Project" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="docutils_input_file" value="" />
+      <option name="docutils_output_file" value="" />
+      <option name="docutils_params" value="" />
+      <option name="docutils_task" value="" />
+      <option name="docutils_open_in_browser" value="false" />
       <method v="2" />
     </configuration>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.25659.43" />
-        <option value="bundled-python-sdk-181015f7ab06-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.25659.43" />
+        <option value="bundled-python-sdk-4e2b1448bda8-9a97661f3031-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.27397.106" />
       </set>
     </attachedChunks>
   </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="8b8b0679-0856-44d1-a9a6-e348ae561f4a" name="Changes" comment="" />
-      <created>1763150321015</created>
+      <changelist id="b462755c-401a-4f89-94a0-cc4c26b61fe9" name="Changes" comment="" />
+      <created>1766869780681</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1763150321015</updated>
-      <workItem from="1763150322775" duration="7201000" />
-      <workItem from="1763381906276" duration="9088000" />
-      <workItem from="1763443598715" duration="741000" />
-      <workItem from="1763449266819" duration="2582000" />
-      <workItem from="1764316906637" duration="1760000" />
-      <workItem from="1764319059173" duration="9799000" />
-      <workItem from="1764705830199" duration="17000" />
-      <workItem from="1764778374214" duration="839000" />
-      <workItem from="1764834002072" duration="2019000" />
-      <workItem from="1764836062703" duration="4991000" />
-      <workItem from="1764849429361" duration="25000" />
-      <workItem from="1765784970076" duration="1124000" />
-      <workItem from="1766044871601" duration="701000" />
-      <workItem from="1766045700027" duration="10000" />
-      <workItem from="1766058983156" duration="1278000" />
-      <workItem from="1766604818544" duration="55000" />
-      <workItem from="1766607871642" duration="115000" />
-      <workItem from="1766918323756" duration="2738000" />
+      <updated>1766869780681</updated>
     </task>
     <servers />
-  </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="3" />
   </component>
 </project>

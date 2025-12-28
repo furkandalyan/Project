@@ -161,9 +161,11 @@
 </style>
 
 <div class="dashboard-header">
-    <h1>Hoş Geldiniz, {{ request.user.first_name }}</h1>
-    <p style="color: #666;">Yönetim paneli üzerinden okul istatistiklerini görüntüleyebilir ve yönetimsel işlemleri
+    <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <h1 style="margin:6px 0 4px 0;">Hoş Geldiniz, {{ request.user.first_name }}</h1>
+        <p style="margin:0; opacity:0.8;">Yönetim paneli üzerinden okul istatistiklerini görüntüleyebilir ve yönetimsel işlemleri
         gerçekleştirebilirsiniz.</p>
+    </div>
 </div>
 
 <!-- İstatistik Kartları -->

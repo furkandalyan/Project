@@ -3,7 +3,7 @@
 {% block content %}
 <div style="display:flex; flex-direction:column; gap:18px;">
     <!-- Hero -->
-    <div style="background:linear-gradient(120deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2); position:relative; overflow:hidden;">
+    <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2); position:relative; overflow:hidden;">
         <div style="position:absolute; inset:0; background:radial-gradient(circle at 18% 22%, rgba(255,255,255,0.1), transparent 40%), radial-gradient(circle at 82% 30%, rgba(255,255,255,0.12), transparent 45%);"></div>
         <div style="position:relative; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;">
             <div>
@@ -24,10 +24,10 @@
     <div style="background:white; border-radius:18px; padding:24px; box-shadow:0 18px 45px rgba(0,0,0,0.08);">
         {% if timeline %}
             <div style="position:relative; padding-left:28px;">
-                <div style="position:absolute; left:12px; top:0; bottom:0; width:2px; background:linear-gradient(180deg, #2563eb, #a5b4fc);"></div>
+                <div style="position:absolute; left:12px; top:0; bottom:0; width:2px; background:linear-gradient(180deg, #1db954, #a5b4fc);"></div>
                 {% for group in timeline %}
                     <div style="margin-bottom:26px;">
-                        <div style="margin-bottom:12px; font-weight:700; color:#2563eb; font-size:14px;">{{ group.date_label }}</div>
+                        <div style="margin-bottom:12px; font-weight:700; color:#1db954; font-size:14px;">{{ group.date_label }}</div>
                         {% for item in group.items %}
                             <div style="display:flex; gap:14px; margin-bottom:18px;">
                                 <div style="width:44px; height:44px; border-radius:50%; background:#f1f5f9; color:#0f172a; display:flex; align-items:center; justify-content:center; font-weight:700; box-shadow:0 6px 16px rgba(0,0,0,0.08);">
@@ -43,7 +43,7 @@
                                     </div>
                                     <div style="margin-top:10px; color:#0f172a; white-space:pre-line;">{{ item.body|safe }}</div>
                                     {% if item.attachment %}
-                                        <a href="{{ item.attachment.url }}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:13px; color:#2563eb; text-decoration:none; font-weight:600;">📎 Eki indir</a>
+                                        <a href="{{ item.attachment.url }}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:13px; color:#1db954; text-decoration:none; font-weight:600;">📎 Eki indir</a>
                                     {% endif %}
                                     <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
                                         <a href="{% url 'announcement_detail' item.id %}" style="padding:8px 10px; border-radius:10px; background:#e0f2fe; color:#0f172a; text-decoration:none; font-size:13px; font-weight:600;">Yorumlar</a>

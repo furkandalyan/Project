@@ -92,7 +92,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         .brand span {
@@ -104,6 +104,7 @@
             flex-direction: column;
             gap: 8px;
             flex: 1;
+            margin-top: 20px;
         }
 
         .nav-link {
@@ -139,12 +140,9 @@
         }
 
         .user-profile {
-            margin-top: auto;
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .avatar {
@@ -341,6 +339,40 @@
             EYS
         </a>
 
+        {% if user.is_authenticated %}
+        <div class="user-profile">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="avatar" onclick="document.getElementById('profile-picture-modal').style.display='flex'">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                    {% else %}
+                        {{ user.first_name|first|default:user.username|first|upper }}
+                    {% endif %}
+                </div>
+                <div style="flex:1;">
+                    <div style="font-weight:600; font-size:14px;">{{ user.get_full_name|default:user.username }}</div>
+                    <div style="font-size:12px; color:#666;">{{ user.role.name }}</div>
+                </div>
+                <a href="/logout/" title="Çıkış" style="color:#ef4444; background:none; border:none; cursor:pointer;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </a>
+            </div>
+
+            <a href="{% url 'student_profile' %}" style="display:flex; align-items:center; gap:8px; margin-top:12px; color:#52525b; text-decoration:none; font-size:13px; padding:8px 12px; background:#f4f4f5; border-radius:8px; transition:all 0.2s;" onmouseover="this.style.background='#e4e4e7'" onmouseout="this.style.background='#f4f4f5'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Profili Düzenle
+            </a>
+        </div>
+        {% endif %}
+
         <nav class="nav-links">
             {% if user.is_authenticated and user.role %}
 
@@ -506,30 +538,6 @@
             </a>
             {% endif %}
         </nav>
-
-        {% if user.is_authenticated %}
-        <div class="user-profile">
-            <div class="avatar" onclick="document.getElementById('profile-picture-modal').style.display='flex'">
-                {% if user.profile_picture %}
-                    <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name|default:user.username }}">
-                {% else %}
-                    {{ user.first_name|first|default:user.username|first|upper }}
-                {% endif %}
-            </div>
-            <div style="flex:1;">
-                <div style="font-weight:600; font-size:14px;">{{ user.get_full_name|default:user.username }}</div>
-                <div style="font-size:12px; color:#666;">{{ user.role.name }}</div>
-            </div>
-            <a href="/logout/" title="Çıkış" style="color:#ef4444; background:none; border:none; cursor:pointer;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-            </a>
-        </div>
-        {% endif %}
     </aside>
     {% endif %}
 
