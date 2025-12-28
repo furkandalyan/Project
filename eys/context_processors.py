@@ -55,4 +55,6 @@ def navbar(request):
     data["nav_upcoming_count"] = min(data["nav_upcoming_count"], 99)
     data["nav_activity_items"] = activity_items
     data["nav_notification_target"] = reverse("notifications")
+    # Add dark mode preference
+    data["dark_mode"] = user.dark_mode if hasattr(user, 'dark_mode') else False
     return data

@@ -249,6 +249,22 @@ def upload_profile_picture(request):
     # Redirect back to the previous page or home
     return redirect(request.META.get('HTTP_REFERER', 'home'))
 
+
+@login_required
+def settings_view(request):
+    """Settings page for user preferences"""
+    if request.method == "POST":
+        dark_mode = request.POST.get('dark_mode') == 'on'
+        request.user.dark_mode = dark_mode
+        request.user.save()
+        messages.success(request, "Ayarlar başarıyla kaydedildi.")
+        return redirect('settings')
+    
+    context = {
+        'dark_mode': request.user.dark_mode if request.user.is_authenticated else False,
+    }
+    return render(request, "eys/settings.html", context)
+
 def home(request):
     return render(request, "eys/home.html")
 

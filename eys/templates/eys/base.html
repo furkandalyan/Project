@@ -21,6 +21,20 @@
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --hover-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f1419;
+            --sidebar-bg: #1a1c23;
+            --text-color: #e4e4e7;
+            --border-color: #2d2d30;
+            --glass-bg: rgba(26, 28, 35, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            --hover-bg: rgba(255, 255, 255, 0.1);
         }
 
         body {
@@ -125,11 +139,24 @@
             color: var(--text-color);
         }
 
+        [data-theme="dark"] .nav-link {
+            color: #a1a1aa;
+        }
+
+        [data-theme="dark"] .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+
         .nav-link.active {
             background: #ecfdf5;
             /* Emerald 50 */
             color: var(--accent);
             font-weight: 600;
+        }
+
+        [data-theme="dark"] .nav-link.active {
+            background: rgba(29, 185, 84, 0.2);
         }
 
         .nav-icon {
@@ -200,8 +227,13 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.03);
         }
 
+        [data-theme="dark"] .top-header {
+            background: rgba(15, 20, 25, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         .search-bar {
-            background: white;
+            background: var(--sidebar-bg);
             border: 1px solid var(--border-color);
             padding: 8px 16px;
             border-radius: 99px;
@@ -224,7 +256,7 @@
             font-size: 14px;
             margin-left: 8px;
             color: var(--text-color);
-            background-color: rgba(255, 255, 255, 1);
+            background-color: transparent;
         }
 
         .content-container {
@@ -306,6 +338,11 @@
             box-shadow: var(--shadow-lg);
             border-left: 4px solid var(--accent);
             animation: slideIn 0.3s ease;
+        }
+
+        [data-theme="dark"] .toast {
+            background: var(--sidebar-bg);
+            color: var(--text-color);
         }
 
         @keyframes slideIn {
@@ -549,8 +586,27 @@
             </form>
 
             <div style="display:flex; gap:15px; align-items:center;">
+                <a href="{% url 'settings' %}"
+                    style="text-decoration:none; color:var(--text-color); padding:8px; border-radius:8px; transition:background 0.2s;"
+                    onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'"
+                    title="Ayarlar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" y1="21" x2="4" y2="14"></line>
+                        <line x1="4" y1="10" x2="4" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12" y2="3"></line>
+                        <line x1="20" y1="21" x2="20" y2="16"></line>
+                        <line x1="20" y1="12" x2="20" y2="3"></line>
+                        <line x1="1" y1="14" x2="7" y2="14"></line>
+                        <line x1="9" y1="8" x2="15" y2="8"></line>
+                        <line x1="17" y1="16" x2="23" y2="16"></line>
+                    </svg>
+                </a>
                 <a href="{{ nav_notification_target }}"
-                    style="position:relative; text-decoration:none; color:var(--text-color);">
+                    style="position:relative; text-decoration:none; color:var(--text-color); padding:8px; border-radius:8px; transition:background 0.2s;"
+                    onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'"
+                    title="Bildirimler">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -580,10 +636,10 @@
     <!-- Profile Picture Upload Modal -->
     {% if user.is_authenticated %}
     <div id="profile-picture-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
-        <div style="background:white; border-radius:20px; padding:32px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div style="background:var(--sidebar-bg); border-radius:20px; padding:32px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                <h2 style="margin:0; font-size:24px; font-weight:700; color:#1a1c23;">Profil Fotoğrafı Değiştir</h2>
-                <button onclick="document.getElementById('profile-picture-modal').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer; color:#71717a; padding:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background='none'">&times;</button>
+                <h2 style="margin:0; font-size:24px; font-weight:700; color:var(--text-color);">Profil Fotoğrafı Değiştir</h2>
+                <button onclick="document.getElementById('profile-picture-modal').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer; color:#71717a; padding:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='none'">&times;</button>
             </div>
 
             <form method="POST" action="{% url 'upload_profile_picture' %}" enctype="multipart/form-data" id="profile-picture-form">
@@ -606,10 +662,10 @@
                 </div>
 
                 <div style="display:flex; gap:12px;">
-                    <button type="submit" style="flex:1; padding:12px; background:#1db954; color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#1aa34a'" onmouseout="this.style.background='#1db954'">
+                    <button type="submit" style="flex:1; padding:12px; background:var(--accent); color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--accent-hover)'" onmouseout="this.style.background='var(--accent)'">
                         Kaydet
                     </button>
-                    <button type="button" onclick="document.getElementById('profile-picture-modal').style.display='none'" style="flex:1; padding:12px; background:#f4f4f5; color:#71717a; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#e4e4e7'" onmouseout="this.style.background='#f4f4f5'">
+                    <button type="button" onclick="document.getElementById('profile-picture-modal').style.display='none'" style="flex:1; padding:12px; background:var(--border-color); color:var(--text-color); border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--border-color)'">
                         İptal
                     </button>
                 </div>
@@ -620,6 +676,13 @@
 
     <!-- SCRIPTS -->
     <script>
+        // Apply dark mode on page load
+        {% if user.is_authenticated and user.dark_mode %}
+        document.documentElement.setAttribute('data-theme', 'dark');
+        {% else %}
+        document.documentElement.setAttribute('data-theme', 'light');
+        {% endif %}
+
         // Loading Animation Control
         window.addEventListener('load', function () {
             setTimeout(function () {
