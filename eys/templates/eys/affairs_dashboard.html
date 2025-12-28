@@ -160,10 +160,15 @@
     }
 </style>
 
-<div class="dashboard-header">
+<div class="dashboard-header" style="position:relative;">
     <h1>Hoş Geldiniz, {{ request.user.first_name }}</h1>
     <p style="color: #666;">Yönetim paneli üzerinden okul istatistiklerini görüntüleyebilir ve yönetimsel işlemleri
         gerçekleştirebilirsiniz.</p>
+    {% if last_login %}
+    <div style="position:absolute; top:0; right:0; background:#f0f0f0; padding:6px 12px; border-radius:8px; font-size:12px; color:#666;">
+        Son giriş: {{ last_login }}
+    </div>
+    {% endif %}
 </div>
 
 <!-- İstatistik Kartları -->

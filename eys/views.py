@@ -386,6 +386,13 @@ def student_dashboard(request):
             }
         ]
 
+    # Format last login time
+    last_login = None
+    if request.user.last_login:
+        last_login_local = timezone.localtime(request.user.last_login)
+        month_label = MONTH_LABELS[last_login_local.month - 1]
+        last_login = f"{last_login_local.day} {month_label} {last_login_local.year} · {last_login_local.strftime('%H:%M')}"
+    
     return render(
         request,
         "eys/student_dashboard.html",
@@ -398,6 +405,7 @@ def student_dashboard(request):
             "upcoming_exams": upcoming_exams,
             "calendar_days": calendar_days,
             "announcement_cards": announcement_cards,
+            "last_login": last_login,
         },
     )
 
