@@ -427,3 +427,12 @@ class PasswordChangeForm(forms.Form):
                 raise forms.ValidationError("Yeni parola en az 8 karakter olmalıdır.")
         
         return cleaned_data
+
+
+class ProfilePictureForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['profile_picture']
+        labels = {
+            'profile_picture': 'Profil Fotoğrafı',
+        }

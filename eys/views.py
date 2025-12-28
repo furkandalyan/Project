@@ -49,6 +49,7 @@ from .forms import (
     SubmissionForm,
     GradeSubmissionForm,
     PasswordChangeForm,
+    ProfilePictureForm,
     AssignmentCriterionForm,
     AssignmentGroupForm,
     CourseMaterialForm,
@@ -226,6 +227,27 @@ def change_password(request):
         form = PasswordChangeForm()
     
     return render(request, "eys/change_password.html", {"hide_navbar": True, "form": form})
+
+
+@login_required
+def upload_profile_picture(request):
+    """Upload or update user profile picture"""
+    if request.method == "POST":
+        form = ProfilePictureForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            # Validate file size (max 5MB)
+            profile_picture = form.cleaned_data.get('profile_picture')
+            if profile_picture:
+                if profile_picture.size > 5 * 1024 * 1024:  # 5MB
+                    messages.error(request, "Dosya boyutu 5MB'dan büyük olamaz.")
+                else:
+                    form.save()
+                    messages.success(request, "Profil fotoğrafınız başarıyla güncellendi.")
+        else:
+            messages.error(request, "Profil fotoğrafı yüklenirken bir hata oluştu.")
+    
+    # Redirect back to the previous page or home
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
 
 def home(request):
     return render(request, "eys/home.html")

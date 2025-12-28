@@ -158,6 +158,22 @@
             color: white;
             font-weight: bold;
             font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
         }
 
         /* --- MAIN CONTENT --- */
@@ -493,8 +509,12 @@
 
         {% if user.is_authenticated %}
         <div class="user-profile">
-            <div class="avatar">
-                {{ user.first_name|first|default:user.username|first|upper }}
+            <div class="avatar" onclick="document.getElementById('profile-picture-modal').style.display='flex'">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                {% else %}
+                    {{ user.first_name|first|default:user.username|first|upper }}
+                {% endif %}
             </div>
             <div style="flex:1;">
                 <div style="font-weight:600; font-size:14px;">{{ user.get_full_name|default:user.username }}</div>
@@ -557,6 +577,47 @@
         </main>
     </div>
 
+    <!-- Profile Picture Upload Modal -->
+    {% if user.is_authenticated %}
+    <div id="profile-picture-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:20px; padding:32px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                <h2 style="margin:0; font-size:24px; font-weight:700; color:#1a1c23;">Profil Fotoğrafı Değiştir</h2>
+                <button onclick="document.getElementById('profile-picture-modal').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer; color:#71717a; padding:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background='none'">&times;</button>
+            </div>
+            
+            <form method="POST" action="{% url 'upload_profile_picture' %}" enctype="multipart/form-data" id="profile-picture-form">
+                {% csrf_token %}
+                <div style="text-align:center; margin-bottom:24px;">
+                    <div style="width:120px; height:120px; margin:0 auto 16px; border-radius:50%; overflow:hidden; border:3px solid #e4e4e7; position:relative;">
+                        {% if user.profile_picture %}
+                            <img id="profile-preview" src="{{ user.profile_picture.url }}" alt="Profile" style="width:100%; height:100%; object-fit:cover;">
+                        {% else %}
+                            <div id="profile-preview" style="width:100%; height:100%; background:linear-gradient(135deg, #FF6B6B, #4ECDC4); display:flex; align-items:center; justify-content:center; color:white; font-size:48px; font-weight:bold;">
+                                {{ user.first_name|first|default:user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <label for="id_profile_picture" style="display:inline-block; padding:10px 20px; background:#1db954; color:white; border-radius:10px; cursor:pointer; font-weight:600; font-size:14px; transition:background 0.2s;" onmouseover="this.style.background='#1aa34a'" onmouseout="this.style.background='#1db954'">
+                        Fotoğraf Seç
+                    </label>
+                    <input type="file" name="profile_picture" id="id_profile_picture" accept="image/*" style="display:none;" onchange="previewProfilePicture(this)" required>
+                    <p style="margin:8px 0 0 0; font-size:12px; color:#71717a;">JPG, PNG veya GIF (max 5MB)</p>
+                </div>
+                
+                <div style="display:flex; gap:12px;">
+                    <button type="submit" style="flex:1; padding:12px; background:#1db954; color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#1aa34a'" onmouseout="this.style.background='#1db954'">
+                        Kaydet
+                    </button>
+                    <button type="button" onclick="document.getElementById('profile-picture-modal').style.display='none'" style="flex:1; padding:12px; background:#f4f4f5; color:#71717a; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#e4e4e7'" onmouseout="this.style.background='#f4f4f5'">
+                        İptal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- SCRIPTS -->
     <script>
         // Loading Animation Control
@@ -583,6 +644,25 @@
                     }
                 }
             });
+        });
+
+        // Profile picture preview
+        function previewProfilePicture(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var preview = document.getElementById('profile-preview');
+                    preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview" style="width:100%; height:100%; object-fit:cover;">';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('profile-picture-modal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
         });
     </script>
     {% endblock %}

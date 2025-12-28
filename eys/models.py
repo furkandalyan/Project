@@ -22,6 +22,7 @@ print(f"DEBUG: Role._meta = {Role._meta if hasattr(Role, '_meta') else 'Not yet 
 
 class User(AbstractUser):
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
 
     class Meta:
         verbose_name = "User"

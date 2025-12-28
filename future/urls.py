@@ -24,11 +24,17 @@ print(f"DEBUG: admin.site = {admin.site}")
 print(f"DEBUG: admin.site._registry in urls.py = {list(admin.site._registry.keys())}")
 
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('eys.urls')),
 ]
+
+# Serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 print(f"DEBUG: urlpatterns configured with admin.site.urls")
 print(f"DEBUG: admin.site._registry after urlpatterns = {list(admin.site._registry.keys())}")
