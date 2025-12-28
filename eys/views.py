@@ -48,6 +48,7 @@ from .forms import (
     AssignmentForm,
     SubmissionForm,
     GradeSubmissionForm,
+    PasswordChangeForm,
     AssignmentCriterionForm,
     AssignmentGroupForm,
     CourseMaterialForm,
@@ -200,6 +201,31 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect("login")
+
+
+def change_password(request):
+    """Password change for unauthenticated users"""
+    if request.method == "POST":
+        form = PasswordChangeForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            old_password = form.cleaned_data.get("old_password")
+            new_password = form.cleaned_data.get("new_password")
+            
+            # Authenticate user with old password
+            user = authenticate(request, username=username, password=old_password)
+            if user is not None:
+                # Set new password
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, "Parolanız başarıyla değiştirildi. Yeni parolanızla giriş yapabilirsiniz.")
+                return redirect("login")
+            else:
+                messages.error(request, "Kullanıcı adı veya mevcut parola hatalı.")
+    else:
+        form = PasswordChangeForm()
+    
+    return render(request, "eys/change_password.html", {"hide_navbar": True, "form": form})
 
 def home(request):
     return render(request, "eys/home.html")

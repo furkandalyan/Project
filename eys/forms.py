@@ -375,3 +375,55 @@ class AssignmentGroupForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if students_qs is not None:
             self.fields["members"].queryset = students_qs
+
+
+class PasswordChangeForm(forms.Form):
+    username = forms.CharField(
+        label="Kullanıcı Adı",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Kullanıcı adınızı girin",
+                "style": "width:100%; padding:14px 16px 14px 45px; border:1px solid #e4e4e7; border-radius:14px; font-size:14px; font-family:inherit; background:#fafafa; box-sizing:border-box;",
+            }
+        ),
+    )
+    old_password = forms.CharField(
+        label="Mevcut Parola",
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Mevcut parolanızı girin",
+                "style": "width:100%; padding:14px 16px 14px 45px; border:1px solid #e4e4e7; border-radius:14px; font-size:14px; font-family:inherit; background:#fafafa; box-sizing:border-box;",
+            }
+        ),
+    )
+    new_password = forms.CharField(
+        label="Yeni Parola",
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Yeni parolanızı girin",
+                "style": "width:100%; padding:14px 16px 14px 45px; border:1px solid #e4e4e7; border-radius:14px; font-size:14px; font-family:inherit; background:#fafafa; box-sizing:border-box;",
+            }
+        ),
+    )
+    confirm_password = forms.CharField(
+        label="Yeni Parola Tekrar",
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Yeni parolayı tekrar girin",
+                "style": "width:100%; padding:14px 16px 14px 45px; border:1px solid #e4e4e7; border-radius:14px; font-size:14px; font-family:inherit; background:#fafafa; box-sizing:border-box;",
+            }
+        ),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get("new_password")
+        confirm_password = cleaned_data.get("confirm_password")
+        
+        if new_password and confirm_password:
+            if new_password != confirm_password:
+                raise forms.ValidationError("Yeni parola ile tekrar alanı eşleşmiyor.")
+            if len(new_password) < 8:
+                raise forms.ValidationError("Yeni parola en az 8 karakter olmalıdır.")
+        
+        return cleaned_data
