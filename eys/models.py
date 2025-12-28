@@ -1,14 +1,13 @@
-import sys
-print("=" * 80, file=sys.stderr)
-print("DEBUG: eys/models.py is being loaded", file=sys.stderr)
-print("=" * 80, file=sys.stderr)
+print("=" * 80)
+print("DEBUG: eys/models.py is being loaded")
+print("=" * 80)
 
 from django.db import models
-print("DEBUG: django.db.models imported successfully", file=sys.stderr)
+print("DEBUG: django.db.models imported successfully")
 
 from django.contrib.auth.models import AbstractUser
-print("DEBUG: AbstractUser imported successfully", file=sys.stderr)
-print(f"DEBUG: AbstractUser = {AbstractUser}", file=sys.stderr)
+print("DEBUG: AbstractUser imported successfully")
+print(f"DEBUG: AbstractUser = {AbstractUser}")
 
 
 class Role(models.Model):
@@ -17,22 +16,26 @@ class Role(models.Model):
     def __str__(self):
         return self.name
 
-print("DEBUG: Role model class defined", file=sys.stderr)
-print(f"DEBUG: Role._meta = {Role._meta if hasattr(Role, '_meta') else 'Not yet initialized'}", file=sys.stderr)
+print("DEBUG: Role model class defined")
+print(f"DEBUG: Role._meta = {Role._meta if hasattr(Role, '_meta') else 'Not yet initialized'}")
 
 
 class User(AbstractUser):
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
 
+    class Meta:
+        verbose_name = "User"
+        verbose_name_plural = "Users"
+
     def __str__(self):
         return self.username
 
-print("DEBUG: User model class defined", file=sys.stderr)
-print(f"DEBUG: User.__bases__ = {User.__bases__}", file=sys.stderr)
-print(f"DEBUG: User._meta = {User._meta if hasattr(User, '_meta') else 'Not yet initialized'}", file=sys.stderr)
-print("=" * 80, file=sys.stderr)
-print("DEBUG: eys/models.py loading complete", file=sys.stderr)
-print("=" * 80, file=sys.stderr)
+print("DEBUG: User model class defined")
+print(f"DEBUG: User.__bases__ = {User.__bases__}")
+print(f"DEBUG: User._meta = {User._meta if hasattr(User, '_meta') else 'Not yet initialized'}")
+print("=" * 80)
+print("DEBUG: eys/models.py loading complete")
+print("=" * 80)
 
 
 class Course(models.Model):

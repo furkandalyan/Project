@@ -14,11 +14,25 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+print("=" * 80)
+print("DEBUG: future/urls.py is being loaded")
+print("=" * 80)
+
 from django.contrib import admin
+print("DEBUG: django.contrib.admin imported in urls.py")
+print(f"DEBUG: admin.site = {admin.site}")
+print(f"DEBUG: admin.site._registry in urls.py = {list(admin.site._registry.keys())}")
+
 from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('eys.urls')),
 ]
+
+print(f"DEBUG: urlpatterns configured with admin.site.urls")
+print(f"DEBUG: admin.site._registry after urlpatterns = {list(admin.site._registry.keys())}")
+print("=" * 80)
+print("DEBUG: future/urls.py loading complete")
+print("=" * 80)
 
