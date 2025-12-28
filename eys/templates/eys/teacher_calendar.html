@@ -10,12 +10,35 @@
         {% if view_mode == 'month' %}
             <a href="?view=month&year={{ prev_month.year }}&month={{ prev_month.month }}{% for cid in selected_course_ids %}&course_id={{ cid }}{% endfor %}"
                style="padding:10px 16px; border:1px solid #e0e0e0; border-radius:8px; text-decoration:none; color:#333;">← Önceki Ay</a>
-            <div style="padding:10px 18px; background:#1f1f1f; color:white; border-radius:8px; font-weight:600; display:flex; align-items:center; gap:8px;">
-                {{ month_name }} {{ selected_year }}
-                {% if selected_course_ids %}
-                    <span style="background:#333; color:#fff; padding:4px 8px; border-radius:999px; font-size:12px;">Filtre: {{ selected_course_ids|length }} ders</span>
-                {% endif %}
-            </div>
+
+            <form method="GET" style="display:flex; gap:8px;">
+                <input type="hidden" name="view" value="month">
+                {% for cid in selected_course_ids %}
+                    <input type="hidden" name="course_id" value="{{ cid }}">
+                {% endfor %}
+                <select name="month" onchange="this.form.submit()" style="padding:10px; border-radius:8px; border:1px solid #e0e0e0; background:white; font-weight:600;">
+                    <option value="1" {% if month_name == 'Ocak' %}selected{% endif %}>Ocak</option>
+                    <option value="2" {% if month_name == 'Şubat' %}selected{% endif %}>Şubat</option>
+                    <option value="3" {% if month_name == 'Mart' %}selected{% endif %}>Mart</option>
+                    <option value="4" {% if month_name == 'Nisan' %}selected{% endif %}>Nisan</option>
+                    <option value="5" {% if month_name == 'Mayıs' %}selected{% endif %}>Mayıs</option>
+                    <option value="6" {% if month_name == 'Haziran' %}selected{% endif %}>Haziran</option>
+                    <option value="7" {% if month_name == 'Temmuz' %}selected{% endif %}>Temmuz</option>
+                    <option value="8" {% if month_name == 'Ağustos' %}selected{% endif %}>Ağustos</option>
+                    <option value="9" {% if month_name == 'Eylül' %}selected{% endif %}>Eylül</option>
+                    <option value="10" {% if month_name == 'Ekim' %}selected{% endif %}>Ekim</option>
+                    <option value="11" {% if month_name == 'Kasım' %}selected{% endif %}>Kasım</option>
+                    <option value="12" {% if month_name == 'Aralık' %}selected{% endif %}>Aralık</option>
+                </select>
+                <select name="year" onchange="this.form.submit()" style="padding:10px; border-radius:8px; border:1px solid #e0e0e0; background:white; font-weight:600;">
+                    <option value="{{ selected_year|add:'-2' }}">{{ selected_year|add:'-2' }}</option>
+                    <option value="{{ selected_year|add:'-1' }}">{{ selected_year|add:'-1' }}</option>
+                    <option value="{{ selected_year }}" selected>{{ selected_year }}</option>
+                    <option value="{{ selected_year|add:'1' }}">{{ selected_year|add:'1' }}</option>
+                    <option value="{{ selected_year|add:'2' }}">{{ selected_year|add:'2' }}</option>
+                </select>
+            </form>
+
             <a href="?view=month&year={{ next_month.year }}&month={{ next_month.month }}{% for cid in selected_course_ids %}&course_id={{ cid }}{% endfor %}"
                style="padding:10px 16px; border:1px solid #e0e0e0; border-radius:8px; text-decoration:none; color:#333;">Sonraki Ay →</a>
         {% else %}

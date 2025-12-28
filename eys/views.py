@@ -249,6 +249,22 @@ def upload_profile_picture(request):
     # Redirect back to the previous page or home
     return redirect(request.META.get('HTTP_REFERER', 'home'))
 
+
+@login_required
+def settings_view(request):
+    """Settings page for user preferences"""
+    if request.method == "POST":
+        dark_mode = request.POST.get('dark_mode') == 'on'
+        # Since dark_mode is removed from the model, we can store it in the session
+        request.session['dark_mode'] = dark_mode
+        messages.success(request, "Ayarlar başarıyla kaydedildi.")
+        return redirect('settings')
+    
+    context = {
+        'dark_mode': request.session.get('dark_mode', False),
+    }
+    return render(request, "eys/settings.html", context)
+
 def home(request):
     return render(request, "eys/home.html")
 
@@ -370,6 +386,13 @@ def student_dashboard(request):
             }
         ]
 
+    # Format last login time
+    last_login = None
+    if request.user.last_login:
+        last_login_local = timezone.localtime(request.user.last_login)
+        month_label = MONTH_LABELS[last_login_local.month - 1]
+        last_login = f"{last_login_local.day} {month_label} {last_login_local.year} · {last_login_local.strftime('%H:%M')}"
+    
     return render(
         request,
         "eys/student_dashboard.html",
@@ -382,6 +405,7 @@ def student_dashboard(request):
             "upcoming_exams": upcoming_exams,
             "calendar_days": calendar_days,
             "announcement_cards": announcement_cards,
+            "last_login": last_login,
         },
     )
 
@@ -517,10 +541,9 @@ def student_announcements(request):
 def student_profile(request):
     if not request.user.is_authenticated:
         return redirect("login")
-    # Rol kontrolü kaldırıldı, herkes erişebilir.
-    # if not request.user.role or request.user.role.name != "Student":
-    #     messages.error(request, "Bu alan yalnızca öğrenciler içindir.")
-    #     return redirect("home")
+    if not request.user.role or request.user.role.name != "Student":
+        messages.error(request, "Bu alan yalnızca öğrenciler içindir.")
+        return redirect("home")
 
     initial_data = {
         "first_name": request.user.first_name,
@@ -536,9 +559,7 @@ def student_profile(request):
             if new_password:
                 user.set_password(new_password)
                 user.save()
-                # update_session_auth_hash(request, user) # Import eksik olabilir, gerekirse eklenmeli
-                # Ancak Django'da login fonksiyonu session'ı günceller.
-                login(request, user) # Şifre değişince oturum düşmemesi için tekrar login
+                update_session_auth_hash(request, user)
             messages.success(request, "Profil bilgilerin güncellendi.")
             return redirect("student_profile")
     else:
@@ -867,6 +888,26 @@ def teacher_dashboard(request):
         if exam.scheduled_at and exam.scheduled_at >= now
     ][:5]
 
+    # Takvim verilerini hazırla
+    calendar_buckets = defaultdict(list)
+    for exam in exams_qs:
+        data = serialize_exam_for_student(exam, now)
+        if data["scheduled_local"]:
+            calendar_buckets[data["scheduled_local"].date()].append(data)
+
+    calendar_days = []
+    for day in sorted(calendar_buckets.keys()):
+        month_label = MONTH_LABELS[day.month - 1]
+        day_label = DAY_LABELS[day.weekday()]
+        calendar_days.append(
+            {
+                "date_label": f"{day.day} {month_label} {day.year}",
+                "day_label": day_label,
+                "items": calendar_buckets[day],
+            }
+        )
+    calendar_days = calendar_days[:4]
+
     announcement_qs = (
         Announcement.objects.filter(Q(course_id__in=course_ids) | Q(author=request.user))
         .select_related("course", "author")
@@ -924,6 +965,13 @@ def teacher_dashboard(request):
             "recent_courses": recent_courses,
         }
 
+    # Format last login time
+    last_login = None
+    if request.user.last_login:
+        last_login_local = timezone.localtime(request.user.last_login)
+        month_label = MONTH_LABELS[last_login_local.month - 1]
+        last_login = f"{last_login_local.day} {month_label} {last_login_local.year} · {last_login_local.strftime('%H:%M')}"
+    
     return render(
         request,
         "eys/teacher_dashboard.html",
@@ -935,6 +983,8 @@ def teacher_dashboard(request):
             "upcoming_exams": upcoming_exams,
             "announcement_cards": announcement_cards,
             "department_stats": department_stats,  # Yeni eklenen veri
+            "last_login": last_login,
+            "calendar_days": calendar_days, # Takvim verisi eklendi
         },
     )
 
@@ -948,11 +998,19 @@ def affairs_dashboard(request):
     # Son Duyurular (Global olanlar veya hepsi)
     recent_announcements = Announcement.objects.all().order_by('-created_at')[:5]
     
+    # Format last login time
+    last_login = None
+    if request.user.last_login:
+        last_login_local = timezone.localtime(request.user.last_login)
+        month_label = MONTH_LABELS[last_login_local.month - 1]
+        last_login = f"{last_login_local.day} {month_label} {last_login_local.year} · {last_login_local.strftime('%H:%M')}"
+    
     context = {
         'student_count': student_count,
         'teacher_count': teacher_count,
         'course_count': course_count,
         'recent_announcements': recent_announcements,
+        'last_login': last_login,
     }
     return render(request, "eys/affairs_dashboard.html", context)
 

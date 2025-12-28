@@ -3,45 +3,45 @@
 {% block content %}
 <div style="display:flex; flex-direction:column; gap:18px;">
     <!-- Hero -->
-    <div style="background:linear-gradient(120deg,#0f172a,#2563eb); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
-        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Ogrenci modu</p>
+    <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Öğrenci Modu</p>
         <h1 style="margin:6px 0 4px 0;">{{ course.name }} <span style="font-size:18px; opacity:0.8;">({{ course.code }})</span></h1>
-        <p style="margin:0; opacity:0.8;">Dersin LO ve sinav baglantilarini, notlarini burada gor.</p>
+        <p style="margin:0; opacity:0.8;">Dersin LO ve sınav bağlantılarını, notlarını burada gör.</p>
     </div>
 
     <!-- Summary -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px;">
         <div style="background:white; padding:14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-            <p style="margin:0; color:#999; font-size:12px;">Ogretim Elemani</p>
+            <p style="margin:0; color:#999; font-size:12px;">Öğretim Elemanı</p>
             <strong style="font-size:18px;">{{ instructor_name }}</strong>
         </div>
         <div style="background:white; padding:14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-            <p style="margin:0; color:#999; font-size:12px;">Donem</p>
+            <p style="margin:0; color:#999; font-size:12px;">Dönem</p>
             <strong style="font-size:18px;">{{ term_label }}</strong>
         </div>
         <div style="background:white; padding:14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-            <p style="margin:0; color:#999; font-size:12px;">Ogrenci</p>
+            <p style="margin:0; color:#999; font-size:12px;">Öğrenci</p>
             <strong style="font-size:18px;">{{ student_count }}</strong>
         </div>
         <div style="background:white; padding:14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
-            <p style="margin:0; color:#999; font-size:12px;">LO / Sinav</p>
+            <p style="margin:0; color:#999; font-size:12px;">LO / Sınav</p>
             <strong style="font-size:18px;">{{ los|length }} / {{ exams|length }}</strong>
         </div>
     </div>
 
     <!-- LO - Exam connections -->
     <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 14px 36px rgba(0,0,0,0.08);">
-        <h3 style="margin-top:0;">LO - Sinav Baglantilari</h3>
+        <h3 style="margin-top:0;">LO - Sınav Bağlantıları</h3>
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
             {% for lo in los %}
-            <div style="padding:12px; border:1px solid #eef2f7; border-radius:12px; background:#f8fafc; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <div style="font-weight:700; color:#0f172a;">LO {{ lo.id }}: {{ lo.title }}</div>
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--badge-bg); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div style="font-weight:700; color:var(--text-color);">LO {{ lo.id }}: {{ lo.title }}</div>
                 <span style="color:#94a3b8;">-></span>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     {% for w in lo.examloweight_set.all %}
-                        <span style="padding:6px 10px; border-radius:10px; background:#e0f2fe; color:#0f172a; font-size:12px;">{{ w.exam.name }} (%{{ w.weight }})</span>
+                        <span style="padding:6px 10px; border-radius:10px; background:var(--bg-color); color:var(--text-color); font-size:12px; border: 1px solid var(--border-color);">{{ w.exam.name }} (%{{ w.weight }})</span>
                     {% empty %}
-                        <span style="color:#94a3b8; font-size:12px;">Bagli sinav yok</span>
+                        <span style="color:#94a3b8; font-size:12px;">Bağlı sınav yok</span>
                     {% endfor %}
                 </div>
                 {% if lo.student_score %}
@@ -49,7 +49,7 @@
                 {% endif %}
             </div>
             {% empty %}
-            <p style="color:#6b7280;">Henuz LO eklenmemis.</p>
+            <p style="color:#6b7280;">Henüz LO eklenmemiş.</p>
             {% endfor %}
         </div>
     </div>
@@ -60,31 +60,31 @@
             <h3 style="margin-top:0;">Learning Outcomes</h3>
             <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:10px;">
                 {% for lo in los %}
-                <div style="background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #eef2f7;">
+                <div style="background:var(--badge-bg); padding:12px; border-radius:12px; border:1px solid var(--border-color);">
                     <p style="margin:0; color:#6b7280; font-size:12px;">LO {{ lo.id }}</p>
                     <strong style="display:block; margin:4px 0;">{{ lo.title }}</strong>
                     {% if lo.student_score %}
                         <div style="font-size:12px; color:#065f46;">Notun: {{ lo.student_score }}</div>
                     {% else %}
-                        <div style="font-size:12px; color:#94a3b8;">Notun hesaplanmadi</div>
+                        <div style="font-size:12px; color:#94a3b8;">Notun hesaplanmadı</div>
                     {% endif %}
                 </div>
                 {% empty %}
-                <p style="color:#6b7280;">Henuz LO eklenmemis.</p>
+                <p style="color:#6b7280;">Henüz LO eklenmemiş.</p>
                 {% endfor %}
             </div>
         </div>
 
         <!-- Exams -->
         <div style="background:white; border-radius:14px; padding:16px; box-shadow:0 14px 36px rgba(0,0,0,0.08);">
-            <h3 style="margin-top:0;">Sinavlar</h3>
+            <h3 style="margin-top:0;">Sınavlar</h3>
             {% if exam_cards %}
             <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
                 {% for exam in exam_cards %}
-                <div style="border:1px solid #eef2f7; border-radius:12px; padding:12px; background:#f8fafc;">
+                <div style="border:1px solid var(--border-color); border-radius:12px; padding:12px; background:var(--badge-bg);">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
                         <div>
-                            <a href="{% url 'exam_detail' exam.id %}" style="font-weight:700; color:#0f172a; text-decoration:none;">{{ exam.name }}</a>
+                            <a href="{% url 'exam_detail' exam.id %}" style="font-weight:700; color:var(--text-color); text-decoration:none;">{{ exam.name }}</a>
                             <div style="font-size:12px; color:#94a3b8;">{{ exam.display_label }}</div>
                         </div>
                         {% if exam.score %}
@@ -94,18 +94,18 @@
                     <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; font-size:12px; color:#475569;">
                         <span>Ders: {{ exam.course_code }}</span>
                         {% if exam.status == 'past' %}
-                            <span style="padding:4px 8px; border-radius:8px; background:#e5e7eb; color:#374151;">Tamamlandi</span>
+                            <span style="padding:4px 8px; border-radius:8px; background:#e5e7eb; color:#374151;">Tamamlandı</span>
                         {% elif exam.status == 'soon' %}
                             <span style="padding:4px 8px; border-radius:8px; background:#fff0da; color:#b86a00;">Bu hafta</span>
                         {% else %}
-                            <span style="padding:4px 8px; border-radius:8px; background:#e0f2fe; color:#0369a1;">Yaklasiyor</span>
+                            <span style="padding:4px 8px; border-radius:8px; background:#e0f2fe; color:#0369a1;">Yaklaşıyor</span>
                         {% endif %}
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <p style="color:#6b7280;">Henuz sinav eklenmemis.</p>
+            <p style="color:#6b7280;">Henüz sınav eklenmemiş.</p>
             {% endif %}
         </div>
     </div>

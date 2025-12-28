@@ -5,15 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b462755c-401a-4f89-94a0-cc4c26b61fe9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eys/templates/eys/affairs_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/affairs_dashboard.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eys/templates/eys/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eys/templates/eys/student_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/student_dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eys/templates/eys/student_profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/student_profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eys/templates/eys/teacher_announcements.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/teacher_announcements.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eys/templates/eys/teacher_assignments.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/teacher_assignments.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eys/templates/eys/teacher_courses.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/teacher_courses.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/student_calendar.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/student_calendar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/student_course_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/student_course_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/student_courses.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/student_courses.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eys/templates/eys/teacher_calendar.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/teacher_calendar.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eys/templates/eys/teacher_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/eys/templates/eys/teacher_dashboard.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/eys/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/eys/views.py" afterDir="false" />
     </list>
@@ -41,24 +38,27 @@
   &quot;associatedIndex&quot;: 7
 }</component>
   <component name="ProjectId" id="37RdNoUr5Lt0C7Hj9bDZXUysz3R" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "eylulv2",
-    "junie.onboarding.icon.badge.shown": "true",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;eylulv2&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="Project" />

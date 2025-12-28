@@ -6,14 +6,40 @@
         <p style="margin:0; color:#9b9b9b;">Planlı sınavlarını buradan yönet</p>
         <h1 style="margin:4px 0 0 0;">📅 Takvimim</h1>
     </div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
         <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}"
-           style="padding:10px 16px; border:1px solid #e0e0e0; border-radius:8px; text-decoration:none; color:#333;">← Önceki Ay</a>
-        <div style="padding:10px 18px; background:#1f1f1f; color:white; border-radius:8px; font-weight:600;">
-            {{ month_name }} {{ selected_year }}
-        </div>
+           style="padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; text-decoration:none; color:var(--text-color);">← Önceki Ay</a>
+
+        <form method="GET" style="display:flex; gap:8px;">
+            <select name="month" onchange="this.form.submit()" style="padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-color); font-weight:600;">
+                <option value="1" {% if month_name == 'Ocak' %}selected{% endif %}>Ocak</option>
+                <option value="2" {% if month_name == 'Şubat' %}selected{% endif %}>Şubat</option>
+                <option value="3" {% if month_name == 'Mart' %}selected{% endif %}>Mart</option>
+                <option value="4" {% if month_name == 'Nisan' %}selected{% endif %}>Nisan</option>
+                <option value="5" {% if month_name == 'Mayıs' %}selected{% endif %}>Mayıs</option>
+                <option value="6" {% if month_name == 'Haziran' %}selected{% endif %}>Haziran</option>
+                <option value="7" {% if month_name == 'Temmuz' %}selected{% endif %}>Temmuz</option>
+                <option value="8" {% if month_name == 'Ağustos' %}selected{% endif %}>Ağustos</option>
+                <option value="9" {% if month_name == 'Eylül' %}selected{% endif %}>Eylül</option>
+                <option value="10" {% if month_name == 'Ekim' %}selected{% endif %}>Ekim</option>
+                <option value="11" {% if month_name == 'Kasım' %}selected{% endif %}>Kasım</option>
+                <option value="12" {% if month_name == 'Aralık' %}selected{% endif %}>Aralık</option>
+            </select>
+            <select name="year" onchange="this.form.submit()" style="padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-color); font-weight:600;">
+                {% for y in "2023 2024 2025 2026 2027"|make_list %}
+                    <!-- Basit bir liste yerine view'dan yil araligi gelse daha iyi olur ama simdilik statik cozum -->
+                    <!-- Template tag destegi olmadigi icin asagidaki gibi manuel yapiyorum -->
+                {% endfor %}
+                <option value="{{ selected_year|add:'-2' }}">{{ selected_year|add:'-2' }}</option>
+                <option value="{{ selected_year|add:'-1' }}">{{ selected_year|add:'-1' }}</option>
+                <option value="{{ selected_year }}" selected>{{ selected_year }}</option>
+                <option value="{{ selected_year|add:'1' }}">{{ selected_year|add:'1' }}</option>
+                <option value="{{ selected_year|add:'2' }}">{{ selected_year|add:'2' }}</option>
+            </select>
+        </form>
+
         <a href="?year={{ next_month.year }}&month={{ next_month.month }}"
-           style="padding:10px 16px; border:1px solid #e0e0e0; border-radius:8px; text-decoration:none; color:#333;">Sonraki Ay →</a>
+           style="padding:10px 16px; border:1px solid var(--border-color); border-radius:8px; text-decoration:none; color:var(--text-color);">Sonraki Ay →</a>
     </div>
 </div>
 
@@ -28,7 +54,7 @@
             {% for row in calendar_rows %}
                 {% for cell in row %}
                     {% if cell %}
-                        <div style="border:1px solid {% if cell.items %}#1db954{% else %}#ededed{% endif %}; border-radius:14px; padding:12px; min-height:120px; display:flex; flex-direction:column; gap:8px; position:relative;">
+                        <div style="border:1px solid {% if cell.items %}#1db954{% else %}var(--border-color){% endif %}; border-radius:14px; padding:12px; min-height:120px; display:flex; flex-direction:column; gap:8px; position:relative;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <span style="font-weight:600; {% if cell.is_today %}color:#1db954;{% endif %}">{{ cell.day }}</span>
                                 {% if cell.is_today %}
@@ -37,9 +63,9 @@
                             </div>
                             <div style="display:flex; flex-direction:column; gap:6px;">
                                 {% for exam in cell.items %}
-                                    <div style="border-radius:10px; padding:8px; background:#f8fdf9;">
-                                        <p style="margin:0; font-weight:600; font-size:13px;">{{ exam.course_code }} · {{ exam.name }}</p>
-                                        <p style="margin:2px 0 8px 0; color:#777; font-size:12px;">{{ exam.time_label }} • {{ exam.course_name }}</p>
+                                    <div style="border-radius:10px; padding:8px; background:var(--badge-bg); border: 1px solid var(--border-color);">
+                                        <p style="margin:0; font-weight:600; font-size:13px; color:var(--text-color);">{{ exam.course_code }} · {{ exam.name }}</p>
+                                        <p style="margin:2px 0 8px 0; color:var(--text-muted); font-size:12px;">{{ exam.time_label }} • {{ exam.course_name }}</p>
                                         <div style="display:flex; gap:8px;">
                                             <a href="{% url 'exam_detail' exam.id %}"
                                                style="flex:1; text-align:center; font-size:12px; padding:6px 0; border-radius:6px; background:#1db954; color:white; text-decoration:none;">Sınav Detayı</a>
@@ -53,13 +79,13 @@
                             </div>
                         </div>
                     {% else %}
-                        <div style="border:1px dashed #f0f0f0; border-radius:14px;"></div>
+                        <div style="border:1px dashed var(--border-color); border-radius:14px;"></div>
                     {% endif %}
                 {% endfor %}
             {% endfor %}
         </div>
         {% if not has_events %}
-            <div style="margin-top:20px; padding:18px; border-radius:12px; background:#f7f7f7; text-align:center; color:#777;">
+            <div style="margin-top:20px; padding:18px; border-radius:12px; background:var(--badge-bg); text-align:center; color:var(--text-muted);">
                 Bu ay için planlanmış sınav görünmüyor. Öğretim elemanı yeni sınav eklediğinde otomatik olarak burada belirecek.
             </div>
         {% endif %}
@@ -71,7 +97,7 @@
         {% if upcoming_list %}
             <div style="display:flex; flex-direction:column; gap:12px;">
                 {% for exam in upcoming_list %}
-                    <div style="border:1px solid #f0f0f0; border-radius:12px; padding:14px;">
+                    <div style="border:1px solid var(--border-color); border-radius:12px; padding:14px;">
                         <p style="margin:0; font-size:13px; color:#999;">{{ exam.display_label }}</p>
                         <strong style="display:block; margin:4px 0;">{{ exam.course_code }} · {{ exam.name }}</strong>
                         <p style="margin:0; color:#666; font-size:13px;">{{ exam.course_name }}</p>
@@ -92,4 +118,3 @@
     </div>
 </div>
 {% endblock %}
-
