@@ -937,6 +937,13 @@ def teacher_dashboard(request):
             "recent_courses": recent_courses,
         }
 
+    # Format last login time
+    last_login = None
+    if request.user.last_login:
+        last_login_local = timezone.localtime(request.user.last_login)
+        month_label = MONTH_LABELS[last_login_local.month - 1]
+        last_login = f"{last_login_local.day} {month_label} {last_login_local.year} · {last_login_local.strftime('%H:%M')}"
+    
     return render(
         request,
         "eys/teacher_dashboard.html",
@@ -948,6 +955,7 @@ def teacher_dashboard(request):
             "upcoming_exams": upcoming_exams,
             "announcement_cards": announcement_cards,
             "department_stats": department_stats,  # Yeni eklenen veri
+            "last_login": last_login,
         },
     )
 
@@ -961,11 +969,19 @@ def affairs_dashboard(request):
     # Son Duyurular (Global olanlar veya hepsi)
     recent_announcements = Announcement.objects.all().order_by('-created_at')[:5]
     
+    # Format last login time
+    last_login = None
+    if request.user.last_login:
+        last_login_local = timezone.localtime(request.user.last_login)
+        month_label = MONTH_LABELS[last_login_local.month - 1]
+        last_login = f"{last_login_local.day} {month_label} {last_login_local.year} · {last_login_local.strftime('%H:%M')}"
+    
     context = {
         'student_count': student_count,
         'teacher_count': teacher_count,
         'course_count': course_count,
         'recent_announcements': recent_announcements,
+        'last_login': last_login,
     }
     return render(request, "eys/affairs_dashboard.html", context)
 
