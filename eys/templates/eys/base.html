@@ -71,12 +71,21 @@
             color: var(--text-color) !important;
         }
 
+
         body.dark-mode div[style*="background:#f8fafc"],
         body.dark-mode div[style*="background:#f8f8f8"],
-        body.dark-mode div[style*="background:#f1f5f9"] {
-            background: #27272a !important; /* Daha koyu iç kutular */
+        body.dark-mode div[style*="background:#f1f5f9"],
+        body.dark-mode div[style*="background:#f7f7f7"],
+        body.dark-mode div[style*="background:#f7f9fc"],
+        body.dark-mode div[style*="background:#f9f9f9"],
+        body.dark-mode div[style*="background:#fcfcfc"],
+        body.dark-mode div[style*="background:#f0f0f0"],
+        body.dark-mode div[style*="background:#eef0f4"],
+        body.dark-mode div[style*="background:#f3fff6"] {
+            background: #27272a !important; /* Daha koyu ic kutular */
             color: var(--text-color) !important;
         }
+
 
         body.dark-mode input,
         body.dark-mode select {
@@ -91,6 +100,32 @@
 
         body.dark-mode p, body.dark-mode span, body.dark-mode li {
             color: var(--text-muted);
+        }
+
+        /* Inline color overrides for dark mode */
+        body.dark-mode [style*="color:#000"],
+        body.dark-mode [style*="color:black"],
+        body.dark-mode [style*="color:#111"],
+        body.dark-mode [style*="color:#222"],
+        body.dark-mode [style*="color:#333"],
+        body.dark-mode [style*="color:#1f1f1f"],
+        body.dark-mode [style*="color:#1a1c23"],
+        body.dark-mode [style*="color:#0f172a"],
+        body.dark-mode [style*="color:#444"],
+        body.dark-mode [style*="color:#555"],
+        body.dark-mode [style*="color:#666"],
+        body.dark-mode [style*="color:#777"],
+        body.dark-mode [style*="color:#888"],
+        body.dark-mode [style*="color:#999"] {
+            color: var(--text-color) !important;
+        }
+
+        body.dark-mode [style*="color:#6b7280"],
+        body.dark-mode [style*="color:#7a7a7a"],
+        body.dark-mode [style*="color:#8a8a8a"],
+        body.dark-mode [style*="color:#94a3b8"],
+        body.dark-mode [style*="color:#9a9a9a"] {
+            color: var(--text-muted) !important;
         }
 
         /* Yeşil gradient kutuları koru ama borderlarını düzelt */
