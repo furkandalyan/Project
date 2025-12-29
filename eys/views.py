@@ -1,6 +1,6 @@
 from calendar import monthrange
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date, timedelta, timezone as dt_timezone
 from decimal import Decimal
 import base64
 import json
@@ -741,6 +741,8 @@ def teacher_create_announcement(request):
         messages.error(request, "Sadece öğretim elemanları duyuru oluşturabilir.")
         return redirect("home")
 
+    recent_announcements = Announcement.objects.filter(author=request.user).order_by("-created_at")[:6]
+
     if request.method == "POST":
         form = AnnouncementForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
@@ -757,6 +759,7 @@ def teacher_create_announcement(request):
         "eys/teacher_create_announcement.html",
         {
             "form": form,
+            "recent_announcements": recent_announcements,
         },
     )
 
@@ -1849,6 +1852,41 @@ def add_lo_po_weight(request, lo_id):
     )
 
 
+@login_required
+def auto_distribute_lo_po(request, lo_id):
+    learning_outcome = get_object_or_404(LearningOutcome.objects.select_related("course"), id=lo_id)
+    if not request.user.role or request.user.role.name not in TEACHER_ROLES:
+        messages.error(request, "Bu sayfaya erisim yetkiniz yok.")
+        return redirect("home")
+    if learning_outcome.course.instructor != request.user:
+        messages.error(request, "Bu LO icin yetkiniz yok.")
+        return redirect("course_detail", course_id=learning_outcome.course.id)
+    if request.method != "POST":
+        return redirect("course_detail", course_id=learning_outcome.course.id)
+
+    pos = list(ProgrammingOutcome.objects.order_by("code"))
+    if not pos:
+        messages.error(request, "PO tanimi bulunamadi.")
+        return redirect("course_detail", course_id=learning_outcome.course.id)
+
+    count = len(pos)
+    base = (Decimal("100") / Decimal(count)).quantize(Decimal("0.01"))
+    weights = [base] * count
+    diff = Decimal("100.00") - sum(weights)
+    if diff != 0:
+        weights[-1] = (weights[-1] + diff).quantize(Decimal("0.01"))
+
+    for po, weight in zip(pos, weights):
+        LOPOWeight.objects.update_or_create(
+            learning_outcome=learning_outcome,
+            programming_outcome=po,
+            defaults={"weight": float(weight)},
+        )
+
+    messages.success(request, "PO yuzdeleri otomatik dagitildi.")
+    return redirect("course_detail", course_id=learning_outcome.course.id)
+
+
 def exam_detail(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     weights = ExamLOWeight.objects.filter(exam=exam)
@@ -1871,12 +1909,25 @@ def exam_detail(request, exam_id):
 def teacher_calendar(request):
     now = timezone.localtime(timezone.now())
     today = timezone.localdate()
+    state = request.session.get("teacher_calendar_state", {})
+    has_any_params = bool(request.GET)
+
+    def pick_param(key, default):
+        if key in request.GET:
+            return request.GET.get(key)
+        if not has_any_params:
+            return state.get(key, default)
+        return state.get(key, default)
+
+    view_mode = (pick_param("view", "month") or "month").strip().lower()
 
     try:
-        selected_month = int(request.GET.get("month", now.month))
-        selected_year = int(request.GET.get("year", now.year))
-    except ValueError:
+        selected_month = int(pick_param("month", now.month))
+    except (TypeError, ValueError):
         selected_month = now.month
+    try:
+        selected_year = int(pick_param("year", now.year))
+    except (TypeError, ValueError):
         selected_year = now.year
 
     if selected_month < 1 or selected_month > 12:
@@ -1897,13 +1948,18 @@ def teacher_calendar(request):
     prev_year, prev_month = shift_month(selected_year, selected_month, -1)
     next_year, next_month = shift_month(selected_year, selected_month, 1)
 
-    view_mode = request.GET.get("view", "month").strip().lower()
-    raw_ids = request.GET.getlist("course_id")
+    raw_ids = None
+    if "course_id" in request.GET:
+        raw_ids = request.GET.getlist("course_id")
+    elif has_any_params:
+        raw_ids = []
+    else:
+        raw_ids = state.get("course_ids", [])
     selected_course_ids = []
     for rid in raw_ids:
         try:
             selected_course_ids.append(int(rid))
-        except ValueError:
+        except (TypeError, ValueError):
             pass
 
     courses = Course.objects.filter(instructor=request.user).order_by("code")
@@ -1925,7 +1981,7 @@ def teacher_calendar(request):
     weekday_labels = ["Pzt", "Salı", "Çar", "Per", "Cum", "Cmt", "Paz"]
 
     if view_mode == "week":
-        week_date_str = request.GET.get("date")
+        week_date_str = pick_param("date", today.isoformat())
         try:
             base_date = date.fromisoformat(week_date_str) if week_date_str else today
         except ValueError:
@@ -1951,6 +2007,13 @@ def teacher_calendar(request):
             if exam["scheduled_local"] and exam["scheduled_local"].date() >= today
         ][:6]
         current_week = base_date.isoformat()
+        request.session["teacher_calendar_state"] = {
+            "view": view_mode,
+            "month": selected_month,
+            "year": selected_year,
+            "date": current_week,
+            "course_ids": selected_course_ids,
+        }
         return render(
             request,
             "eys/teacher_calendar.html",
@@ -1998,6 +2061,13 @@ def teacher_calendar(request):
             if exam["scheduled_local"] and exam["scheduled_local"].date() >= today
         ][:6]
 
+        request.session["teacher_calendar_state"] = {
+            "view": view_mode,
+            "month": selected_month,
+            "year": selected_year,
+            "date": state.get("date", today.isoformat()),
+            "course_ids": selected_course_ids,
+        }
         return render(
             request,
             "eys/teacher_calendar.html",
@@ -2050,7 +2120,7 @@ def teacher_calendar_ics(request):
     for exam in exams_qs:
         if not exam.scheduled_at:
             continue
-        start_utc = timezone.localtime(exam.scheduled_at, timezone.utc)
+        start_utc = timezone.localtime(exam.scheduled_at, dt_timezone.utc)
         end_utc = start_utc + timedelta(hours=1)
         uid = f"exam-{exam.id}@eys"
         summary = f"{exam.course.code} - {exam.name}"
@@ -2069,7 +2139,7 @@ def teacher_calendar_ics(request):
     for a in assignments_qs:
         if not a.due_at:
             continue
-        start_utc = timezone.localtime(a.due_at, timezone.utc)
+        start_utc = timezone.localtime(a.due_at, dt_timezone.utc)
         end_utc = start_utc + timedelta(hours=1)
         uid = f"assignment-{a.id}@eys"
         summary = f"{a.course.code} - {a.title}"
@@ -2246,9 +2316,28 @@ def teacher_assignment_create(request):
             initial["course"] = course
     except (TypeError, ValueError):
         pass
+    copy_id = request.GET.get("copy_id")
+    copy_assignment = None
+    if copy_id:
+        copy_assignment = Assignment.objects.filter(
+            id=copy_id,
+            course__instructor=request.user,
+        ).first()
+        if copy_assignment:
+            if "course" not in initial:
+                initial["course"] = copy_assignment.course
+            initial.update(
+                {
+                    "title": copy_assignment.title,
+                    "description": copy_assignment.description,
+                    "max_score": copy_assignment.max_score,
+                    "due_at": copy_assignment.due_at,
+                    "is_group": copy_assignment.is_group,
+                }
+            )
     template_id = request.GET.get("template_id")
     template_obj = None
-    if template_id:
+    if template_id and not copy_assignment:
         template_obj = AssignmentTemplate.objects.filter(id=template_id, created_by=request.user).first()
         if template_obj:
             initial.update(
@@ -2270,6 +2359,14 @@ def teacher_assignment_create(request):
             # Kriterleri şablondan klonla
             if template_obj:
                 for crit in template_obj.assignmentcriterion_set.all():
+                    AssignmentCriterion.objects.create(
+                        assignment=assignment,
+                        title=crit.title,
+                        max_score=crit.max_score,
+                        order=crit.order,
+                    )
+            if copy_assignment:
+                for crit in copy_assignment.criteria.all():
                     AssignmentCriterion.objects.create(
                         assignment=assignment,
                         title=crit.title,

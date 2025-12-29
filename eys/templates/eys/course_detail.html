@@ -98,8 +98,12 @@
                             <li>PO baglantisi yok.</li>
                         {% endfor %}
                     </ul>
-                    <div style="margin-top:8px;">
+                    <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;">
                         <a href="{% url 'add_lo_po_weight' lo.id %}" style="color:#1db954;">PO Bagla</a>
+                        <form method="post" action="{% url 'auto_distribute_lo_po' lo.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" style="border:1px solid #1db954; color:#1db954; background:white; padding:4px 10px; border-radius:8px; cursor:pointer;">PO Dagit</button>
+                        </form>
                     </div>
 
             </div>
@@ -409,8 +413,12 @@
                             <li>PO baglantisi yok.</li>
                         {% endfor %}
                     </ul>
-                    <div style="margin-top:8px;">
+                    <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;">
                         <a href="{% url 'add_lo_po_weight' lo.id %}" style="color:#1db954;">PO Bagla</a>
+                        <form method="post" action="{% url 'auto_distribute_lo_po' lo.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" style="border:1px solid #1db954; color:#1db954; background:white; padding:4px 10px; border-radius:8px; cursor:pointer;">PO Dagit</button>
+                        </form>
                     </div>
 
                 </details>

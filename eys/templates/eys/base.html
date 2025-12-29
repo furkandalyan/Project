@@ -1729,7 +1729,7 @@
                 },
                 {
                     keywords: ["ders", "derslerim", "course", "kurs"],
-                    answer: "Derslerini 'Derslerim' menusunden gorebilir, ders detayindan sinav/LO/PO baglantilarini inceleyebilirsin."
+                    answer: "Derslerini Derslerim menusunden gorebilirsin. Ogrenci: <a href='/student/courses/'>Derslerim</a> | Ogretmen: <a href='/teacher/courses/'>Derslerim</a>."
                 },
                 {
                     keywords: ["sinav", "not", "puan", "skor"],
@@ -1749,19 +1749,19 @@
                 },
                 {
                     keywords: ["odev", "assignment", "teslim"],
-                    answer: "Ogretmenler Odevler sayfasindan odev olusturur. Ogrenciler Odevler sayfasindan teslim eder."
+                    answer: "Ogretmen: <a href='/teacher/assignments/'>Odevler</a>. Ogrenci: <a href='/student/assignments/'>Odevler</a>."
                 },
                 {
                     keywords: ["duyuru", "announcement"],
-                    answer: "Duyuru olusturmak icin Duyurularim sayfasina git. Ogrenciler Duyurular alaninda gorur."
+                    answer: "Ogretmen: <a href='/teacher/announcements/'>Duyurularim</a>. Ogrenci: <a href='/student/announcements/'>Duyurular</a>."
                 },
                 {
                     keywords: ["takvim", "calendar"],
-                    answer: "Takvim menusu ogrenciler ve ogretmenler icin mevcut. Sinavlari tarihe gore gorebilirsin."
+                    answer: "Takvim: <a href='/student/calendar/'>Ogrenci takvimi</a> | <a href='/teacher/calendar/'>Ogretmen takvimi</a>."
                 },
                 {
                     keywords: ["profil", "hesap", "email", "eposta"],
-                    answer: "Profil bilgilerini Profil sayfasindan duzenleyebilirsin. E-posta alanlari sadece goruntulenir."
+                    answer: "Profil bilgileri icin <a href='/student/profile/'>Profil</a> sayfasini kullanabilirsin. E-posta alanlari sadece goruntulenir."
                 },
                 {
                     keywords: ["danisman", "advisor"],
@@ -1769,11 +1769,11 @@
                 },
                 {
                     keywords: ["materyal", "material"],
-                    answer: "Ders materyalleri Ders detayi veya Materyaller sayfasinda listelenir."
+                    answer: "Materyaller: <a href='/student/materials/'>Ogrenci</a> | <a href='/teacher/materials/'>Ogretmen</a>."
                 },
                 {
                     keywords: ["bildirim", "notification"],
-                    answer: "Bildirimler ust bardaki zil ikonunda gorunur. Tum bildirimler sayfasina tiklayabilirsin."
+                    answer: "Bildirimler ust bardaki zil ikonunda gorunur. Tum bildirimler icin <a href='/notifications/'>Bildirimler</a>."
                 },
                 {
                     keywords: ["arama", "search"],
@@ -2133,7 +2133,11 @@
             function addMessage(text, who) {
                 const msg = document.createElement("div");
                 msg.className = "cevai-msg " + (who === "user" ? "user" : "bot");
-                msg.textContent = text;
+                if (who === "bot") {
+                    msg.innerHTML = text;
+                } else {
+                    msg.textContent = text;
+                }
                 body.appendChild(msg);
                 body.scrollTop = body.scrollHeight;
             }
@@ -2212,7 +2216,7 @@
                     qBtn.addEventListener("click", function() { handleSend(q); });
                     const a = document.createElement("div");
                     a.className = "cevai-qa-answer";
-                    a.textContent = answer;
+                    a.innerHTML = answer;
                     wrap.appendChild(qBtn);
                     wrap.appendChild(a);
                     container.appendChild(wrap);

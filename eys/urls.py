@@ -63,6 +63,7 @@ urlpatterns = [
     path('teacher/exam/<int:exam_id>/', views.exam_detail, name='exam_detail'),
     path('teacher/exam/<int:exam_id>/add-lo-weight/', views.add_exam_lo_weight, name='add_exam_lo_weight'),
     path('teacher/lo/<int:lo_id>/add-po-weight/', views.add_lo_po_weight, name='add_lo_po_weight'),
+    path('teacher/lo/<int:lo_id>/auto-po-weight/', views.auto_distribute_lo_po, name='auto_distribute_lo_po'),
     path('teacher/exam/<int:exam_id>/grades/', views.manage_exam_scores, name='manage_exam_scores'),
     path('teacher/exam/<int:exam_id>/grades/mobile/', views.manage_exam_scores_mobile, name='manage_exam_scores_mobile'),
     path('submission/<int:submission_id>/grade/', views.grade_submission, name='grade_submission'),

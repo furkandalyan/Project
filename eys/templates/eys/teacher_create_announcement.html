@@ -16,6 +16,23 @@
                 <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:20px;">
                     {% csrf_token %}
                     {{ form.media }}
+                    {% if recent_announcements %}
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <label for="copy-announcement" style="font-weight:600; color:#333;">Onceki duyurudan kopyala</label>
+                        <select id="copy-announcement" style="padding:10px 12px; border-radius:10px; border:1px solid #e2e8f0;">
+                            <option value="">Seciniz</option>
+                            {% for ann in recent_announcements %}
+                                <option value="{{ ann.id }}"
+                                        data-title="{{ ann.title|escapejs }}"
+                                        data-body="{{ ann.body|escapejs }}"
+                                        data-course="{{ ann.course_id|default:'' }}">
+                                    {{ ann.title|truncatechars:40 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <span style="color:#8a8a8a; font-size:12px;">Baslik, mesaj ve ders otomatik dolar.</span>
+                    </div>
+                    {% endif %}
                     {% if form.non_field_errors %}
                         <div style="background:#fff2f2; border:1px solid #ffbcbc; color:#c20000; padding:12px; border-radius:10px;">
                             {{ form.non_field_errors }}
@@ -124,7 +141,13 @@
 
     function syncPreview() {
         const title = titleInput.value.trim();
-        const body = bodyInput.value.trim();
+        let body = bodyInput.value;
+        if (window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances[bodyInput.id]) {
+            body = CKEDITOR.instances[bodyInput.id].getData();
+            body = body.replace(/<[^>]*>/g, "").trim();
+        } else {
+            body = body.trim();
+        }
         previewTitle.textContent = title || "Başlık bekleniyor";
         previewBody.textContent = body || "Mesaj metni burada belirecek. Yazmaya başladığında önizleme otomatik güncellenecek.";
         previewCourse.textContent = labelForCourse();
@@ -142,6 +165,7 @@
     const tplHomework = document.getElementById("tpl-homework");
     const tplExam = document.getElementById("tpl-exam");
     const tplGeneral = document.getElementById("tpl-general");
+    const copySelect = document.getElementById("copy-announcement");
 
     function applyTemplate(kind) {
         if (kind === "homework") {
@@ -160,6 +184,28 @@
     if (tplHomework) tplHomework.addEventListener("click", function(){ applyTemplate("homework") });
     if (tplExam) tplExam.addEventListener("click", function(){ applyTemplate("exam") });
     if (tplGeneral) tplGeneral.addEventListener("click", function(){ applyTemplate("general") });
+
+    function setBodyValue(value) {
+        if (window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances[bodyInput.id]) {
+            CKEDITOR.instances[bodyInput.id].setData(value);
+        } else {
+            bodyInput.value = value;
+        }
+    }
+
+    if (copySelect) {
+        copySelect.addEventListener("change", function() {
+            const opt = copySelect.options[copySelect.selectedIndex];
+            if (!opt || !opt.value) return;
+            const title = opt.getAttribute("data-title") || "";
+            const body = opt.getAttribute("data-body") || "";
+            const course = opt.getAttribute("data-course") || "";
+            if (title) titleInput.value = title;
+            if (body) setBodyValue(body);
+            if (courseSelect && course !== "") courseSelect.value = course;
+            syncPreview();
+        });
+    }
 
     if (courseSelect) {
         courseSelect.addEventListener("change", function() {

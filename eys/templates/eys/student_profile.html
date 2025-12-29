@@ -127,6 +127,11 @@
                     <p style="margin:0; font-size:12px; color:#7a7a7a;">E-posta</p>
                     <strong>{{ advisor_email|default:"-" }}</strong>
                 </div>
+                {% if advisor_email %}
+                <a href="mailto:{{ advisor_email }}" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 12px; border-radius:10px; border:1px solid #1db954; color:#1db954; text-decoration:none; font-weight:600;">
+                    Danismana e-posta
+                </a>
+                {% endif %}
             </div>
             {% else %}
             <p style="margin:0; color:#94a3b8;">Henuz danisman atanmamis.</p>
