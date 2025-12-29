@@ -1,0 +1,162 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Danisman Paneli</p>
+        <h1 style="margin:6px 0 4px 0;">{{ student.get_full_name|default:student.username }}</h1>
+        <p style="margin:0; opacity:0.8;">Ogrenci Not ve Odev Detayi</p>
+    </div>
+
+    <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">Ders Ortalamalari</h3>
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:12px; font-size:12px; color:#777; padding:0 0 10px 0; border-bottom:1px solid #f0f0f0;">
+            <div>Ders</div>
+            <div>Ortalama</div>
+        </div>
+        {% for course in course_avgs %}
+            <div style="display:grid; grid-template-columns:2fr 1fr; gap:12px; padding:10px 0; border-bottom:1px solid #f7f7f7;">
+                <div>{{ course.exam__course__code }} - {{ course.exam__course__name }}</div>
+                <div>
+                    <span style="background:#eef4ff; color:#2459c3; padding:4px 10px; border-radius:999px; font-size:12px;">
+                        {% if course.avg_score %}{{ course.avg_score|floatformat:1 }}{% else %}-{% endif %}
+                    </span>
+                    {% if course.avg_score and course.avg_score < risk_threshold %}
+                        <span style="background:#ffe4e6; color:#d9534f; padding:4px 8px; border-radius:999px; font-size:11px;">Risk</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div style="color:#888; padding:12px 0;">Ders ortalamasi yok.</div>
+        {% endfor %}
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Not Dagilimi</h3>
+            {% for b in buckets %}
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                    <div style="width:60px; font-size:12px; color:#666;">{{ b.label }}</div>
+                    <div style="flex:1; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+                        <div style="width:{{ b.width }}%; background:#1db954; color:white; font-size:11px; padding:2px 8px;">
+                            {{ b.count }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Danisman Notu</h3>
+            <form method="post">
+                {% csrf_token %}
+                <textarea name="advisor_note" rows="6" style="width:100%; border:1px solid #e0e0e0; border-radius:10px; padding:10px;">{{ student.advisor_note }}</textarea>
+                <button type="submit" style="margin-top:10px; padding:8px 14px; border-radius:8px; border:none; background:#1db954; color:white; cursor:pointer;">Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Son 5 Sinav Trendi</h3>
+            {% for res in recent_exam_results %}
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                    <div style="width:140px; font-size:12px; color:#666;">{{ res.exam.name }}</div>
+                    <div style="flex:1; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+                        <div style="width:{{ res.score|floatformat:0 }}%; background:#2459c3; color:white; font-size:11px; padding:2px 8px;">
+                            {{ res.score|floatformat:1 }}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="color:#888;">Sinav verisi yok.</div>
+            {% endfor %}
+        </div>
+
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Son 5 Odev Trendi</h3>
+            {% for sub in recent_assignment_results %}
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                    <div style="width:140px; font-size:12px; color:#666;">{{ sub.assignment.title }}</div>
+                    <div style="flex:1; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+                        <div style="width:{{ sub.score|floatformat:0 }}%; background:#1db954; color:white; font-size:11px; padding:2px 8px;">
+                            {{ sub.score|floatformat:1 }}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="color:#888;">Odev verisi yok.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">Sinav Notlari</h3>
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; font-size:12px; color:#777; padding:0 0 10px 0; border-bottom:1px solid #f0f0f0;">
+            <div>Sinav</div>
+            <div>Tarih</div>
+            <div>Puan</div>
+        </div>
+        {% for res in exam_results %}
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; padding:10px 0; border-bottom:1px solid #f7f7f7;">
+                <div>{{ res.exam.course.code }} - {{ res.exam.name }}</div>
+                <div>{% if res.exam.scheduled_at %}{{ res.exam.scheduled_at|date:"d.m.Y" }}{% else %}-{% endif %}</div>
+                <div>
+                    <span style="background:#e5f7ee; color:#1d7c4a; padding:4px 10px; border-radius:999px; font-size:12px;">{{ res.score|floatformat:1 }}</span>
+                </div>
+            </div>
+        {% empty %}
+            <div style="color:#888; padding:12px 0;">Sinav notu yok.</div>
+        {% endfor %}
+    </div>
+
+    <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+        <h3 style="margin-top:0;">Odev Teslimleri</h3>
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; font-size:12px; color:#777; padding:0 0 10px 0; border-bottom:1px solid #f0f0f0;">
+            <div>Odev</div>
+            <div>Ders</div>
+            <div>Durum</div>
+        </div>
+        {% for sub in submissions %}
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; padding:10px 0; border-bottom:1px solid #f7f7f7;">
+                <div>{{ sub.assignment.title }}</div>
+                <div>{{ sub.assignment.course.code }}</div>
+                <div>
+                    {% if sub.score is not None %}
+                        <span style="background:#eef4ff; color:#2459c3; padding:4px 10px; border-radius:999px; font-size:12px;">Not: {{ sub.score|floatformat:1 }}</span>
+                    {% else %}
+                        <span style="background:#fff0da; color:#b86a00; padding:4px 10px; border-radius:999px; font-size:12px;">Teslim Edildi</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div style="color:#888; padding:12px 0;">Odev teslimi yok.</div>
+        {% endfor %}
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Geciken Odevler</h3>
+            {% for a in overdue_assignments %}
+                <div style="padding:8px 0; border-bottom:1px solid #f7f7f7;">
+                    <strong style="display:block;">{{ a.title }}</strong>
+                    <span style="font-size:12px; color:#777;">{{ a.course.code }} | Son: {{ a.due_at|date:"d.m.Y" }}</span>
+                </div>
+            {% empty %}
+                <div style="color:#888;">Geciken odev yok.</div>
+            {% endfor %}
+        </div>
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Gec Teslimler</h3>
+            {% for s in late_submissions %}
+                <div style="padding:8px 0; border-bottom:1px solid #f7f7f7;">
+                    <strong style="display:block;">{{ s.assignment.title }}</strong>
+                    <span style="font-size:12px; color:#777;">{{ s.assignment.course.code }} | Teslim: {{ s.submitted_at|date:"d.m.Y" }}</span>
+                </div>
+            {% empty %}
+                <div style="color:#888;">Gec teslim yok.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1213,6 +1213,176 @@ def department_instructor_detail(request, instructor_id):
         },
     )
 
+
+@login_required
+def advisor_students(request):
+    if not request.user.role or request.user.role.name != "Advisor Instructor":
+        messages.error(request, "Bu sayfaya erisim yetkiniz yok.")
+        return redirect("teacher_dashboard")
+
+    advisees = (
+        User.objects.filter(advisor=request.user, role__name="Student")
+        .prefetch_related("courses_taken")
+        .order_by("last_name", "first_name", "username")
+    )
+
+    results = (
+        ExamResult.objects.filter(student__in=advisees)
+        .select_related("exam__course", "student")
+    )
+    scores_by_student = defaultdict(lambda: defaultdict(list))
+    for res in results:
+        scores_by_student[res.student_id][res.exam.course_id].append(float(res.score))
+
+    submissions = Submission.objects.filter(student__in=advisees).select_related("student")
+    submission_counts = defaultdict(lambda: {"total": 0, "graded": 0})
+    for sub in submissions:
+        entry = submission_counts[sub.student_id]
+        entry["total"] += 1
+        if sub.score is not None:
+            entry["graded"] += 1
+
+    student_cards = []
+    for student in advisees:
+        course_summaries = []
+        for course in student.courses_taken.all():
+            scores = scores_by_student.get(student.id, {}).get(course.id, [])
+            avg_val = sum(scores) / len(scores) if scores else None
+            course_summaries.append(
+                {
+                    "code": course.code,
+                    "name": course.name,
+                    "avg_score": avg_val,
+                }
+            )
+        counts = submission_counts.get(student.id, {"total": 0, "graded": 0})
+        overall_scores = []
+        for course_scores in scores_by_student.get(student.id, {}).values():
+            overall_scores.extend(course_scores)
+        overall_avg = sum(overall_scores) / len(overall_scores) if overall_scores else None
+
+        student_cards.append(
+            {
+                "student": student,
+                "overall_avg": overall_avg,
+                "courses": course_summaries,
+                "submission_total": counts["total"],
+                "submission_graded": counts["graded"],
+            }
+        )
+
+    return render(
+        request,
+        "eys/advisor_students.html",
+        {"student_cards": student_cards},
+    )
+
+
+@login_required
+def advisor_student_detail(request, student_id):
+    if not request.user.role or request.user.role.name != "Advisor Instructor":
+        messages.error(request, "Bu sayfaya erisim yetkiniz yok.")
+        return redirect("teacher_dashboard")
+
+    student = get_object_or_404(
+        User,
+        id=student_id,
+        role__name="Student",
+        advisor=request.user,
+    )
+
+    if request.method == "POST":
+        note = (request.POST.get("advisor_note") or "").strip()
+        student.advisor_note = note
+        student.save(update_fields=["advisor_note"])
+        messages.success(request, "Danisman notu guncellendi.")
+        return redirect("advisor_student_detail", student_id=student.id)
+
+    risk_threshold = 60.0
+    course_avgs = (
+        ExamResult.objects.filter(student=student)
+        .values("exam__course_id", "exam__course__code", "exam__course__name")
+        .annotate(avg_score=Avg("score"))
+        .order_by("exam__course__code")
+    )
+    exam_results = (
+        ExamResult.objects.filter(student=student)
+        .select_related("exam__course")
+        .order_by("exam__course__code", "exam__scheduled_at", "exam__id")
+    )
+    submissions = (
+        Submission.objects.filter(student=student)
+        .select_related("assignment__course")
+        .order_by("-submitted_at")
+    )
+
+    recent_exam_results = list(
+        ExamResult.objects.filter(student=student)
+        .select_related("exam__course")
+        .order_by("-updated_at")[:5]
+    )
+    recent_exam_results.reverse()
+
+    recent_assignment_results = list(
+        Submission.objects.filter(student=student, score__isnull=False)
+        .select_related("assignment__course")
+        .order_by("-graded_at", "-submitted_at")[:5]
+    )
+    recent_assignment_results.reverse()
+
+    # Histogram buckets for student's exam scores
+    bucket_defs = [
+        ("0-49", 0, 49),
+        ("50-59", 50, 59),
+        ("60-69", 60, 69),
+        ("70-84", 70, 84),
+        ("85-100", 85, 100),
+    ]
+    scores = list(
+        ExamResult.objects.filter(student=student).values_list("score", flat=True)
+    )
+    buckets = []
+    max_count = 0
+    for label, low, high in bucket_defs:
+        count = sum(1 for s in scores if s is not None and float(s) >= low and float(s) <= high)
+        max_count = max(max_count, count)
+        buckets.append({"label": label, "count": count})
+    for b in buckets:
+        b["width"] = int((b["count"] / max_count) * 100) if max_count else 0
+
+    # Overdue assignments
+    now = timezone.now()
+    overdue_assignments = (
+        Assignment.objects.filter(course__students=student, due_at__lt=now)
+        .exclude(submissions__student=student)
+        .select_related("course")
+        .order_by("due_at")
+    )
+
+    late_submissions = (
+        Submission.objects.filter(student=student, assignment__due_at__isnull=False)
+        .select_related("assignment__course")
+        .filter(submitted_at__gt=F("assignment__due_at"))
+        .order_by("-submitted_at")
+    )
+
+    return render(
+        request,
+        "eys/advisor_student_detail.html",
+        {
+            "student": student,
+            "course_avgs": list(course_avgs),
+            "exam_results": exam_results,
+            "submissions": submissions,
+            "recent_exam_results": recent_exam_results,
+            "recent_assignment_results": recent_assignment_results,
+            "risk_threshold": risk_threshold,
+            "buckets": buckets,
+            "overdue_assignments": overdue_assignments,
+            "late_submissions": late_submissions,
+        },
+    )
+
 @login_required
 def affairs_dashboard(request):
     # İstatistikler

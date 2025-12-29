@@ -36,18 +36,18 @@ except Exception as e:
 print("DEBUG: Creating CustomUserAdmin class...")
 class CustomUserAdmin(UserAdmin):
     model = User
-    list_display = ("username", "role", "is_staff", "is_active")
-    list_filter = ("role", "is_staff", "is_active")
+    list_display = ("username", "role", "advisor", "is_staff", "is_active")
+    list_filter = ("role", "advisor", "is_staff", "is_active")
 
     fieldsets = (
         (None, {"fields": ("username", "password")}),
-        ("Permissions", {"fields": ("is_staff", "is_active", "role")}),
+        ("Permissions", {"fields": ("is_staff", "is_active", "role", "advisor")}),
     )
 
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
-            "fields": ("username", "password1", "password2", "role", "is_staff", "is_active"),
+            "fields": ("username", "password1", "password2", "role", "advisor", "is_staff", "is_active"),
         }),
     )
 
@@ -82,7 +82,7 @@ try:
     
     # Verify User is in registry
     if User in admin.site._registry:
-        print(f"DEBUG: ✓ User model confirmed in admin registry")
+        print("DEBUG: User model confirmed in admin registry")
         print(f"DEBUG: User admin class = {admin.site._registry[User]}")
     else:
         print(f"DEBUG: ✗ ERROR: User model NOT found in admin registry after registration!")
@@ -172,7 +172,7 @@ print("DEBUG: Verifying User model visibility...")
 try:
     if User in admin.site._registry:
         user_admin = admin.site._registry[User]
-        print(f"DEBUG: ✓ User model is registered with admin class: {user_admin}")
+        print(f"DEBUG: User model is registered with admin class: {user_admin}")
         print(f"DEBUG: User model verbose_name: {User._meta.verbose_name}")
         print(f"DEBUG: User model verbose_name_plural: {User._meta.verbose_name_plural}")
         print(f"DEBUG: User admin has_permission check: {hasattr(user_admin, 'has_view_permission')}")

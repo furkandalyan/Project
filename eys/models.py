@@ -23,6 +23,26 @@ print(f"DEBUG: Role._meta = {Role._meta if hasattr(Role, '_meta') else 'Not yet 
 class User(AbstractUser):
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
+    advisor = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="advisees",
+    )
+    advisor_note = models.TextField(blank=True, default="")
+
+    def save(self, *args, **kwargs):
+        old_advisor_id = None
+        if self.pk:
+            old_advisor_id = User.objects.filter(pk=self.pk).values_list("advisor_id", flat=True).first()
+        new_advisor_id = self.advisor_id
+        super().save(*args, **kwargs)
+        # Update advisor roles whenever advisor assignment changes or this is a student save.
+        is_student = bool(self.role and self.role.name == "Student")
+        if old_advisor_id != new_advisor_id or is_student:
+            _update_advisor_role_by_id(old_advisor_id)
+            _update_advisor_role_by_id(new_advisor_id)
 
     class Meta:
         verbose_name = "User"
@@ -37,6 +57,26 @@ print(f"DEBUG: User._meta = {User._meta if hasattr(User, '_meta') else 'Not yet 
 print("=" * 80)
 print("DEBUG: eys/models.py loading complete")
 print("=" * 80)
+
+
+def _update_advisor_role_by_id(advisor_id):
+    if not advisor_id:
+        return
+    advisor = User.objects.filter(pk=advisor_id).select_related("role").first()
+    if not advisor:
+        return
+    current_role = advisor.role.name if advisor.role else None
+    if current_role == "Head of Department":
+        return
+    advisee_count = User.objects.filter(role__name="Student", advisor=advisor).count()
+    if advisee_count > 0:
+        target_role, _ = Role.objects.get_or_create(name="Advisor Instructor")
+        if target_role and current_role != "Advisor Instructor":
+            User.objects.filter(pk=advisor.id).update(role=target_role)
+    else:
+        target_role, _ = Role.objects.get_or_create(name="Regular Instructor")
+        if target_role and current_role == "Advisor Instructor":
+            User.objects.filter(pk=advisor.id).update(role=target_role)
 
 
 class Course(models.Model):

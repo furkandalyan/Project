@@ -24,7 +24,7 @@ class EysConfig(AppConfig):
             # Check if User is in admin registry
             from django.contrib import admin
             if User in admin.site._registry:
-                print(f"DEBUG: ✓ User model is in admin registry in ready()")
+                print("DEBUG: User model is in admin registry in ready()")
                 print(f"DEBUG: User admin class = {admin.site._registry[User]}")
             else:
                 print(f"DEBUG: ✗ WARNING: User model NOT in admin registry in ready()!")

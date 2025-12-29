@@ -37,6 +37,8 @@ urlpatterns = [
     path('teacher/exam/<int:exam_id>/export-scores/', views.export_exam_scores_csv, name='export_exam_scores_csv'),
     path('teacher/materials/', views.teacher_materials, name='teacher_materials'),
     path('teacher/materials/new/', views.create_material, name='create_material'),
+    path('advisor/students/', views.advisor_students, name='advisor_students'),
+    path('advisor/students/<int:student_id>/', views.advisor_student_detail, name='advisor_student_detail'),
 
     path('announcement/<int:ann_id>/', views.announcement_detail, name='announcement_detail'),
     path('notifications/', views.notifications, name='notifications'),
