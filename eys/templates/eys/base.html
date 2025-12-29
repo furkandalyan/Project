@@ -524,8 +524,7 @@
                 </svg>
                 Dashboard
             </a>
-            {% if user.role.name != 'Head of Department' %}
-            <a href="{% url 'teacher_courses' %}" class="nav-link {% if '/teacher/course' in request.path %}active{% endif %}">
+                        <a href="{% url 'teacher_courses' %}" class="nav-link {% if '/teacher/course' in request.path %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
@@ -544,8 +543,7 @@
                 </svg>
                 Ödevler & Notlar
             </a>
-            {% endif %}
-            <a href="{% url 'teacher_calendar' %}" class="nav-link {% if '/teacher/calendar/' in request.path %}active{% endif %}">
+                        <a href="{% url 'teacher_calendar' %}" class="nav-link {% if '/teacher/calendar/' in request.path %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -563,19 +561,35 @@
                 Duyurularım
             </a>
 
+            
             {% if user.role.name == 'Head of Department' %}
             <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border-color);">
                 <span
-                    style="font-size:11px; color:var(--text-muted); padding-left:14px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Yönetim</span>
-                <a href="#" class="nav-link" style="color:#b8860b;">
-                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path>
-                    </svg>
-                    Bölüm Paneli
-                </a>
+                    style="font-size:11px; color:var(--text-muted); padding-left:14px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Yonetim</span>
+                
+                <details style="margin-top:6px;">
+                    <summary class="nav-link" style="color:var(--accent); list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+                        <span style="display:flex; align-items:center; gap:12px;">
+                            <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path>
+                            </svg>
+                            Bolum Paneli
+                        </span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </summary>
+                    <div style="margin-left:14px; display:flex; flex-direction:column; gap:6px; padding-top:6px;">
+                        <a href="{% url 'department_overview' %}" class="nav-link {% if '/department/overview/' in request.path %}active{% endif %}">Genel Bakis</a>
+                        <a href="{% url 'department_instructors' %}" class="nav-link {% if '/department/instructors/' in request.path %}active{% endif %}">Ogretmenler</a>
+                        <a href="{% url 'department_courses' %}" class="nav-link {% if '/department/courses/' in request.path %}active{% endif %}">Dersler</a>
+                    </div>
+                </details>
+
             </div>
             {% endif %}
+
 
             <!-- ÖĞRENCİ İŞLERİ MENÜSÜ -->
             {% elif user.role.name == 'Student Affairs' %}

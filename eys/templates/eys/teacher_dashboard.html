@@ -2,16 +2,19 @@
 
 {% block content %}
 <div style="display:flex; flex-direction:column; gap:18px;">
+    
+    
+    
     {% if department_stats %}
-    <!-- BÖLÜM BAŞKANI ÖZEL PANELI -->
-    <div
+    <!-- BOLUM BASKANI OZEL PANELI -->
+    <div id="dept-overview"
         style="background:linear-gradient(135deg, #1e1e2f 0%, #3e3e5e 100%); color:white; border-radius:18px; padding:24px; box-shadow:0 15px 35px rgba(0,0,0,0.2); border: 2px solid #ffd700;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <div>
                 <span
                     style="background:#ffd700; color:#000; padding:4px 10px; border-radius:6px; font-weight:700; font-size:11px; letter-spacing:1px; text-transform:uppercase;">Admin</span>
-                <h2 style="margin:12px 0 6px 0; color:#ffd700;">Bölüm Başkanı Paneli</h2>
-                <p style="margin:0; opacity:0.8;">Bölüm genelindeki akademik durumu buradan takip edebilirsiniz.</p>
+                <h2 style="margin:12px 0 6px 0; color:#ffd700;">Bolum Baskani Paneli</h2>
+                <p style="margin:0; opacity:0.8;">Bolum genelindeki akademik durumu buradan takip edebilirsiniz.</p>
             </div>
             <div style="text-align:right;">
                 <div style="font-size:32px; font-weight:700;">{{ department_stats.all_courses_count }}</div>
@@ -22,24 +25,21 @@
         <div
             style="margin-top:24px; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
             <div style="background:rgba(255,255,255,0.1); padding:16px; border-radius:12px; backdrop-filter:blur(5px);">
-                <!-- Icon Removed -->
                 <strong style="display:block; font-size:18px; margin:4px 0;">{{ department_stats.total_instructors }}</strong>
                 <span style="font-size:12px; opacity:0.7;">Akademik Personel</span>
             </div>
             <div style="background:rgba(255,255,255,0.1); padding:16px; border-radius:12px; backdrop-filter:blur(5px);">
-                <!-- Icon Removed -->
                 <strong style="display:block; font-size:18px; margin:4px 0;">%{{ department_stats.average_score }}</strong>
-                <span style="font-size:12px; opacity:0.7;">Genel Başarı Ort.</span>
+                <span style="font-size:12px; opacity:0.7;">Genel Basari Ort.</span>
             </div>
             <div style="background:rgba(255,255,255,0.1); padding:16px; border-radius:12px; backdrop-filter:blur(5px);">
-                <!-- Icon Removed -->
                 <strong style="display:block; font-size:18px; margin:4px 0;">{{ department_stats.critical_course_count }}</strong>
                 <span style="font-size:12px; opacity:0.7;">Kritik Ders</span>
             </div>
         </div>
 
-        <div style="margin-top:24px;">
-            <h4 style="margin:0 0 12px 0; font-size:14px; opacity:0.9;">Son Açılan Dersler</h4>
+        <div id="dept-courses" style="margin-top:24px;">
+            <h4 style="margin:0 0 12px 0; font-size:14px; opacity:0.9;">Son Acilan Dersler</h4>
             <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:5px;">
                 {% for course in department_stats.recent_courses %}
                 <span
@@ -49,8 +49,34 @@
                 {% endfor %}
             </div>
         </div>
+
+        <div id="dept-instructors" style="margin-top:24px; background:rgba(255,255,255,0.08); padding:16px; border-radius:12px; border:1px solid rgba(255,255,255,0.15);">
+            <h4 style="margin:0 0 12px 0; font-size:14px; opacity:0.9;">Akademik Kadro ve Dersler</h4>
+            <div style="display:flex; flex-direction:column; gap:12px; max-height:320px; overflow:auto;">
+                {% for instructor in department_stats.instructors %}
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:10px; background:rgba(0,0,0,0.25); border-radius:10px;">
+                    <div>
+                        <strong style="display:block;">{{ instructor.get_full_name|default:instructor.username }}</strong>
+                        <div style="font-size:12px; opacity:0.7;">{{ instructor.courses_given.count }} ders</div>
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;">
+                        {% for course in instructor.courses_given.all %}
+                        <span style="background:rgba(255,255,255,0.15); padding:4px 8px; border-radius:999px; font-size:12px;">
+                            {{ course.code }} - Ort: {% if course.avg_score %}{{ course.avg_score|floatformat:1 }}{% else %}-{% endif %} - Ogr: {{ course.student_count }}
+                        </span>
+                        {% empty %}
+                        <span style="font-size:12px; opacity:0.6;">Ders yok</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                <div style="font-size:12px; opacity:0.7;">Akademik personel bulunamadi.</div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
     {% endif %}
+
 
     <!-- EĞİTMEN PANELİ -->
     <div

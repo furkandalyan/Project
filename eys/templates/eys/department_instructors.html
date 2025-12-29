@@ -1,0 +1,37 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Bolum Paneli</p>
+        <h1 style="margin:6px 0 4px 0;">Ogretmenler</h1>
+        <p style="margin:0; opacity:0.8;">Ogretmen bazinda ders ve ortalama ozeti.</p>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px;">
+        {% for instructor in instructors %}
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                <div>
+                    <a href="{% url 'department_instructor_detail' instructor.id %}" style="display:block; font-size:16px; font-weight:700; text-decoration:none; color:#1db954;">
+                        {{ instructor.get_full_name|default:instructor.username }}
+                    </a>
+                    <span style="font-size:12px; color:#888;">{{ instructor.courses_given.count }} ders</span>
+                </div>
+            </div>
+            <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;">
+                {% for course in instructor.courses_given.all %}
+                <span style="background:#f8f9fa; border:1px solid #eee; padding:6px 10px; border-radius:999px; font-size:12px;">
+                    {{ course.code }} - Ort: {% if course.avg_score %}{{ course.avg_score|floatformat:1 }}{% else %}-{% endif %} - Og: {{ course.student_count }}
+                </span>
+                {% empty %}
+                <span style="font-size:12px; color:#888;">Ders yok.</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div style="color:#888;">Ogretmen bulunamadi.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

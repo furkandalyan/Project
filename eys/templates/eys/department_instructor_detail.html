@@ -1,0 +1,71 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Bolum Paneli</p>
+        <h1 style="margin:6px 0 4px 0;">{{ instructor.get_full_name|default:instructor.username }}</h1>
+        <p style="margin:0; opacity:0.8;">Ogretmen Detayi</p>
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <a href="{% url 'department_instructor_detail' instructor.id %}"
+           style="padding:8px 14px; border-radius:999px; border:1px solid #e0e0e0; text-decoration:none; color:#333; {% if not critical_only %}background:#e8f5e9; color:#1db954; border-color:#b7e3c3;{% endif %}">Tum Dersler</a>
+        <a href="{% url 'department_instructor_detail' instructor.id %}?critical=1&threshold={{ threshold }}"
+           style="padding:8px 14px; border-radius:999px; border:1px solid #e0e0e0; text-decoration:none; color:#333; {% if critical_only %}background:#ffe4e6; color:#d9534f; border-color:#f6b8c0;{% endif %}">Kritik < {{ threshold }}</a>
+        <form method="get" style="display:flex; gap:8px; align-items:center;">
+            <input type="hidden" name="critical" value="1">
+            <label style="font-size:12px; color:#666;">Esik</label>
+            <input type="number" name="threshold" value="{{ threshold }}" step="1" min="0" max="100"
+                style="width:80px; padding:6px 8px; border:1px solid #e0e0e0; border-radius:8px;">
+            <button type="submit"
+                style="padding:6px 10px; border:1px solid #e0e0e0; border-radius:8px; background:white; cursor:pointer;">Uygula</button>
+        </form>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px;">
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">Ders Sayisi</p>
+            <h3 style="margin:6px 0 0 0;">{{ courses|length }}</h3>
+        </div>
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">Toplam Ogrenci</p>
+            <h3 style="margin:6px 0 0 0;">{{ summary.total_students }}</h3>
+        </div>
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">Ortalama Skor</p>
+            <h3 style="margin:6px 0 0 0;">{% if summary.avg_score %}{{ summary.avg_score|floatformat:1 }}{% else %}-{% endif %}</h3>
+        </div>
+    </div>
+
+    <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:12px; font-size:12px; color:#777; padding:0 0 10px 0; border-bottom:1px solid #f0f0f0;">
+            <div>Ders</div>
+            <div>Ogrenci</div>
+            <div>Sinav</div>
+            <div>Ortalama</div>
+        </div>
+        {% for course in courses %}
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:12px; padding:10px 0; border-bottom:1px solid #f7f7f7;">
+                <div>
+                    <a href="{% url 'department_course_detail' course.id %}" style="text-decoration:none; color:#1db954; font-weight:700;">
+                        {{ course.code }} - {{ course.name }}
+                    </a>
+                </div>
+                <div style="font-size:12px; color:#666;">{{ course.student_count }}</div>
+                <div style="font-size:12px; color:#666;">{{ course.exam_count }}</div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <span style="background:#eef4ff; color:#2459c3; padding:4px 10px; border-radius:999px; font-size:12px;">
+                        {% if course.avg_score %}{{ course.avg_score|floatformat:1 }}{% else %}-{% endif %}
+                    </span>
+                    {% if course.avg_score and course.avg_score < threshold %}
+                        <span style="background:#ffe4e6; color:#d9534f; padding:4px 8px; border-radius:999px; font-size:11px;">Kritik</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div style="color:#888; padding:12px 0;">Ders bulunamadi.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

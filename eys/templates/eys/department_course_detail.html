@@ -1,0 +1,95 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Bolum Paneli</p>
+        <h1 style="margin:6px 0 4px 0;">{{ course.code }} - {{ course.name }}</h1>
+        <p style="margin:0; opacity:0.8;">Ogretmen: {{ course.instructor.get_full_name|default:course.instructor.username|default:"-" }}</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:16px;">
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                <h3 style="margin:0;">Ogrenci Not Ozeti</h3>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <span style="font-size:12px; color:#666;">Sinav:</span>
+                    <a href="?sort=date&student_sort={{ student_sort }}"
+                        style="padding:6px 10px; border-radius:999px; border:1px solid #e0e0e0; text-decoration:none; font-size:12px; color:#333; {% if sort == 'date' %}background:#e8f5e9; color:#1db954; border-color:#b7e3c3;{% endif %}">Tarih</a>
+                    <a href="?sort=score&student_sort={{ student_sort }}"
+                        style="padding:6px 10px; border-radius:999px; border:1px solid #e0e0e0; text-decoration:none; font-size:12px; color:#333; {% if sort == 'score' %}background:#e8f5e9; color:#1db954; border-color:#b7e3c3;{% endif %}">Puan</a>
+                    <span style="font-size:12px; color:#666; margin-left:6px;">Ogrenci:</span>
+                    <a href="?sort={{ sort }}&student_sort=name"
+                        style="padding:6px 10px; border-radius:999px; border:1px solid #e0e0e0; text-decoration:none; font-size:12px; color:#333; {% if student_sort == 'name' %}background:#e8f5e9; color:#1db954; border-color:#b7e3c3;{% endif %}">Isim</a>
+                    <a href="?sort={{ sort }}&student_sort=avg"
+                        style="padding:6px 10px; border-radius:999px; border:1px solid #e0e0e0; text-decoration:none; font-size:12px; color:#333; {% if student_sort == 'avg' %}background:#e8f5e9; color:#1db954; border-color:#b7e3c3;{% endif %}">Ortalama</a>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; font-size:12px; color:#777; padding:0 0 10px 0; border-bottom:1px solid #f0f0f0;">
+                <div>Ogrenci</div>
+                <div>Sinav</div>
+                <div>Ortalama</div>
+            </div>
+            {% for student in students %}
+                <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; padding:10px 0; border-bottom:1px solid #f7f7f7;">
+                    <div>
+                        <strong>{{ student.get_full_name|default:student.username }}</strong>
+                        <div style="margin-top:8px; border:1px solid #f0f0f0; border-radius:10px; overflow:hidden;">
+                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; padding:6px 8px; background:#fafafa; font-size:11px; color:#666;">
+                                <div>Sinav</div>
+                                <div>Tarih</div>
+                                <div>Puan</div>
+                            </div>
+                            {% for item in student.exam_scores %}
+                                <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; padding:6px 8px; font-size:11px; border-top:1px solid #f5f5f5;">
+                                    <div>{{ item.exam.name }}</div>
+                                    <div>{% if item.exam.scheduled_at %}{{ item.exam.scheduled_at|date:"d.m.Y" }}{% else %}-{% endif %}</div>
+                                    <div>{% if item.score %}{{ item.score|floatformat:1 }}{% else %}-{% endif %}</div>
+                                </div>
+                            {% empty %}
+                                <div style="padding:6px 8px; font-size:11px; color:#888;">Sinav notu yok.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div style="font-size:12px; color:#666;">{{ student.exam_count }}</div>
+                    <div>
+                        <span style="background:#eef4ff; color:#2459c3; padding:4px 10px; border-radius:999px; font-size:12px;">
+                            {% if student.avg_score %}{{ student.avg_score|floatformat:1 }}{% else %}-{% endif %}
+                        </span>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="color:#888; padding:12px 0;">Ogrenci bulunamadi.</div>
+            {% endfor %}
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+            <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+                <h3 style="margin-top:0;">Sinavlar</h3>
+                {% for exam in exams %}
+                    <div style="padding:8px 0; border-bottom:1px solid #f7f7f7;">
+                        <strong style="display:block;">{{ exam.name }}</strong>
+                        <span style="font-size:12px; color:#777;">{{ exam.scheduled_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                {% empty %}
+                    <div style="color:#888;">Sinav yok.</div>
+                {% endfor %}
+            </div>
+
+            <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+                <h3 style="margin-top:0;">Ders Materyalleri</h3>
+                {% for material in materials %}
+                    <div style="padding:8px 0; border-bottom:1px solid #f7f7f7;">
+                        <strong style="display:block;">Hafta {{ material.week }} - {{ material.title }}</strong>
+                        {% if material.attachment %}
+                            <a href="{{ material.attachment.url }}" style="font-size:12px; color:#1db954; text-decoration:none;">Dosya</a>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <div style="color:#888;">Materyal yok.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

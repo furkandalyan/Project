@@ -6,7 +6,7 @@ import csv
 import io
 import zipfile
 
-from django.db.models import Avg, Count, Q, Max, Prefetch
+from django.db.models import Avg, Count, Q, Max, Prefetch, F
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import authenticate, login, get_user_model, logout
@@ -939,23 +939,41 @@ def teacher_dashboard(request):
     # Bölüm Başkanı için Ekstra Veriler
     department_stats = None
     if request.user.role and request.user.role.name == "Head of Department":
-        # 1. Akademik Personel Sayısı
-        total_instructors = User.objects.filter(role__name__in=["Regular Instructor", "Advisor Instructor"]).count()
-        
-        # 2. Genel Başarı Ortalaması
-        agg = ExamResult.objects.aggregate(avg_score=Avg("score"))
-        avg_score = agg.get("avg_score") or 0
-        
-        # 3. Kritik Dersler (Ortalaması 50'nin altında olanlar)
-        critical_count = 0
+        # 1. Akademik Personel Say?s?
+        total_instructors = User.objects.filter(
+            role__name__in=["Regular Instructor", "Advisor Instructor", "Head of Department"]
+        ).count()
+
+        # 2. Genel Ba?ar? Ortalamas?
+        avg_score = ExamResult.objects.aggregate(avg_score=Avg("score")).get("avg_score") or 0
+
+        # 3. Kritik Dersler (Ortalamas? 50'nin alt?nda olanlar)
         all_courses = Course.objects.all()
+        critical_count = (
+            all_courses.annotate(avg_score=Avg("exam__results__score"))
+            .filter(avg_score__lt=50)
+            .count()
+        )
         # Son eklenen 5 ders
-        recent_courses = all_courses.order_by('-id')[:5]
-        
-        for crs in all_courses:
-            c_avg = ExamResult.objects.filter(exam__course=crs).aggregate(a=Avg("score")).get("a")
-            if c_avg and c_avg < 50:
-                critical_count += 1
+        recent_courses = all_courses.only("id", "code").order_by("-id")[:5]
+
+        # Akademik kadro ve ders performans ozetleri
+        instructors = (
+            User.objects.filter(
+                role__name__in=["Regular Instructor", "Advisor Instructor", "Head of Department"]
+            )
+            .order_by("last_name", "first_name", "username")
+            .prefetch_related(
+                Prefetch(
+                    "courses_given",
+                    queryset=Course.objects.annotate(
+                        avg_score=Avg("exam__results__score"),
+                        exam_count=Count("exam", distinct=True),
+                        student_count=Count("students", distinct=True),
+                    ).order_by("code"),
+                )
+            )
+        )
 
         department_stats = {
             "all_courses_count": all_courses.count(),
@@ -963,6 +981,7 @@ def teacher_dashboard(request):
             "average_score": round(avg_score, 1),
             "critical_course_count": critical_count,
             "recent_courses": recent_courses,
+            "instructors": instructors,
         }
 
     # Format last login time
@@ -985,6 +1004,212 @@ def teacher_dashboard(request):
             "department_stats": department_stats,  # Yeni eklenen veri
             "last_login": last_login,
             "calendar_days": calendar_days, # Takvim verisi eklendi
+        },
+    )
+
+
+@login_required
+def department_overview(request):
+    if not request.user.role or request.user.role.name != "Head of Department":
+        messages.error(request, "Bu sayfaya erisim yetkiniz yok.")
+        return redirect("teacher_dashboard")
+
+    total_instructors = User.objects.filter(
+        role__name__in=["Regular Instructor", "Advisor Instructor", "Head of Department"]
+    ).count()
+    avg_score = ExamResult.objects.aggregate(avg_score=Avg("score")).get("avg_score") or 0
+
+    courses_qs = Course.objects.annotate(
+        avg_score=Avg("exam__results__score"),
+        exam_count=Count("exam", distinct=True),
+        student_count=Count("students", distinct=True),
+    ).select_related("instructor")
+
+    critical_courses = courses_qs.filter(avg_score__lt=50).order_by("avg_score")[:6]
+    top_courses = courses_qs.filter(avg_score__isnull=False).order_by(F("avg_score").desc())[:6]
+    low_courses = courses_qs.filter(avg_score__isnull=False).order_by("avg_score")[:6]
+
+    return render(
+        request,
+        "eys/department_overview.html",
+        {
+            "total_instructors": total_instructors,
+            "average_score": round(avg_score, 1),
+            "critical_courses": critical_courses,
+            "top_courses": top_courses,
+            "low_courses": low_courses,
+        },
+    )
+
+
+@login_required
+def department_instructors(request):
+    if not request.user.role or request.user.role.name != "Head of Department":
+        messages.error(request, "Bu sayfaya erisim yetkiniz yok.")
+        return redirect("teacher_dashboard")
+
+    instructors = (
+        User.objects.filter(
+            role__name__in=["Regular Instructor", "Advisor Instructor", "Head of Department"]
+        )
+        .order_by("last_name", "first_name", "username")
+        .prefetch_related(
+            Prefetch(
+                "courses_given",
+                queryset=Course.objects.annotate(
+                    avg_score=Avg("exam__results__score"),
+                    exam_count=Count("exam", distinct=True),
+                    student_count=Count("students", distinct=True),
+                ).order_by("code"),
+            )
+        )
+    )
+
+    return render(
+        request,
+        "eys/department_instructors.html",
+        {"instructors": instructors},
+    )
+
+
+@login_required
+def department_courses(request):
+    if not request.user.role or request.user.role.name != "Head of Department":
+        messages.error(request, "Bu sayfaya erisim yetkiniz yok.")
+        return redirect("teacher_dashboard")
+
+    courses = (
+        Course.objects.annotate(
+            avg_score=Avg("exam__results__score"),
+            exam_count=Count("exam", distinct=True),
+            student_count=Count("students", distinct=True),
+        )
+        .select_related("instructor")
+        .order_by("code")
+    )
+    critical_count = courses.filter(avg_score__lt=50).count()
+
+    return render(
+        request,
+        "eys/department_courses.html",
+        {
+            "courses": courses,
+            "critical_count": critical_count,
+        },
+    )
+
+
+@login_required
+def department_course_detail(request, course_id):
+    if not request.user.role or request.user.role.name != "Head of Department":
+        messages.error(request, "Bu sayfaya erisim yetkiniz yok.")
+        return redirect("teacher_dashboard")
+
+    course = get_object_or_404(
+        Course.objects.select_related("instructor").prefetch_related("students"),
+        id=course_id,
+    )
+    materials = CourseMaterial.objects.filter(course=course).order_by("week", "-created_at")
+    sort = request.GET.get("sort", "date").strip().lower()
+    exams_qs = Exam.objects.filter(course=course).annotate(
+        avg_score=Avg("results__score"),
+    )
+    if sort == "score":
+        exams_qs = exams_qs.order_by("-avg_score", "scheduled_at", "id")
+    else:
+        sort = "date"
+        exams_qs = exams_qs.order_by("scheduled_at", "id")
+    exams = list(exams_qs)
+
+    student_sort = request.GET.get("student_sort", "name").strip().lower()
+    students_qs = course.students.annotate(
+        avg_score=Avg(
+            "exam_results__score",
+            filter=Q(exam_results__exam__course=course),
+        ),
+        exam_count=Count(
+            "exam_results",
+            filter=Q(exam_results__exam__course=course),
+            distinct=True,
+        ),
+    ).order_by("last_name", "first_name", "username")
+    if student_sort == "avg":
+        students_qs = students_qs.order_by(F("avg_score").desc(nulls_last=True), "last_name", "first_name")
+    else:
+        student_sort = "name"
+        students_qs = students_qs.order_by("last_name", "first_name", "username")
+    students = list(students_qs)
+
+    results = ExamResult.objects.filter(exam__course=course).select_related("exam", "student")
+    score_map = {(res.student_id, res.exam_id): res.score for res in results}
+    for student in students:
+        student.exam_scores = [
+            {
+                "exam": exam,
+                "score": score_map.get((student.id, exam.id)),
+            }
+            for exam in exams
+        ]
+
+    return render(
+        request,
+        "eys/department_course_detail.html",
+        {
+            "course": course,
+            "materials": materials,
+            "exams": exams,
+            "students": students,
+            "sort": sort,
+            "student_sort": student_sort,
+        },
+    )
+
+
+@login_required
+def department_instructor_detail(request, instructor_id):
+    if not request.user.role or request.user.role.name != "Head of Department":
+        messages.error(request, "Bu sayfaya erisim yetkiniz yok.")
+        return redirect("teacher_dashboard")
+
+    instructor = get_object_or_404(
+        User,
+        id=instructor_id,
+        role__name__in=["Regular Instructor", "Advisor Instructor", "Head of Department"],
+    )
+    courses = (
+        instructor.courses_given.annotate(
+            avg_score=Avg("exam__results__score"),
+            exam_count=Count("exam", distinct=True),
+            student_count=Count("students", distinct=True),
+        )
+        .order_by("code")
+    )
+    critical_only = request.GET.get("critical") == "1"
+    threshold = 50.0
+    threshold_raw = request.GET.get("threshold")
+    if threshold_raw:
+        try:
+            threshold = float(threshold_raw)
+        except ValueError:
+            threshold = 50.0
+    if critical_only:
+        courses = courses.filter(avg_score__lt=threshold)
+
+    summary = courses.aggregate(
+        avg_score=Avg("avg_score"),
+        total_students=Count("students", distinct=True),
+        total_exams=Count("exam", distinct=True),
+    )
+
+    return render(
+        request,
+        "eys/department_instructor_detail.html",
+        {
+            "instructor": instructor,
+            "courses": courses,
+            "summary": summary,
+            "critical_only": critical_only,
+            "threshold": threshold,
         },
     )
 

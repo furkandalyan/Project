@@ -1,0 +1,79 @@
+{% extends "eys/base.html" %}
+
+{% block content %}
+<div style="display:flex; flex-direction:column; gap:18px;">
+    <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; border-radius:18px; padding:22px; box-shadow:0 22px 55px rgba(0,0,0,0.2);">
+        <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Bolum Paneli</p>
+        <h1 style="margin:6px 0 4px 0;">Genel Bakis</h1>
+        <p style="margin:0; opacity:0.8;">Bolum performansi ve kritik ders ozeti.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px;">
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">Akademik Personel</p>
+            <h3 style="margin:6px 0 0 0;">{{ total_instructors }}</h3>
+        </div>
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">Genel Basari Ort.</p>
+            <h3 style="margin:6px 0 0 0;">%{{ average_score }}</h3>
+        </div>
+        <div style="background:white; padding:16px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.08);">
+            <p style="margin:0; color:#999;">Kritik Ders</p>
+            <h3 style="margin:6px 0 0 0;">{{ critical_courses|length }}</h3>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px;">
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">En Basarili Dersler</h3>
+            {% for course in top_courses %}
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                    <div>
+                        <strong style="display:block;">{{ course.code }} - {{ course.name }}</strong>
+                        <span style="font-size:12px; color:#888;">Og: {{ course.student_count }} | Sinav: {{ course.exam_count }}</span>
+                    </div>
+                    <span style="background:#e5f7ee; color:#1d7c4a; padding:6px 10px; border-radius:999px; font-size:12px;">
+                        {% if course.avg_score %}{{ course.avg_score|floatformat:1 }}{% else %}-{% endif %}
+                    </span>
+                </div>
+            {% empty %}
+                <div style="color:#888;">Veri yok.</div>
+            {% endfor %}
+        </div>
+
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">En Dusuk Ortalamalar</h3>
+            {% for course in low_courses %}
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                    <div>
+                        <strong style="display:block;">{{ course.code }} - {{ course.name }}</strong>
+                        <span style="font-size:12px; color:#888;">Og: {{ course.student_count }} | Sinav: {{ course.exam_count }}</span>
+                    </div>
+                    <span style="background:#fff0da; color:#b86a00; padding:6px 10px; border-radius:999px; font-size:12px;">
+                        {% if course.avg_score %}{{ course.avg_score|floatformat:1 }}{% else %}-{% endif %}
+                    </span>
+                </div>
+            {% empty %}
+                <div style="color:#888;">Veri yok.</div>
+            {% endfor %}
+        </div>
+
+        <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,0.08);">
+            <h3 style="margin-top:0;">Kritik Dersler</h3>
+            {% for course in critical_courses %}
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                    <div>
+                        <strong style="display:block;">{{ course.code }} - {{ course.name }}</strong>
+                        <span style="font-size:12px; color:#888;">Og: {{ course.student_count }} | Sinav: {{ course.exam_count }}</span>
+                    </div>
+                    <span style="background:#ffe4e6; color:#d9534f; padding:6px 10px; border-radius:999px; font-size:12px;">
+                        {% if course.avg_score %}{{ course.avg_score|floatformat:1 }}{% else %}-{% endif %}
+                    </span>
+                </div>
+            {% empty %}
+                <div style="color:#888;">Kritik ders bulunmadi.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

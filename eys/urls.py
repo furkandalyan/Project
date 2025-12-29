@@ -46,6 +46,12 @@ urlpatterns = [
     path('search/', views.global_search, name='global_search'),
     path('affairs/dashboard/', views.affairs_dashboard, name='affairs_dashboard'),
 
+    path('department/overview/', views.department_overview, name='department_overview'),
+    path('department/instructors/', views.department_instructors, name='department_instructors'),
+    path('department/courses/', views.department_courses, name='department_courses'),
+    path('department/course/<int:course_id>/', views.department_course_detail, name='department_course_detail'),
+    path('department/instructor/<int:instructor_id>/', views.department_instructor_detail, name='department_instructor_detail'),
+
     path('teacher/courses/', views.teacher_courses, name='teacher_courses'),
     path('teacher/course/<int:course_id>/', views.course_detail, name='course_detail'),
     path('teacher/course/<int:course_id>/thresholds/', views.edit_course_threshold, name='edit_course_threshold'),
