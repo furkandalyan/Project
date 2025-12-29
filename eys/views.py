@@ -1278,22 +1278,6 @@ def teacher_calendar(request):
 
     courses = Course.objects.filter(instructor=request.user).order_by("code")
     exams_filter = {"scheduled_at__isnull": False, "course__in": courses}
-    start_raw = request.GET.get("start")
-    end_raw = request.GET.get("end")
-    start_date = None
-    end_date = None
-    try:
-        if start_raw:
-            start_date = date.fromisoformat(start_raw)
-        if end_raw:
-            end_date = date.fromisoformat(end_raw)
-    except ValueError:
-        start_date = None
-        end_date = None
-    if start_date:
-        exams_filter["scheduled_at__date__gte"] = start_date
-    if end_date:
-        exams_filter["scheduled_at__date__lte"] = end_date
     if selected_course_ids:
         exams_filter["course_id__in"] = selected_course_ids
     exams_qs = (
@@ -1336,6 +1320,7 @@ def teacher_calendar(request):
             for exam in serialized_exams
             if exam["scheduled_local"] and exam["scheduled_local"].date() >= today
         ][:6]
+        current_week = base_date.isoformat()
         return render(
             request,
             "eys/teacher_calendar.html",
@@ -1345,11 +1330,10 @@ def teacher_calendar(request):
                 "week_days": week_days,
                 "prev_week": prev_week,
                 "next_week": next_week,
+                "current_week": current_week,
                 "courses": courses,
                 "selected_course_ids": selected_course_ids,
                 "upcoming_list": upcoming_list,
-                "start": start_date,
-                "end": end_date,
             },
         )
     else:
@@ -1391,6 +1375,7 @@ def teacher_calendar(request):
                 "view_mode": "month",
                 "month_name": MONTH_LABELS[selected_month - 1],
                 "selected_year": selected_year,
+                "selected_month": selected_month,
                 "prev_month": {"month": prev_month, "year": prev_year},
                 "next_month": {"month": next_month, "year": next_year},
                 "weekday_labels": weekday_labels,
@@ -1399,8 +1384,6 @@ def teacher_calendar(request):
                 "upcoming_list": upcoming_list,
                 "courses": courses,
                 "selected_course_ids": selected_course_ids,
-                "start": start_date,
-                "end": end_date,
             },
         )
 
@@ -1416,15 +1399,6 @@ def teacher_calendar_ics(request):
 
     courses = Course.objects.filter(instructor=request.user)
     exams_filter = {"scheduled_at__isnull": False, "course__in": courses}
-    start_raw = request.GET.get("start")
-    end_raw = request.GET.get("end")
-    try:
-        if start_raw:
-            exams_filter["scheduled_at__date__gte"] = date.fromisoformat(start_raw)
-        if end_raw:
-            exams_filter["scheduled_at__date__lte"] = date.fromisoformat(end_raw)
-    except ValueError:
-        pass
     if selected_course_ids:
         exams_filter["course_id__in"] = selected_course_ids
     exams_qs = Exam.objects.filter(**exams_filter).select_related("course").order_by("scheduled_at")
@@ -1433,13 +1407,6 @@ def teacher_calendar_ics(request):
     assignments_qs = []
     if include_assignments:
         assign_filter = {"due_at__isnull": False, "course__in": courses}
-        try:
-            if start_raw:
-                assign_filter["due_at__date__gte"] = date.fromisoformat(start_raw)
-            if end_raw:
-                assign_filter["due_at__date__lte"] = date.fromisoformat(end_raw)
-        except ValueError:
-            pass
         if selected_course_ids:
             assign_filter["course_id__in"] = selected_course_ids
         assignments_qs = Assignment.objects.filter(**assign_filter).select_related("course").order_by("due_at")

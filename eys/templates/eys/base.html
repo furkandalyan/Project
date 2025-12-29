@@ -476,7 +476,7 @@
                 </svg>
                 Dashboard
             </a>
-            <a href="{% url 'student_courses' %}" class="nav-link">
+            <a href="{% url 'student_courses' %}" class="nav-link {% if '/student/course' in request.path %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
@@ -484,7 +484,7 @@
                 </svg>
                 Derslerim
             </a>
-            <a href="{% url 'student_calendar' %}" class="nav-link">
+            <a href="{% url 'student_calendar' %}" class="nav-link {% if '/student/calendar/' in request.path %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -494,7 +494,7 @@
                 </svg>
                 Takvim
             </a>
-            <a href="{% url 'student_assignments' %}" class="nav-link">
+            <a href="{% url 'student_assignments' %}" class="nav-link {% if '/student/assignment' in request.path %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
@@ -502,7 +502,7 @@
                 </svg>
                 Ödevler
             </a>
-            <a href="{% url 'student_announcements' %}" class="nav-link">
+            <a href="{% url 'student_announcements' %}" class="nav-link {% if '/student/announcements/' in request.path %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -525,7 +525,7 @@
                 Dashboard
             </a>
             {% if user.role.name != 'Head of Department' %}
-            <a href="{% url 'teacher_courses' %}" class="nav-link">
+            <a href="{% url 'teacher_courses' %}" class="nav-link {% if '/teacher/course' in request.path %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
@@ -533,7 +533,7 @@
                 </svg>
                 Ders Yönetimi
             </a>
-            <a href="{% url 'teacher_assignments' %}" class="nav-link">
+            <a href="{% url 'teacher_assignments' %}" class="nav-link {% if '/teacher/assignment' in request.path %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -545,7 +545,17 @@
                 Ödevler & Notlar
             </a>
             {% endif %}
-            <a href="{% url 'teacher_announcements' %}" class="nav-link">
+            <a href="{% url 'teacher_calendar' %}" class="nav-link {% if '/teacher/calendar/' in request.path %}active{% endif %}">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                Takvim
+            </a>
+            <a href="{% url 'teacher_announcements' %}" class="nav-link {% if '/teacher/announcement' in request.path %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -569,7 +579,7 @@
 
             <!-- ÖĞRENCİ İŞLERİ MENÜSÜ -->
             {% elif user.role.name == 'Student Affairs' %}
-            <a href="{% url 'affairs_dashboard' %}" class="nav-link active">
+            <a href="{% url 'affairs_dashboard' %}" class="nav-link {% if request.path == '/affairs/dashboard/' %}active{% endif %}">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="2" x2="12" y2="6"></line>

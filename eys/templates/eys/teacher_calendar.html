@@ -57,28 +57,30 @@
            style="padding:10px 16px; border:1px solid #e0e0e0; border-radius:8px; text-decoration:none; color:#333; {% if view_mode == 'month' %}background:#f0f0f0;{% endif %}">Ay</a>
         <a href="?view=week{% for cid in selected_course_ids %}&course_id={{ cid }}{% endfor %}"
            style="padding:10px 16px; border:1px solid #e0e0e0; border-radius:8px; text-decoration:none; color:#333; {% if view_mode == 'week' %}background:#f0f0f0;{% endif %}">Hafta</a>
-        <form method="GET" style="display:inline-flex; gap:8px; align-items:center; margin-left:8px;">
+        <form method="GET" style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-left:8px;">
             <input type="hidden" name="view" value="{{ view_mode }}">
             {% if view_mode == 'month' %}
                 <input type="hidden" name="year" value="{{ selected_year }}">
-                <input type="hidden" name="month" value="{{ prev_month.month }}">
+                <input type="hidden" name="month" value="{{ selected_month }}">
             {% else %}
-                <input type="hidden" name="date" value="{{ prev_week }}">
+                <input type="hidden" name="date" value="{{ current_week }}">
             {% endif %}
-            <label style="font-size:13px; color:#7a7a7a;">Ders:</label>
-            <select name="course_id" multiple onchange="this.form.submit()" style="padding:8px 10px; border:1px solid #e0e0e0; border-radius:8px; min-width:260px; height:80px;">
-                {% for c in courses %}
-                    <option value="{{ c.id }}" {% if selected_course_ids and c.id in selected_course_ids %}selected{% endif %}>{{ c.code }} · {{ c.name }}</option>
-                {% endfor %}
-            </select>
-            <label style="font-size:13px; color:#7a7a7a; margin-left:8px;">Tarih Aralığı:</label>
-            <input type="date" name="start" value="{% if start %}{{ start|date:'Y-m-d' }}{% endif %}" style="padding:8px 10px; border:1px solid #e0e0e0; border-radius:8px;">
-            <span style="color:#999;">–</span>
-            <input type="date" name="end" value="{% if end %}{{ end|date:'Y-m-d' }}{% endif %}" style="padding:8px 10px; border:1px solid #e0e0e0; border-radius:8px;">
-            <button type="submit" style="padding:8px 12px; border:1px solid #e0e0e0; border-radius:8px; background:white;">Uygula</button>
+            <div style="display:flex; align-items:center; gap:10px; min-height:44px; padding:6px 10px; border:1px solid #e0e0e0; border-radius:8px; background:#fafafa; max-width:520px;">
+                <span style="font-size:13px; color:#7a7a7a; white-space:nowrap;">Ders Filtre</span>
+                <div style="display:flex; gap:8px; overflow-x:auto;">
+                    {% for c in courses %}
+                        <label style="display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid #e6e6e6; background:white; cursor:pointer; font-size:13px; white-space:nowrap;">
+                            <input type="checkbox" name="course_id" value="{{ c.id }}" {% if selected_course_ids and c.id in selected_course_ids %}checked{% endif %} style="accent-color:#1db954;" onchange="this.form.submit()">
+                            {{ c.code }} - {{ c.name }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% if selected_course_ids %}
+                <a href="?view={{ view_mode }}{% if view_mode == 'month' %}&year={{ selected_year }}&month={{ selected_month }}{% else %}&date={{ current_week }}{% endif %}"
+                   style="padding:10px 16px; border:1px solid #e0e0e0; border-radius:8px; text-decoration:none; color:#333; background:white;">Filtreyi Temizle</a>
+            {% endif %}
         </form>
-        <a href="?view=week" style="padding:10px 16px; border:1px solid #e0e0e0; border-radius:8px; text-decoration:none; color:#333;">Bu Hafta</a>
-        <a href="?view=month" style="padding:10px 16px; border:1px solid #e0e0e0; border-radius:8px; text-decoration:none; color:#333;">Bu Ay</a>
     </div>
 </div>
 
