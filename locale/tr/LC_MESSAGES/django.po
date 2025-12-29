@@ -1,0 +1,76 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: eys\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: tr\n"
+
+msgid "EYS - E?itim Y?netim Sistemi"
+msgstr "EYS - E?itim Y?netim Sistemi"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Derslerim"
+msgstr "Derslerim"
+
+msgid "Takvim"
+msgstr "Takvim"
+
+msgid "Odevler"
+msgstr "Odevler"
+
+msgid "Duyurular"
+msgstr "Duyurular"
+
+msgid "Profil Duzenle"
+msgstr "Profil Duzenle"
+
+msgid "Ders Yonetimi"
+msgstr "Ders Yonetimi"
+
+msgid "Odevler ve Notlar"
+msgstr "Odevler ve Notlar"
+
+msgid "Duyurularim"
+msgstr "Duyurularim"
+
+msgid "Danisman Ogrencilerim"
+msgstr "Danisman Ogrencilerim"
+
+msgid "Yonetim"
+msgstr "Yonetim"
+
+msgid "Bolum Paneli"
+msgstr "Bolum Paneli"
+
+msgid "Genel Bakis"
+msgstr "Genel Bakis"
+
+msgid "Ogretmenler"
+msgstr "Ogretmenler"
+
+msgid "Dersler"
+msgstr "Dersler"
+
+msgid "Kullanici Ekle"
+msgstr "Kullanici Ekle"
+
+msgid "Ders Ac"
+msgstr "Ders Ac"
+
+msgid "Ana Sayfa"
+msgstr "Ana Sayfa"
+
+msgid "Giris Yap"
+msgstr "Giris Yap"
+
+msgid "Dil"
+msgstr "Dil"
+
+msgid "Genel arama yap..."
+msgstr "Genel arama yap..."
+
+msgid "Tema Degistir"
+msgstr "Tema Degistir"

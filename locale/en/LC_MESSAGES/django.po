@@ -1,0 +1,76 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: eys\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+
+msgid "EYS - E?itim Y?netim Sistemi"
+msgstr "EYS - Education Management System"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Derslerim"
+msgstr "My Courses"
+
+msgid "Takvim"
+msgstr "Calendar"
+
+msgid "Odevler"
+msgstr "Assignments"
+
+msgid "Duyurular"
+msgstr "Announcements"
+
+msgid "Profil Duzenle"
+msgstr "Edit Profile"
+
+msgid "Ders Yonetimi"
+msgstr "Course Management"
+
+msgid "Odevler ve Notlar"
+msgstr "Assignments & Grades"
+
+msgid "Duyurularim"
+msgstr "My Announcements"
+
+msgid "Danisman Ogrencilerim"
+msgstr "My Advisees"
+
+msgid "Yonetim"
+msgstr "Management"
+
+msgid "Bolum Paneli"
+msgstr "Department Panel"
+
+msgid "Genel Bakis"
+msgstr "Overview"
+
+msgid "Ogretmenler"
+msgstr "Instructors"
+
+msgid "Dersler"
+msgstr "Courses"
+
+msgid "Kullanici Ekle"
+msgstr "Add User"
+
+msgid "Ders Ac"
+msgstr "Add Course"
+
+msgid "Ana Sayfa"
+msgstr "Home"
+
+msgid "Giris Yap"
+msgstr "Sign In"
+
+msgid "Dil"
+msgstr "Language"
+
+msgid "Genel arama yap..."
+msgstr "Search..."
+
+msgid "Tema Degistir"
+msgstr "Toggle Theme"

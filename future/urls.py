@@ -24,12 +24,14 @@ print(f"DEBUG: admin.site = {admin.site}")
 print(f"DEBUG: admin.site._registry in urls.py = {list(admin.site._registry.keys())}")
 
 from django.urls import path, include
+from django.conf.urls.i18n import set_language
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('eys.urls')),
+    path('i18n/setlang/', set_language, name='set_language'),
 ]
 
 # Serve media files during development
