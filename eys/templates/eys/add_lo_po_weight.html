@@ -12,8 +12,8 @@
 <div style="max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:18px;">
     <div style="background:linear-gradient(120deg,#0f5132,#1db954); color:white; padding:18px 22px; border-radius:16px; box-shadow:0 18px 45px rgba(0,0,0,0.18);">
         <p style="margin:0; letter-spacing:0.08em; text-transform:uppercase; font-size:12px; opacity:0.85;">Baglanti</p>
-        <h2 style="margin:6px 0 0 0;">LO Bagla</h2>
-        <p style="margin:6px 0 0 0; opacity:0.85;">Sinav: <strong>{{ exam.name }}</strong></p>
+        <h2 style="margin:6px 0 0 0;">PO Bagla</h2>
+        <p style="margin:6px 0 0 0; opacity:0.85;">LO: <strong>{{ learning_outcome.title }}</strong></p>
     </div>
 
     <form method="POST" class="weight-form" style="background:white; padding:22px; border-radius:16px; box-shadow:0 12px 28px rgba(0,0,0,0.08); border:1px solid #eef0f4;">
@@ -21,18 +21,18 @@
 
         <div style="display:flex; flex-direction:column; gap:14px;">
             <div>
-                <label style="display:block; font-size:13px; color:#6b7280; margin-bottom:6px;">Learning Outcome</label>
+                <label style="display:block; font-size:13px; color:#6b7280; margin-bottom:6px;">Programming Outcome</label>
                 <div style="border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; background:#f8fafc;">
-                    {{ form.learning_outcome }}
+                    {{ form.programming_outcome }}
                 </div>
             </div>
 
             <div>
                 <label style="display:block; font-size:13px; color:#6b7280; margin-bottom:6px;">Yuzdelik (%)</label>
                 <input type="number" name="weight" min="1" max="100" required
-                       placeholder="Orn. 25"
+                       placeholder="Orn. 40"
                        style="width:100%; padding:12px 14px; border-radius:12px; border:1px solid #e2e8f0; font-size:14px;">
-                <p style="margin:6px 0 0 0; font-size:12px; color:#94a3b8;">Sinavin LO'ya etkisi.</p>
+                <p style="margin:6px 0 0 0; font-size:12px; color:#94a3b8;">LO puaninin PO'ya aktarim oranidir.</p>
             </div>
         </div>
 
@@ -41,7 +41,7 @@
                     style="background:#1db954; padding:10px 18px; border:none; border-radius:10px; color:white; font-weight:600;">
                 Kaydet
             </button>
-            <a href="{% url 'course_detail' exam.course.id %}"
+            <a href="{% url 'course_detail' learning_outcome.course.id %}"
                style="display:inline-block; padding:10px 18px; border-radius:10px; border:1px solid #e2e8f0; color:#1f1f1f; text-decoration:none; font-weight:600;">
                 Geri Don
             </a>

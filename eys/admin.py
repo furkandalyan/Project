@@ -18,6 +18,8 @@ try:
         Exam,
         LearningOutcome,
         ExamLOWeight,
+        ProgrammingOutcome,
+        LOPOWeight,
         Announcement,
         ExamResult,
     )
@@ -142,6 +144,24 @@ try:
     print(f"DEBUG: ExamLOWeight registered successfully")
 except Exception as e:
     print(f"DEBUG ERROR: Failed to register ExamLOWeight: {e}")
+    import traceback
+    traceback.print_exc()
+
+print("DEBUG: Registering ProgrammingOutcome model...")
+try:
+    admin.site.register(ProgrammingOutcome)
+    print("DEBUG: ProgrammingOutcome registered successfully")
+except Exception as e:
+    print(f"DEBUG ERROR: Failed to register ProgrammingOutcome: {e}")
+    import traceback
+    traceback.print_exc()
+
+print("DEBUG: Registering LOPOWeight model...")
+try:
+    admin.site.register(LOPOWeight)
+    print("DEBUG: LOPOWeight registered successfully")
+except Exception as e:
+    print(f"DEBUG ERROR: Failed to register LOPOWeight: {e}")
     import traceback
     traceback.print_exc()
 

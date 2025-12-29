@@ -8,6 +8,8 @@ from .models import (
     LearningOutcome,
     Exam,
     ExamLOWeight,
+    ProgrammingOutcome,
+    LOPOWeight,
     Announcement,
     AnnouncementComment,
     Assignment,
@@ -53,6 +55,12 @@ class ExamLOWeightForm(forms.ModelForm):
     class Meta:
         model = ExamLOWeight
         fields = ["learning_outcome", "weight"]
+
+
+class LOPOWeightForm(forms.ModelForm):
+    class Meta:
+        model = LOPOWeight
+        fields = ["programming_outcome", "weight"]
 
 
 class CourseThresholdForm(forms.ModelForm):

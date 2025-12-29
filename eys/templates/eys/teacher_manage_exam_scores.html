@@ -5,14 +5,29 @@
     <p style="margin:0; color:#9a9a9a; text-transform:uppercase; letter-spacing:0.08em; font-size:12px;">Sınav Not Girişi</p>
     <h1 style="margin:6px 0 0 0;">{{ exam.course.code }} • {{ exam.name }}</h1>
     <p style="color:#666;">Bu dersin tüm öğrencileri için skor ve geri bildirim girebilirsin. Boş bıraktığın satırlar silinir.</p>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:stretch;">
+
+        <div style="display:flex; align-items:center; gap:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; min-height:88px;">
+            {% if qr_data_url %}
+                <img src="{{ qr_data_url }}" alt="QR" style="width:88px; height:88px; border-radius:8px;">
+            {% else %}
+                <div style="width:88px; height:88px; border-radius:8px; background:#e2e8f0; display:flex; align-items:center; justify-content:center; color:#64748b; font-size:12px;">QR yok</div>
+            {% endif %}
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <strong style="font-size:13px;">Mobil Not Girisi</strong>
+                <span style="font-size:12px; color:#64748b;">Telefonla bu QR kodu okut.</span>
+                <a href="{{ mobile_url }}" style="font-size:12px; color:#1db954; text-decoration:none;">Mobil ekrani ac</a>
+            </div>
+        </div>
+        
         <a href="{% url 'export_exam_scores_csv' exam.id %}"
-           style="padding:8px 12px; border:1px solid #ddd; border-radius:10px; text-decoration:none; color:#333;">CSV Dışa Aktar</a>
-        <form method="POST" enctype="multipart/form-data" style="display:inline-flex; gap:8px; align-items:center;">
+           style="display:flex; align-items:center; justify-content:center; padding:10px 14px; min-height:88px; border:1px solid #e2e8f0; border-radius:12px; text-decoration:none; color:#1f2937; background:#f8fafc; font-weight:600;">CSV Disari Aktar</a>
+        <form method="POST" enctype="multipart/form-data" style="display:flex; gap:8px; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; min-height:88px;">
             {% csrf_token %}
-            <input type="file" name="csv_file" accept="text/csv" style="border:1px solid #ddd; border-radius:10px; padding:6px;">
-            <button type="submit" style="padding:8px 12px; border:none; border-radius:10px; background:#1f1f1f; color:white;">CSV İçe Aktar</button>
+            <input type="file" name="csv_file" accept="text/csv" style="border:1px solid #e2e8f0; border-radius:10px; padding:6px; background:#fff;">
+            <button type="submit" style="padding:8px 12px; border:none; border-radius:10px; background:#1f1f1f; color:white; font-weight:600;">CSV Ice Aktar</button>
         </form>
+
     </div>
 </div>
 

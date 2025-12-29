@@ -2,6 +2,8 @@ from calendar import monthrange
 from collections import defaultdict
 from datetime import date, timedelta
 from decimal import Decimal
+import base64
+import json
 import csv
 import io
 import zipfile
@@ -25,6 +27,8 @@ from .models import (
     LearningOutcome,
     Exam,
     ExamLOWeight,
+    ProgrammingOutcome,
+    LOPOWeight,
     Announcement,
     ExamResult,
     AnnouncementComment,
@@ -42,6 +46,7 @@ from .forms import (
     LOForm,
     ExamForm,
     ExamLOWeightForm,
+    LOPOWeightForm,
     AnnouncementForm,
     ProfileUpdateForm,
     CommentForm,
@@ -438,7 +443,10 @@ def student_course_detail(request, course_id):
     course = get_object_or_404(
         Course.objects.select_related("instructor"), id=course_id, students=request.user
     )
-    los = LearningOutcome.objects.filter(course=course).prefetch_related("examloweight_set__exam")
+    los = LearningOutcome.objects.filter(course=course).prefetch_related(
+        "examloweight_set__exam",
+        "po_weights__programming_outcome",
+    )
     exams = (
         Exam.objects.filter(course=course)
         .select_related("course")
@@ -469,11 +477,53 @@ def student_course_detail(request, course_id):
             lo.student_score = None
         lo.score_coverage = total_weight
 
+    po_scores = {}
+    po_weights = {}
+    for lo in los:
+        if lo.student_score is None:
+            continue
+        for weight in lo.po_weights.all():
+            po = weight.programming_outcome
+            if not po:
+                continue
+            weight_percent = Decimal(str(weight.weight or 0))
+            po_weights[po.id] = po_weights.get(po.id, Decimal("0")) + weight_percent
+            po_scores[po.id] = po_scores.get(po.id, Decimal("0")) + (
+                Decimal(lo.student_score) * (weight_percent / Decimal("100"))
+            )
+
+
+    po_cards = []
+    linked_po_ids = set()
+    for lo in los:
+        for w in lo.po_weights.all():
+            if w.programming_outcome_id:
+                linked_po_ids.add(w.programming_outcome_id)
+
+    for po in ProgrammingOutcome.objects.filter(id__in=linked_po_ids).order_by("code", "id"):
+        total_weight = po_weights.get(po.id, Decimal("0"))
+        score = po_scores.get(po.id)
+        if score is not None and total_weight > 0:
+            display_score = round(min(Decimal("100"), score), 2)
+        else:
+            display_score = None
+        po_cards.append(
+            {
+                "code": po.code,
+                "title": po.title,
+                "description": po.description,
+                "score": display_score,
+                "coverage": total_weight,
+            }
+        )
+
+
     context = {
         "course": course,
         "los": los,
         "exams": exams,
         "exam_cards": exam_cards,
+        "po_cards": po_cards,
         "student_count": course.students.count(),
         "term_label": getattr(course, "term", None) or "Belirtilmedi",
         "instructor_name": course.instructor.get_full_name()
@@ -571,6 +621,17 @@ def student_profile(request):
         else "Henüz giriş yapılmadı"
     )
     joined_date = timezone.localtime(request.user.date_joined).strftime("%d.%m.%Y")
+
+    role_name = request.user.role.name if request.user.role else "Tanimsiz"
+    advisor = request.user.advisor
+    advisor_name = None
+    advisor_email = None
+    advisor_username = None
+    if advisor:
+        advisor_name = advisor.get_full_name() or advisor.username
+        advisor_email = advisor.email or ""
+        advisor_username = advisor.username
+
     role_name = request.user.role.name if request.user.role else "Tanımsız"
 
     context = {
@@ -579,6 +640,9 @@ def student_profile(request):
         "joined_date": joined_date,
         "role_name": role_name,
         "username": request.user.username,
+        "advisor_name": advisor_name,
+        "advisor_email": advisor_email,
+        "advisor_username": advisor_username,
     }
     return render(request, "eys/student_profile.html", context)
 
@@ -833,11 +897,81 @@ def manage_exam_scores(request, exam_id):
             messages.success(request, "Sınav notları güncellendi.")
             return redirect("exam_detail", exam_id=exam.id)
 
+
+    mobile_url = request.build_absolute_uri(reverse("manage_exam_scores_mobile", args=[exam.id]))
+    qr_data_url = None
+    try:
+        import qrcode
+        buffer = io.BytesIO()
+        img = qrcode.make(mobile_url)
+        img.save(buffer, format="PNG")
+        qr_data_url = "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
+    except Exception:
+        qr_data_url = None
+
     student_rows = [{"student": student, "result": existing.get(student.id)} for student in students]
 
     return render(
         request,
         "eys/teacher_manage_exam_scores.html",
+        {
+            "exam": exam,
+            "student_rows": student_rows,
+            "mobile_url": mobile_url,
+            "qr_data_url": qr_data_url,
+        },
+    )
+
+
+
+def manage_exam_scores_mobile(request, exam_id):
+    exam = get_object_or_404(
+        Exam.objects.select_related("course__instructor"), id=exam_id, course__instructor=request.user
+    )
+    students = exam.course.students.all().order_by("first_name", "last_name", "username")
+    existing = {
+        res.student_id: res for res in ExamResult.objects.filter(exam=exam).select_related("student")
+    }
+
+    if request.method == "POST":
+        errors = []
+        for student in students:
+            score_raw = request.POST.get(f"score_{student.id}", "").strip()
+            feedback = request.POST.get(f"feedback_{student.id}", "").strip()
+
+            if score_raw == "":
+                if student.id in existing:
+                    existing[student.id].delete()
+                continue
+            try:
+                score_val = float(score_raw.replace(",", "."))
+            except ValueError:
+                errors.append(f"{student.get_full_name() or student.username} icin skor sayi olmali.")
+                continue
+
+            score_val = max(0, min(100, score_val))
+            result, created = ExamResult.objects.get_or_create(
+                exam=exam,
+                student=student,
+                defaults={"score": score_val, "feedback": feedback},
+            )
+            if not created:
+                result.score = score_val
+                result.feedback = feedback
+                result.save()
+
+        if errors:
+            for err in errors:
+                messages.error(request, err)
+        else:
+            messages.success(request, "Notlar guncellendi.")
+            return redirect("manage_exam_scores_mobile", exam_id=exam.id)
+
+    student_rows = [{"student": student, "result": existing.get(student.id)} for student in students]
+
+    return render(
+        request,
+        "eys/teacher_manage_exam_scores_mobile.html",
         {
             "exam": exam,
             "student_rows": student_rows,
@@ -1439,7 +1573,11 @@ def edit_course_threshold(request, course_id):
 
 def course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    los = LearningOutcome.objects.filter(course=course).prefetch_related("examloweight_set__exam")
+    los = LearningOutcome.objects.filter(course=course).prefetch_related(
+        "examloweight_set__exam",
+        "po_weights__programming_outcome",
+    )
+    los = list(los)
     exams = Exam.objects.filter(course=course).prefetch_related("examloweight_set__learning_outcome")
     materials_qs = CourseMaterial.objects.filter(course=course).order_by("week", "-created_at")
     weeks = sorted({m.week for m in materials_qs})
@@ -1497,11 +1635,26 @@ def course_detail(request, course_id):
     )
     exam_results = ExamResult.objects.filter(exam__course=course).select_related("student")
     results_by_student = defaultdict(list)
+    exam_scores_by_student = defaultdict(dict)
     for res in exam_results:
         try:
             results_by_student[res.student_id].append(float(res.score))
+            exam_scores_by_student[res.student_id][res.exam_id] = Decimal(res.score)
         except (TypeError, ValueError):
             continue
+
+    lo_exam_weights = {}
+    for lo in los:
+        weights = []
+        for w in lo.examloweight_set.all():
+            try:
+                weight_val = Decimal(str(w.weight or 0))
+            except Exception:
+                weight_val = Decimal("0")
+            weights.append((w.exam_id, weight_val))
+        lo_exam_weights[lo.id] = weights
+
+    po_defs = list(ProgrammingOutcome.objects.all().order_by("code", "id"))
     student_cards = []
     for student in student_qs:
         full_name = student.get_full_name() or student.username
@@ -1536,6 +1689,65 @@ def course_detail(request, course_id):
             pass_label = "Geçemeyebilir"
             display_score = f"{average_score}"
 
+
+        lo_scores = []
+        lo_scores_by_id = {}
+        student_exam_scores = exam_scores_by_student.get(student.id, {})
+        for lo in los:
+            total = Decimal("0")
+            total_weight = Decimal("0")
+            has_score = False
+            for exam_id, weight_val in lo_exam_weights.get(lo.id, []):
+                total_weight += weight_val
+                score = student_exam_scores.get(exam_id)
+                if score is not None:
+                    has_score = True
+                    total += Decimal(score) * (weight_val / Decimal("100"))
+            if total_weight > 0 and has_score:
+                lo_score = round(min(Decimal("100"), total), 2)
+            else:
+                lo_score = None
+            lo_scores.append(
+                {
+                    "id": lo.id,
+                    "title": lo.title or f"LO {lo.id}",
+                    "score": float(lo_score) if lo_score is not None else None,
+                }
+            )
+            lo_scores_by_id[lo.id] = lo_score
+
+        po_scores = []
+        for po in po_defs:
+            total = Decimal("0")
+            total_weight = Decimal("0")
+            has_score = False
+            for lo in los:
+                lo_score = lo_scores_by_id.get(lo.id)
+                if lo_score is None:
+                    continue
+                for w in lo.po_weights.all():
+                    if w.programming_outcome_id != po.id:
+                        continue
+                    try:
+                        weight_val = Decimal(str(w.weight or 0))
+                    except Exception:
+                        weight_val = Decimal("0")
+                    total_weight += weight_val
+                    has_score = True
+                    total += Decimal(str(lo_score)) * (weight_val / Decimal("100"))
+            if total_weight > 0 and has_score:
+                po_score = round(min(Decimal("100"), total), 2)
+            else:
+                po_score = None
+            po_scores.append(
+                {
+                    "id": po.id,
+                    "code": po.code,
+                    "title": po.title,
+                    "score": float(po_score) if po_score is not None else None,
+                }
+            )
+
         student_cards.append(
             {
                 "id": student.id,
@@ -1552,6 +1764,8 @@ def course_detail(request, course_id):
                 "pass_label": pass_label,
                 "pass_min": threshold_values["pass_min"],
                 "upcoming_exam": upcoming_exam_label,
+                "lo_scores_json": json.dumps(lo_scores, ensure_ascii=True),
+                "po_scores_json": json.dumps(po_scores, ensure_ascii=True),
             }
         )
 
@@ -1612,6 +1826,27 @@ def add_exam_lo_weight(request, exam_id):
     form = ExamLOWeightForm()
     form.fields['learning_outcome'].queryset = LearningOutcome.objects.filter(course=exam.course)
     return render(request, "eys/add_exam_lo_weight.html", {"form": form, "exam": exam})
+
+
+def add_lo_po_weight(request, lo_id):
+    learning_outcome = get_object_or_404(LearningOutcome.objects.select_related("course"), id=lo_id)
+    if request.method == "POST":
+        form = LOPOWeightForm(request.POST)
+        if form.is_valid():
+            weight = form.save(commit=False)
+            LOPOWeight.objects.update_or_create(
+                learning_outcome=learning_outcome,
+                programming_outcome=weight.programming_outcome,
+                defaults={"weight": weight.weight},
+            )
+            messages.success(request, "Programming Outcome baglantisi kaydedildi!")
+            return redirect("course_detail", course_id=learning_outcome.course.id)
+    form = LOPOWeightForm()
+    return render(
+        request,
+        "eys/add_lo_po_weight.html",
+        {"form": form, "learning_outcome": learning_outcome},
+    )
 
 
 def exam_detail(request, exam_id):

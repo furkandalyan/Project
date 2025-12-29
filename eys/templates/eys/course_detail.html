@@ -90,6 +90,18 @@
                         <li>Henüz herhangi bir sınava bağlı değil.</li>
                     {% endfor %}
                 </ul>
+                    <p style="margin:8px 0 0 0; font-size:13px; color:#777;">Bagli PO'lar:</p>
+                    <ul style="padding-left:18px; margin:4px 0 0 0; color:#555;">
+                        {% for w in lo.po_weights.all %}
+                            <li>{{ w.programming_outcome.code }} - {{ w.programming_outcome.title }} (%{{ w.weight }})</li>
+                        {% empty %}
+                            <li>PO baglantisi yok.</li>
+                        {% endfor %}
+                    </ul>
+                    <div style="margin-top:8px;">
+                        <a href="{% url 'add_lo_po_weight' lo.id %}" style="color:#1db954;">PO Bagla</a>
+                    </div>
+
             </div>
             {% empty %}
             <p style="color:#999;">Henüz LO eklenmemiş.</p>
@@ -257,6 +269,8 @@
                     data-status-color="{{ student.status_color }}"
                     data-pass="{{ student.pass_label }}"
                     data-upcoming="{{ student.upcoming_exam }}"
+                    data-lo-scores="{{ student.lo_scores_json|escape }}"
+                    data-po-scores="{{ student.po_scores_json|escape }}"
                     style="border:1px solid #f0f0f0; border-radius:12px; padding:14px; display:flex; align-items:center; gap:14px; background:#fff; cursor:pointer; text-align:left;">
                 <div style="width:46px; height:46px; border-radius:50%; background:#f3fff6; display:flex; align-items:center; justify-content:center; font-weight:600; color:#1db954;">
                     {{ student.initials }}
@@ -314,6 +328,17 @@
                     <strong id="detail-upcoming"></strong>
                 </div>
             </div>
+
+        <div style="margin-top:16px; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+            <div style="background:#f9f9f9; border-radius:12px; padding:12px;">
+                <p style="margin:0 0 6px 0; font-size:12px; color:#7a7a7a;">LO Puanlari</p>
+                <div id="detail-lo-list" style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:#555;"></div>
+            </div>
+            <div style="background:#f9f9f9; border-radius:12px; padding:12px;">
+                <p style="margin:0 0 6px 0; font-size:12px; color:#7a7a7a;">PO Puanlari</p>
+                <div id="detail-po-list" style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:#555;"></div>
+            </div>
+        </div>
         </div>
     </div>
 </div>
@@ -376,6 +401,18 @@
                             <li>Henüz sınav yok.</li>
                         {% endfor %}
                     </ul>
+                    <p style="margin:8px 0 0 0; font-size:13px; color:#777;">Bagli PO'lar:</p>
+                    <ul style="padding-left:18px; margin:4px 0 0 0; color:#555;">
+                        {% for w in lo.po_weights.all %}
+                            <li>{{ w.programming_outcome.code }} - {{ w.programming_outcome.title }} (%{{ w.weight }})</li>
+                        {% empty %}
+                            <li>PO baglantisi yok.</li>
+                        {% endfor %}
+                    </ul>
+                    <div style="margin-top:8px;">
+                        <a href="{% url 'add_lo_po_weight' lo.id %}" style="color:#1db954;">PO Bagla</a>
+                    </div>
+
                 </details>
             {% empty %}
                 <p style="color:#999;">Henüz LO eklenmemiş.</p>
@@ -506,6 +543,56 @@ function closeExamModal() {
         }
     }
 
+    function renderScoreList(containerId, items) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = "";
+        if (!items || !items.length) {
+            container.innerHTML = '<span style="color:#94a3b8; font-size:12px;">Veri yok</span>';
+            return;
+        }
+        items.forEach(function(item) {
+            var label = item.code ? (item.code + " - " + item.title) : item.title;
+            var scoreText = (item.score === null || item.score === undefined) ? "-" : item.score;
+            var scoreColor = "#64748b";
+            var scoreBg = "#f1f5f9";
+            if (scoreText !== "-") {
+                var val = parseFloat(scoreText);
+                if (!isNaN(val)) {
+                    if (val >= 80) { scoreColor = "#0f5132"; scoreBg = "#dcfce7"; }
+                    else if (val >= 65) { scoreColor = "#b45309"; scoreBg = "#ffedd5"; }
+                    else { scoreColor = "#b91c1c"; scoreBg = "#fee2e2"; }
+                }
+            }
+            var row = document.createElement("div");
+            row.style.display = "flex";
+            row.style.justifyContent = "space-between";
+            row.style.alignItems = "center";
+            row.style.gap = "8px";
+            row.style.padding = "6px 8px";
+            row.style.borderRadius = "8px";
+            row.style.background = "#f8fafc";
+            row.style.border = "1px solid #e2e8f0";
+
+            var labelEl = document.createElement("span");
+            labelEl.textContent = label;
+            labelEl.style.fontSize = "12px";
+            labelEl.style.color = "#334155";
+
+            var scoreEl = document.createElement("span");
+            scoreEl.textContent = scoreText;
+            scoreEl.style.fontSize = "12px";
+            scoreEl.style.fontWeight = "700";
+            scoreEl.style.color = scoreColor;
+            scoreEl.style.background = scoreBg;
+            scoreEl.style.padding = "2px 8px";
+            scoreEl.style.borderRadius = "999px";
+
+            row.appendChild(labelEl);
+            row.appendChild(scoreEl);
+            container.appendChild(row);
+        });
+    }
     function selectStudent(item) {
         studentItems.forEach(function(btn) { btn.classList.remove("active-student"); });
         item.classList.add("active-student");
@@ -524,6 +611,13 @@ function closeExamModal() {
         document.getElementById("detail-status").textContent = item.dataset.status;
         document.getElementById("detail-status").style.color = item.dataset.statusColor;
         document.getElementById("detail-pass").textContent = item.dataset.pass;
+
+        var loScores = [];
+        var poScores = [];
+        try { loScores = JSON.parse(item.dataset.loScores || "[]"); } catch (e) { loScores = []; }
+        try { poScores = JSON.parse(item.dataset.poScores || "[]"); } catch (e) { poScores = []; }
+        renderScoreList("detail-lo-list", loScores);
+        renderScoreList("detail-po-list", poScores);
         emptyPane.style.display = "none";
         detailPane.style.display = "block";
     }

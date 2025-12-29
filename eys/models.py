@@ -158,6 +158,35 @@ class ExamLOWeight(models.Model):
         return f"{self.exam.name} → {self.learning_outcome.title} (%{self.weight})"
 
 
+class ProgrammingOutcome(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.code} - {self.title}"
+
+
+class LOPOWeight(models.Model):
+    learning_outcome = models.ForeignKey(
+        LearningOutcome,
+        on_delete=models.CASCADE,
+        related_name="po_weights",
+    )
+    programming_outcome = models.ForeignKey(
+        ProgrammingOutcome,
+        on_delete=models.CASCADE,
+        related_name="lo_weights",
+    )
+    weight = models.FloatField()  # LO -> PO aktarim yuzdesi
+
+    class Meta:
+        unique_together = ("learning_outcome", "programming_outcome")
+
+    def __str__(self):
+        return f"{self.learning_outcome} -> {self.programming_outcome} (%{self.weight})"
+
+
 class ExamResult(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="results")
     student = models.ForeignKey(

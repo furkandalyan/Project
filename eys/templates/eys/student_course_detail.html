@@ -29,9 +29,10 @@
         </div>
     </div>
 
+
     <!-- LO - Exam connections -->
     <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 14px 36px rgba(0,0,0,0.08);">
-        <h3 style="margin-top:0;">LO - Sınav Bağlantıları</h3>
+        <h3 style="margin-top:0;">LO - Sinav Baglantilari</h3>
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
             {% for lo in los %}
             <div style="padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--badge-bg); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -41,20 +42,49 @@
                     {% for w in lo.examloweight_set.all %}
                         <span style="padding:6px 10px; border-radius:10px; background:var(--bg-color); color:var(--text-color); font-size:12px; border: 1px solid var(--border-color);">{{ w.exam.name }} (%{{ w.weight }})</span>
                     {% empty %}
-                        <span style="color:#94a3b8; font-size:12px;">Bağlı sınav yok</span>
+                        <span style="color:#94a3b8; font-size:12px;">Bagli sinav yok</span>
                     {% endfor %}
                 </div>
                 {% if lo.student_score %}
                     <span style="margin-left:auto; padding:6px 10px; border-radius:10px; background:#e0fbea; color:#065f46; font-size:12px;">LO notun: {{ lo.student_score }}</span>
                 {% endif %}
+                <div style="width:100%; display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                    {% for w in lo.po_weights.all %}
+                        <span style="padding:6px 10px; border-radius:10px; background:var(--bg-color); color:var(--text-color); font-size:12px; border: 1px solid var(--border-color);">{{ w.programming_outcome.code }} (%{{ w.weight }})</span>
+                    {% empty %}
+                        <span style="color:#94a3b8; font-size:12px;">Bagli PO yok</span>
+                    {% endfor %}
+                </div>
             </div>
             {% empty %}
-            <p style="color:#6b7280;">Henüz LO eklenmemiş.</p>
+            <p style="color:#6b7280;">Henuz LO eklenmemis.</p>
             {% endfor %}
         </div>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px;">
+    <div style="background:white; padding:18px; border-radius:14px; box-shadow:0 14px 36px rgba(0,0,0,0.08); margin-top:16px;">
+        <h3 style="margin-top:0;">Programming Outcomes</h3>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+            {% for po in po_cards %}
+            <div style="padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--badge-bg); display:flex; flex-direction:column; gap:6px;">
+                <strong style="color:var(--text-color);">{{ po.code }} - {{ po.title }}</strong>
+                {% if po.description %}
+                    <span style="font-size:12px; color:#6b7280;">{{ po.description }}</span>
+                {% endif %}
+                {% if po.score %}
+                    <span style="padding:6px 10px; border-radius:10px; background:#e0fbea; color:#065f46; font-size:12px; width:fit-content;">PO notun: {{ po.score }}</span>
+                {% else %}
+                    <span style="font-size:12px; color:#94a3b8;">Henuz hesaplanmadi</span>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p style="color:#6b7280;">PO tanimi yok.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px;">
         <!-- LO cards -->
         <div style="background:white; border-radius:14px; padding:16px; box-shadow:0 14px 36px rgba(0,0,0,0.08);">
             <h3 style="margin-top:0;">Learning Outcomes</h3>
@@ -66,11 +96,11 @@
                     {% if lo.student_score %}
                         <div style="font-size:12px; color:#065f46;">Notun: {{ lo.student_score }}</div>
                     {% else %}
-                        <div style="font-size:12px; color:#94a3b8;">Notun hesaplanmadı</div>
+                        <div style="font-size:12px; color:#94a3b8;">Notun hesaplanmadi</div>
                     {% endif %}
                 </div>
                 {% empty %}
-                <p style="color:#6b7280;">Henüz LO eklenmemiş.</p>
+                <p style="color:#6b7280;">Henuz LO eklenmemis.</p>
                 {% endfor %}
             </div>
         </div>

@@ -110,6 +110,29 @@
             </div>
         </div>
 
+
+        <div style="background:white; border-radius:20px; padding:24px; box-shadow:0 20px 45px rgba(0,0,0,0.08); border:1px solid #eef0f4;">
+            <h3 style="margin-top:0;">Danisman Bilgileri</h3>
+            {% if advisor_name %}
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <div style="background:#f8f8f8; border-radius:12px; padding:12px;">
+                    <p style="margin:0; font-size:12px; color:#7a7a7a;">Ad Soyad</p>
+                    <strong>{{ advisor_name }}</strong>
+                </div>
+                <div style="background:#f8f8f8; border-radius:12px; padding:12px;">
+                    <p style="margin:0; font-size:12px; color:#7a7a7a;">Kullanici Adi</p>
+                    <strong>@{{ advisor_username }}</strong>
+                </div>
+                <div style="background:#f8f8f8; border-radius:12px; padding:12px;">
+                    <p style="margin:0; font-size:12px; color:#7a7a7a;">E-posta</p>
+                    <strong>{{ advisor_email|default:"-" }}</strong>
+                </div>
+            </div>
+            {% else %}
+            <p style="margin:0; color:#94a3b8;">Henuz danisman atanmamis.</p>
+            {% endif %}
+        </div>
+
         <!-- Güvenlik İpuçları - Güncellenmiş Tasarım -->
         <div style="background:white; color:#1a1c23; border-radius:20px; padding:24px; box-shadow:0 20px 45px rgba(0,0,0,0.08); border:1px solid #e4e4e7; position:relative; overflow:hidden;">
             <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:#ef4444;"></div>
