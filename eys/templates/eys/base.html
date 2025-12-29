@@ -404,6 +404,210 @@
                 opacity: 1;
             }
         }
+
+        /* --- CEVAI Assistant --- */
+        .cevai-fab {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1db954, #119c45);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 12px 28px rgba(16, 185, 129, 0.35);
+            z-index: 10001;
+        }
+
+        .cevai-panel {
+            position: fixed;
+            right: 24px;
+            bottom: 96px;
+            width: 480px;
+            max-width: calc(100vw - 48px);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            z-index: 10001;
+            display: none;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(16px) scale(0.98);
+        }
+
+        .cevai-panel.cevai-open {
+            animation: cevaiPop 0.25s ease forwards;
+        }
+
+        @keyframes cevaiPop {
+            from {
+                opacity: 0;
+                transform: translateY(16px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+
+        .cevai-header {
+            background: linear-gradient(135deg, #0f5132, #1db954);
+            color: white;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cevai-header strong {
+            font-size: 14px;
+        }
+
+        .cevai-body {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 520px;
+            overflow: auto;
+        }
+
+        .cevai-msg {
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .cevai-msg.bot {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+        }
+
+        .cevai-msg.user {
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            align-self: flex-end;
+        }
+
+        .cevai-quick {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+
+        .cevai-qa {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .cevai-qa-question {
+            font-size: 12px;
+            font-weight: 600;
+            color: #0f172a;
+            text-align: left;
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .cevai-qa-answer {
+            font-size: 12px;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        .cevai-chip {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+
+        .cevai-cats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: #f8fafc;
+        }
+
+        .cevai-cat {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .cevai-cat.active {
+            background: #1db954;
+            color: white;
+            border-color: #1db954;
+        }
+
+        .cevai-input {
+            display: flex;
+            gap: 8px;
+            border-top: 1px solid var(--border-color);
+            padding: 10px;
+            background: #f8fafc;
+        }
+
+        .cevai-input input {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .cevai-input button {
+            background: #1db954;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .cevai-panel {
+                right: 12px;
+                left: 12px;
+                width: auto;
+                bottom: 88px;
+            }
+            .cevai-fab {
+                right: 16px;
+                bottom: 16px;
+                width: 64px;
+                height: 64px;
+            }
+        }
     </style>
 </head>
 
@@ -727,6 +931,41 @@
         </main>
     </div>
 
+    <!-- CEVAI Assistant -->
+    <button id="cevai-fab" class="cevai-fab" aria-label="CEVAI">
+        C
+    </button>
+    <div id="cevai-panel" class="cevai-panel" role="dialog" aria-label="CEVAI Assistant">
+        <div class="cevai-header">
+            <div>
+                <strong>CEVAI</strong>
+                <div style="font-size:11px; opacity:0.85;">Yardimci asistan</div>
+            </div>
+            <button id="cevai-close" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;">&times;</button>
+        </div>
+        <div class="cevai-cats">
+            <button class="cevai-cat active" data-cat="Hepsi">Hepsi</button>
+            <button class="cevai-cat" data-cat="Genel">Genel</button>
+            <button class="cevai-cat" data-cat="Ogrenci">Ogrenci</button>
+            <button class="cevai-cat" data-cat="Ogretmen">Ogretmen</button>
+            <button class="cevai-cat" data-cat="Notlar">Notlar</button>
+            <button class="cevai-cat" data-cat="LO/PO">LO/PO</button>
+            <button class="cevai-cat" data-cat="Odev">Odev</button>
+            <button class="cevai-cat" data-cat="Duyuru">Duyuru</button>
+            <button class="cevai-cat" data-cat="Takvim">Takvim</button>
+            <button class="cevai-cat" data-cat="Profil">Profil</button>
+            <button class="cevai-cat" data-cat="Bolum">Bolum</button>
+        </div>
+        <div id="cevai-body" class="cevai-body">
+            <div class="cevai-msg bot">Merhaba! Ben CEVAI. Sana bu sistemde hizlica yardim edebilirim. Asagidaki orneklerden baslayabilirsin.</div>
+            <div id="cevai-quick" class="cevai-quick"></div>
+        </div>
+        <div class="cevai-input">
+            <input id="cevai-input" type="text" placeholder="Sorunu yaz..." />
+            <button id="cevai-send">Gonder</button>
+        </div>
+    </div>
+
     <!-- Profile Picture Upload Modal -->
     {% if user.is_authenticated %}
     <div id="profile-picture-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
@@ -851,6 +1090,1123 @@
                 this.style.display = 'none';
             }
         });
+    </script>
+
+    <script>
+        (function() {
+            const fab = document.getElementById("cevai-fab");
+            const panel = document.getElementById("cevai-panel");
+            const closeBtn = document.getElementById("cevai-close");
+            const body = document.getElementById("cevai-body");
+            const input = document.getElementById("cevai-input");
+            const send = document.getElementById("cevai-send");
+
+            const roleName = "{{ user.role.name|default:'' }}";
+            const currentPath = "{{ request.path|default:'' }}";
+            let selectedCategory = "Hepsi";
+
+
+            const quickMap = {
+        "Hepsi": [
+                "giris yapamiyorum",
+                "sifre degistir",
+                "tema degistir",
+                "arama kutusu",
+                "bildirimler",
+                "derslerim nerede",
+                "notlarim",
+                "sinav tarihi",
+                "odev teslim",
+                "duyuru yaz",
+                "takvim nerede",
+                "lo nedir",
+                "po nedir",
+                "lo baglama",
+                "po baglama",
+                "csv disari aktar",
+                "csv ice aktar",
+                "ogrenci listesi",
+                "danisman bilgisi",
+                "profil guncelle",
+                "materyal indir",
+                "odev ek",
+                "sinav ekle",
+                "not girme",
+                "geri bildirim",
+                "bolum paneli",
+                "ogretmen listesi",
+                "ders listesi",
+                "raporlar",
+                "ics indir",
+                "riskli ogrenci",
+                "ortalama not",
+                "not bantlari",
+                "duyuru sil",
+                "yorum ekle",
+                "profil fotograf",
+                "kullanici adi",
+                "rol degisimi",
+                "mobil not",
+                "qr",
+                "ogrenci paneli",
+                "ogretmen paneli",
+                "odev notla",
+                "odev kriter",
+                "dosya yukle",
+                "sayfa acilmiyor",
+                "yavas",
+                "takvim gorunumu",
+                "danisman ogrencilerim",
+                "mesaj"
+        ],
+        "Genel": [
+                "giris yapamiyorum",
+                "sifre sifirla",
+                "tema degistir",
+                "arama kutusu",
+                "bildirimler",
+                "profil guncelle",
+                "profil fotograf",
+                "hesap bilgisi",
+                "kullanici adi",
+                "rol yetki",
+                "sayfa acilmiyor",
+                "yavas",
+                "cikis",
+                "yardim",
+                "destek",
+                "sistem nasil calisir",
+                "guvenlik ipuclari",
+                "parola kurallari",
+                "tarayici uyum",
+                "internet sorunu",
+                "dosya yukle",
+                "dosya indir",
+                "hata mesaji",
+                "duyuru bildirimi",
+                "genel duyuru",
+                "tema koyu mod",
+                "tema acik mod",
+                "arama nasil kullanilir",
+                "bildirimleri temizle",
+                "profil email",
+                "kullanici ekle",
+                "hesap sil",
+                "kapatma",
+                "yetki hatasi",
+                "rol degisimi",
+                "sayfa yenile",
+                "guncelleme",
+                "kisisel veri",
+                "gizlilik",
+                "cihaz degistir",
+                "mobil uyum",
+                "bildirim ayari",
+                "oturum sure",
+                "guvenli cikis",
+                "tanimli rol",
+                "yardimci asistan",
+                "cevai",
+                "cevai nasil calisir",
+                "sik sorulan sorular",
+                "iletisim"
+        ],
+        "Ogrenci": [
+                "derslerim nerede",
+                "notlarim",
+                "sinav tarihi",
+                "odev teslim",
+                "odev teslim tarihi",
+                "odev notu",
+                "ders materyali",
+                "takvim",
+                "duyurular",
+                "duyuru bildirimi",
+                "danisman bilgisi",
+                "profil guncelle",
+                "profil fotograf",
+                "email gorunur",
+                "ogrenci paneli",
+                "sinav sonucu",
+                "lo puanim",
+                "po puanim",
+                "ders detayi",
+                "ogrenci profil",
+                "ogrenci listesi gorur muyum",
+                "odev gec teslim",
+                "odev ek dosya",
+                "odev geri bildirim",
+                "odev grup",
+                "takvim haftalik",
+                "takvim aylik",
+                "bildirimler",
+                "bildirim okundu",
+                "duyuru yorum",
+                "materyal indir",
+                "materyal hafta",
+                "sinav hatirlatma",
+                "not bantlari",
+                "ortalama not",
+                "riskli ogrenci olur mu",
+                "ders kaydi",
+                "ders ekleme",
+                "danisman hocam",
+                "ogrenci haklari",
+                "parola degistir",
+                "sifre unutma",
+                "cikis",
+                "profil bilgileri",
+                "yardim",
+                "cevai yardim",
+                "cevai ogrenci",
+                "takvimde sinav",
+                "kurs kodu",
+                "ders adi"
+        ],
+        "Ogretmen": [
+                "ogretmen paneli",
+                "ders yonetimi",
+                "sinav ekle",
+                "sinav duzenle",
+                "not girme",
+                "not guncelle",
+                "ogrenci listesi",
+                "duyuru ek",
+                "duyuru sil",
+                "odev ek",
+                "odev notla",
+                "odev kriter",
+                "odev grup",
+                "materyal ekle",
+                "materyal liste",
+                "lo ekle",
+                "po bagla",
+                "lo bagla",
+                "lo po yuzde",
+                "sinav lo",
+                "csv disari aktar",
+                "csv ice aktar",
+                "mobil not girisi",
+                "qr",
+                "sinav hatirlat",
+                "takvim ogretmen",
+                "takvim filtre",
+                "ics indir",
+                "ogrenci performans",
+                "not bantlari",
+                "ortalama not",
+                "riskli ogrenci",
+                "danisman ogrencilerim",
+                "advisor instructor",
+                "bolum paneli",
+                "ders listesi",
+                "ogretmen profil",
+                "parola degistir",
+                "profil fotograf",
+                "duyuru yorum",
+                "sinav detay",
+                "sinav sonucu",
+                "odev teslim",
+                "odev gec",
+                "ders materyali",
+                "ders kodu",
+                "ders adi",
+                "cevai ogretmen",
+                "yardim",
+                "bildirimler"
+        ],
+        "Notlar": [
+                "not girme",
+                "not guncelle",
+                "not sil",
+                "skor nedir",
+                "puanlama",
+                "sinav sonucu",
+                "sinav notu",
+                "ortalama not",
+                "not bantlari",
+                "gecme notu",
+                "csv disari aktar",
+                "csv ice aktar",
+                "csv format",
+                "csv hata",
+                "mobil not",
+                "qr ile not",
+                "geri bildirim",
+                "not tutarsiz",
+                "puan duzelt",
+                "sinav notlari",
+                "ogretmen not giris",
+                "ogrenci not gor",
+                "notlarim",
+                "notlar nerede",
+                "ders notu",
+                "sinav ekle",
+                "sinav duzenle",
+                "sinav sil",
+                "sinav tarihi",
+                "sinav hatirlat",
+                "not araligi",
+                "0-100",
+                "not kriter",
+                "not giris ekrani",
+                "not listesi",
+                "not gecmis",
+                "not duzeltme",
+                "puanlama modeli",
+                "notlama",
+                "excel ile",
+                "csv disari",
+                "csv ice",
+                "not silme",
+                "bos birak",
+                "kaydet",
+                "sinav notu gir",
+                "ogrenci notu",
+                "feedback",
+                "geri bildirim ek",
+                "not giris hizli"
+        ],
+        "LO/PO": [
+                "lo nedir",
+                "po nedir",
+                "lo ekle",
+                "po ekle",
+                "lo bagla",
+                "po bagla",
+                "lo po yuzde",
+                "lo puani",
+                "po puani",
+                "lo po aktarim",
+                "sinav lo yuzde",
+                "lo kriter",
+                "po kriter",
+                "lo listesi",
+                "po listesi",
+                "lo puan hesap",
+                "po puan hesap",
+                "lo oran",
+                "po oran",
+                "lo baglantisi",
+                "po baglantisi",
+                "lo po harita",
+                "lo po esleme",
+                "program outcome",
+                "learning outcome",
+                "lo po graf",
+                "lo po rapor",
+                "lo po analiz",
+                "lo po takibi",
+                "lo po detay",
+                "lo yuzde gir",
+                "po yuzde gir",
+                "lo basari",
+                "po basari",
+                "lo ortalama",
+                "po ortalama",
+                "lo notu",
+                "po notu",
+                "lo sinav",
+                "po sinav",
+                "lo po goruntule",
+                "lo po sayfasi",
+                "lo po tablosu",
+                "lo po ayari",
+                "lo po bagli",
+                "lo po sil",
+                "lo po guncelle",
+                "lo po ekrani",
+                "lo po soru",
+                "lo po bilgi"
+        ],
+        "Odev": [
+                "odev ek",
+                "odev olustur",
+                "odev teslim",
+                "odev teslim tarihi",
+                "odev gec teslim",
+                "odev notla",
+                "odev kriter",
+                "odev rubrik",
+                "odev dosya",
+                "odev aciklama",
+                "odev grup",
+                "odev grup olustur",
+                "odev kriter ekle",
+                "odev puan",
+                "odev geri bildirim",
+                "odev listesi",
+                "odev detay",
+                "odev durum",
+                "odev teslim et",
+                "odev yeniden",
+                "odev duzenle",
+                "odev sil",
+                "odev materyal",
+                "odev ek dosya",
+                "odev template",
+                "odev sablon",
+                "odev dosya yukle",
+                "odev dosya indir",
+                "odev notu",
+                "odev ortalama",
+                "odev kriter puan",
+                "odev teslim sayisi",
+                "odev eksik",
+                "odev teslim kontrol",
+                "odev gec",
+                "odev degerlendirme",
+                "odev puanlama",
+                "odev feedback",
+                "odev yorum",
+                "odev not gir",
+                "odev kriter listesi",
+                "odev kriter sil",
+                "odev kriter duzenle",
+                "odev teslim tarihi degis",
+                "odev onay",
+                "odev planla",
+                "odev hatirlat",
+                "odev bildir",
+                "odev ogrenci",
+                "odev ogretmen"
+        ],
+        "Duyuru": [
+                "duyuru ek",
+                "duyuru yaz",
+                "duyuru sil",
+                "duyuru guncelle",
+                "duyuru detayi",
+                "duyuru bildirimi",
+                "duyuru yorum",
+                "duyuru ek dosya",
+                "duyuru baslik",
+                "duyuru icerik",
+                "duyuru sabit",
+                "duyuru pin",
+                "duyuru ogrenci",
+                "duyuru ogretmen",
+                "duyuru tarih",
+                "duyuru listesi",
+                "duyuru kategori",
+                "duyuru ekrani",
+                "duyuru paylas",
+                "duyuru gor",
+                "duyuru silme",
+                "duyuru duzenleme",
+                "duyuru yorum ekle",
+                "duyuru yorum sil",
+                "duyuru yorumlari",
+                "duyuru mail",
+                "duyuru bildirimleri",
+                "duyuru sayisi",
+                "duyuru arama",
+                "duyuru filtre",
+                "duyuru genel",
+                "duyuru ders",
+                "duyuru dosya",
+                "duyuru eklemek",
+                "duyuru secenek",
+                "duyuru duzelt",
+                "duyuru hata",
+                "duyuru yayin",
+                "duyuru taslak",
+                "duyuru onay",
+                "duyuru paylasim",
+                "duyuru listede",
+                "duyuru goster",
+                "duyuru soru",
+                "duyuru cevap",
+                "duyuru sorun",
+                "duyuru zaman",
+                "duyuru guncel",
+                "duyuru eski",
+                "duyuru okundu"
+        ],
+        "Takvim": [
+                "takvim nerede",
+                "takvim haftalik",
+                "takvim aylik",
+                "takvim gorunumu",
+                "takvim filtre",
+                "takvim sinav",
+                "takvim ders",
+                "takvim etkinlik",
+                "takvim hatirlat",
+                "takvim tarih",
+                "takvim bugun",
+                "takvim gelecek",
+                "takvim gecmis",
+                "takvim ics",
+                "ics indir",
+                "takvim paylas",
+                "takvim ders filtre",
+                "takvim sinav tarihi",
+                "takvim saat",
+                "takvim gun",
+                "takvim hafta",
+                "takvim ay",
+                "takvim yil",
+                "takvim dugme",
+                "takvim liste",
+                "takvim giris",
+                "takvim kullan",
+                "takvim sirala",
+                "takvim yenile",
+                "takvim iptal",
+                "takvim bildirim",
+                "takvim sinav hatirlat",
+                "takvim ders programi",
+                "takvim detay",
+                "takvim acil",
+                "takvim sinav ekle",
+                "takvim sinav duzenle",
+                "takvim ogretmen",
+                "takvim ogrenci",
+                "takvim bolum",
+                "takvim saat dilimi",
+                "takvim zaman",
+                "takvim alarm",
+                "takvim bugun ders",
+                "takvim bos",
+                "takvim sinav listesi",
+                "takvim olay",
+                "takvim sinav list",
+                "takvim ayar",
+                "takvim takibi"
+        ],
+        "Profil": [
+                "profil guncelle",
+                "profil fotograf",
+                "profil email",
+                "profil ad",
+                "profil soyad",
+                "profil sifre",
+                "sifre degistir",
+                "parola degistir",
+                "profil gor",
+                "profil duzenle",
+                "profil sayfasi",
+                "profil bilgiler",
+                "profil kaydet",
+                "profil hata",
+                "profil avatar",
+                "profil resim yukle",
+                "profil resim sil",
+                "profil foto degis",
+                "profil guvenlik",
+                "profil ipucu",
+                "profil cikis",
+                "profil oturum",
+                "profil kullanici adi",
+                "profil rol",
+                "profil danisman",
+                "profil danisman bilgisi",
+                "profil eposta",
+                "profil bilgisi",
+                "profil duzelt",
+                "profil yeni",
+                "profil parola",
+                "profil sifre sifirla",
+                "profil sifre kural",
+                "profil guncel",
+                "profil hesap",
+                "profil bilgi guncelle",
+                "profil mail",
+                "profil fotograf yukle",
+                "profil fotograf sorun",
+                "profil fotograf boyut",
+                "profil sayfa",
+                "profil ok",
+                "profil degisiklik",
+                "profil mesaj",
+                "profil not",
+                "profil ozeti",
+                "profil yardim",
+                "profil ayar",
+                "profil tema",
+                "profil guvenlik",
+                "profil simge",
+                "profil tamamlama",
+                "profil soru",
+                "profil cevap",
+                "profil bilgi",
+                "profil goruntule"
+        ],
+        "Bolum": [
+                "bolum paneli",
+                "bolum genel bakis",
+                "bolum dersler",
+                "bolum ogretmenler",
+                "bolum rapor",
+                "bolum analiz",
+                "bolum kritik ders",
+                "bolum ortalama",
+                "bolum kadro",
+                "bolum liste",
+                "bolum ogretmen listesi",
+                "bolum ders listesi",
+                "bolum ders detay",
+                "bolum ogretmen detay",
+                "bolum not",
+                "bolum sinav",
+                "bolum lo",
+                "bolum po",
+                "bolum takip",
+                "bolum istatistik",
+                "bolum grafik",
+                "bolum tablo",
+                "bolum ozet",
+                "bolum yetki",
+                "bolum baskani",
+                "bolum ayar",
+                "bolum ogretim",
+                "bolum ogrenci",
+                "bolum plan",
+                "bolum program",
+                "bolum performans",
+                "bolum risk",
+                "bolum destek",
+                "bolum duzenle",
+                "bolum sayfa",
+                "bolum sayilari",
+                "bolum ders acil",
+                "bolum ders kodu",
+                "bolum ders adi",
+                "bolum sinif",
+                "bolum ogretmen atama",
+                "bolum ders atama",
+                "bolum takvim",
+                "bolum duyuru",
+                "bolum not bandi",
+                "bolum islem",
+                "bolum sorular",
+                "bolum yardim",
+                "bolum raporlama",
+                "bolum paneli nedir"
+        ]
+};
+
+            const faq = [
+                {
+                    keywords: ["giris", "login", "sifre", "parola", "oturum"],
+                    answer: "Giris yapmak icin login sayfasina git. Parola unutulduysa sifre degistirme ekranini kullanabilirsin."
+                },
+                {
+                    keywords: ["ders", "derslerim", "course", "kurs"],
+                    answer: "Derslerini 'Derslerim' menusunden gorebilir, ders detayindan sinav/LO/PO baglantilarini inceleyebilirsin."
+                },
+                {
+                    keywords: ["sinav", "not", "puan", "skor"],
+                    answer: "Ogretmenler 'Sinavlar & Notlar' alanindan not girer. Ogrenciler ders detayinda notlarini gorur."
+                },
+                {
+                    keywords: ["lo", "learning outcome"],
+                    answer: "LO (Learning Outcome), ders kazanimi demek. Ogretmen sinavi LO'ya yuzde ile baglar."
+                },
+                {
+                    keywords: ["po", "programming outcome"],
+                    answer: "PO (Programming Outcome) program kazanimi demek. LO puani, baglanan PO'lara yuzdeyle aktarilir."
+                },
+                {
+                    keywords: ["lo po", "lo/po", "bagla", "baglanti", "yuzde"],
+                    answer: "LO-PO baglantisi ders detayinda LO kartlarindan yapilir. Her baglanti icin yuzde girilir."
+                },
+                {
+                    keywords: ["odev", "assignment", "teslim"],
+                    answer: "Ogretmenler Odevler sayfasindan odev olusturur. Ogrenciler Odevler sayfasindan teslim eder."
+                },
+                {
+                    keywords: ["duyuru", "announcement"],
+                    answer: "Duyuru olusturmak icin Duyurularim sayfasina git. Ogrenciler Duyurular alaninda gorur."
+                },
+                {
+                    keywords: ["takvim", "calendar"],
+                    answer: "Takvim menusu ogrenciler ve ogretmenler icin mevcut. Sinavlari tarihe gore gorebilirsin."
+                },
+                {
+                    keywords: ["profil", "hesap", "email", "eposta"],
+                    answer: "Profil bilgilerini Profil sayfasindan duzenleyebilirsin. E-posta alanlari sadece goruntulenir."
+                },
+                {
+                    keywords: ["danisman", "advisor"],
+                    answer: "Danisman bilgilerini Profil sayfasinda gorebilirsin. Danisman atanmamissa bilgi gorunmez."
+                },
+                {
+                    keywords: ["materyal", "material"],
+                    answer: "Ders materyalleri Ders detayi veya Materyaller sayfasinda listelenir."
+                },
+                {
+                    keywords: ["bildirim", "notification"],
+                    answer: "Bildirimler ust bardaki zil ikonunda gorunur. Tum bildirimler sayfasina tiklayabilirsin."
+                },
+                {
+                    keywords: ["arama", "search"],
+                    answer: "Ust bardaki arama kutusundan ders veya sinav arayabilirsin."
+                },
+                {
+                    keywords: ["ogrenci", "student", "liste", "sinif"],
+                    answer: "Ogretmen ders detayinda ogrenci listesini gorur. Ogrenciler yalniz kendi bilgilerini gorur."
+                },
+                {
+                    keywords: ["bolum", "department", "yonetim"],
+                    answer: "Bolum baskani icin Bolum Paneli menusu vardir. Ogretmen ve ders analizlerini oradan gorur."
+                },
+                {
+                    keywords: ["csv", "disari aktar", "ice aktar"],
+                    answer: "Notlar sayfasindan CSV disari aktarabilir veya CSV ice aktarabilirsin."
+                },
+                {
+                    keywords: ["mobil", "telefon", "qr"],
+                    answer: "Notlar sayfasinda QR ile mobil not girisi var. Telefon ve PC ayni agda olmali."
+                },
+                {
+                    keywords: ["gorev", "rol", "yetki"],
+                    answer: "Roluna gore menuler degisir. Rol hatasi varsa yoneticiye bildirebilirsin."
+                },
+                {
+                    keywords: ["sifre degistir", "parola degistir"],
+                    answer: "Sifre degistirmek icin Profil sayfasini kullan."
+                },
+                {
+                    keywords: ["not ortalama", "ortalama", "analiz"],
+                    answer: "Ders detayinda ogrenci ortalamalari ve basari durumlari gosterilir."
+                },
+                {
+                    keywords: ["devamsizlik", "yoklama"],
+                    answer: "Devamsizlik ozelligi yoksa yoneticiye talep olarak iletebilirsin."
+                },
+                {
+                    keywords: ["yardim", "destek", "problem", "hata"],
+                    answer: "Sorun yasarsan sayfa adini ve hatayi paylas, birlikte cozeriz."
+                },
+                {
+                    keywords: ["dani", "danisman", "danisman hocam"],
+                    answer: "Danismanini Profil sayfanda gorebilirsin. Orada ad, kullanici adi ve e-posta gorunur."
+                },
+                {
+                    keywords: ["profil fotograf", "foto", "avatar"],
+                    answer: "Profil fotografini sol menudeki profil kartindan yukleyebilirsin."
+                },
+                {
+                    keywords: ["sinav ekle", "exam olustur"],
+                    answer: "Ders detayinda Sinav Ekle butonu ile yeni sinav olusturabilirsin."
+                },
+                {
+                    keywords: ["lo ekle", "learning outcome ekle"],
+                    answer: "Ders detayinda LO Ekle butonu ile LO tanimlayabilirsin."
+                },
+                {
+                    keywords: ["po ekle", "program outcome"],
+                    answer: "PO'lar admin panelinden tanimlanir. LO kartindan PO Bagla ile yuzde girilir."
+                },
+                {
+                    keywords: ["csv", "disa aktar", "ice aktar"],
+                    answer: "Notlar sayfasinda CSV disari aktar ve CSV ice aktar kutulari vardir."
+                },
+                {
+                    keywords: ["ogrenci notu", "sinav sonucu"],
+                    answer: "Ogrenci sinav notlarini ders detayinda gorur. Ogretmen not giris ekranindan gunceller."
+                },
+                {
+                    keywords: ["lo po puan", "po puani", "lo puani"],
+                    answer: "LO puani sinav yuzdelerinden hesaplanir. PO puani LO'dan yuzdeyle aktarilir."
+                },
+                {
+                    keywords: ["duyuru sil", "duyuru guncelle"],
+                    answer: "Duyurularim sayfasindan duyuru duzenleyebilir veya silebilirsin."
+                },
+                {
+                    keywords: ["materyal ekle", "ders materyali"],
+                    answer: "Ogretmenler Materyaller sayfasindan yeni materyal ekler."
+                },
+                {
+                    keywords: ["odev notla", "teslim", "submission"],
+                    answer: "Odevler sayfasinda odev detayi icinde teslimleri notlayabilirsin."
+                },
+                {
+                    keywords: ["ogrenci listesi", "sinif listesi"],
+                    answer: "Ogretmen ders detayinda ogrenci listesini gorebilir."
+                },
+                {
+                    keywords: ["bildirimler", "okundu"],
+                    answer: "Zil ikonuna tiklayip bildirimleri gorebilir ve okundu yapabilirsin."
+                },
+                {
+                    keywords: ["takvim indirme", "ics"],
+                    answer: "Ogretmen takvim sayfasinda ICS export linki var."
+                },
+                {
+                    keywords: ["takvimde ders filtresi", "filtre"],
+                    answer: "Takvim ekraninda ders filtresiyle hangi dersleri gorecegini secebilirsin."
+                },
+                {
+                    keywords: ["sifre sifirlama", "parola sifirla"],
+                    answer: "Sifre degistirme ekranindan yeni parola belirleyebilirsin."
+                },
+                {
+                    keywords: ["ogrenci paneli", "ogrenci sayfalari"],
+                    answer: "Ogrenciler icin Dashboard, Derslerim, Takvim, Odevler ve Duyurular menuleri var."
+                },
+                {
+                    keywords: ["ogretmen paneli", "ogretmen sayfalari"],
+                    answer: "Ogretmenler icin Dashboard, Ders Yonetimi, Odevler & Notlar, Takvim ve Duyurular menuleri var."
+                },
+                {
+                    keywords: ["bolum baskani", "bolum paneli"],
+                    answer: "Bolum Baskani, Bolum Paneli menusuyle ogretmen ve ders analizlerini gorebilir."
+                },
+                {
+                    keywords: ["mesaj", "yorum", "comment"],
+                    answer: "Duyuru detayindan yorum ekleyebilir veya yorumlari gorebilirsin."
+                },
+                {
+                    keywords: ["kayit", "ders kaydi"],
+                    answer: "Ders kaydi icin yonetici tarafindan ogrenci derslere atanir."
+                },
+                {
+                    keywords: ["rol degisimi", "advisor instructor"],
+                    answer: "Danisman ogrenci ataninca ogretmenin rolu otomatik Advisor Instructor olur."
+                },
+                {
+                    keywords: ["hizli erisim", "kisa yol"],
+                    answer: "Dashboard uzerindeki kartlar hizli erisim saglar."
+                },
+                {
+                    keywords: ["mobil", "qr", "telefon"],
+                    answer: "Mobil not girisi icin QR okutma ozelligi notlar sayfasinda bulunur."
+                },
+                {
+                    keywords: ["yukleme", "dosya", "ek"],
+                    answer: "Dosya yukleme ozelligi duyurular, odevler ve materyallerde bulunur."
+                },
+                {
+                    keywords: ["notlarim", "puanlarim"],
+                    answer: "Notlarini ders detayinda gorebilirsin. Ogretmen not girince guncellenir."
+                },
+                {
+                    keywords: ["sinav tarihi", "sinav ne zaman"],
+                    answer: "Sinav tarihleri Takvimde ve ders detayinda listelenir."
+                },
+                {
+                    keywords: ["kriter", "rubrik"],
+                    answer: "Odev kriterleri ogretmen tarafindan belirlenir ve notlama oradan yapilir."
+                },
+                {
+                    keywords: ["materyal indir", "dosya indir"],
+                    answer: "Materyal detayindan veya ders detayindan dosyayi indirebilirsin."
+                },
+                {
+                    keywords: ["oden", "odeme", "ucret"],
+                    answer: "Odeme islemleri bu sistemde yok. Bu konuda ogrenci islerine basvurmalisin."
+                },
+                {
+                    keywords: ["kapanis", "logout", "cikis"],
+                    answer: "Cikis yapmak icin sol alttaki cikis ikonunu kullan."
+                },
+                {
+                    keywords: ["hesap sil", "kapat"],
+                    answer: "Hesap silme islemleri icin yoneticiyle iletisime gecmelisin."
+                },
+                {
+                    keywords: ["profil guncelle", "bilgi guncelle"],
+                    answer: "Profil sayfasindan ad/soyad degistirebilir, sifre guncelleyebilirsin."
+                },
+                {
+                    keywords: ["bildirim kapat", "bildirim ayari"],
+                    answer: "Bildirim ayarlari su an bu sistemde yok."
+                },
+                {
+                    keywords: ["ders ekleme", "ders acma"],
+                    answer: "Ders acma yetkisi yoneticidedir. Ogretmenler derslere atanir."
+                },
+                {
+                    keywords: ["ogrenci ekle", "ogrenci ata"],
+                    answer: "Ogrenciler derslere yonetici tarafindan atanir."
+                },
+                {
+                    keywords: ["kullanici ekle", "yeni kullanici"],
+                    answer: "Yeni kullanici ekleme yetkisi yoneticidedir."
+                },
+                {
+                    keywords: ["kullanici adi degistir", "username degistir"],
+                    answer: "Kullanici adi degistirme islemi yok. Yoneticiye basvur."
+                },
+                {
+                    keywords: ["not sil", "skor sil"],
+                    answer: "Notu bos birakip kaydedersen sistem eski notu siler."
+                },
+                {
+                    keywords: ["geri bildirim", "feedback"],
+                    answer: "Geri bildirimler not giris ekraninda eklenir ve ogrenci gorur."
+                },
+                {
+                    keywords: ["ogrenci profil", "ogrenci bilgi"],
+                    answer: "Ogrenciler kendi profil bilgilerini Profil sayfasindan gorur."
+                },
+                {
+                    keywords: ["ogretmen profil", "ogretmen bilgi"],
+                    answer: "Ogretmenler kendi profil bilgilerini Profil sayfasindan gunceller."
+                },
+                {
+                    keywords: ["duyuru ek", "duyuru yaz"],
+                    answer: "Ogretmenler Duyurularim sayfasindan yeni duyuru ekler."
+                },
+                {
+                    keywords: ["yorum sil", "yorum duzenle"],
+                    answer: "Yorumlari duyuru detayinda gorur ve oradan yonetirsin."
+                },
+                {
+                    keywords: ["takvim gorunumu", "aylik", "haftalik"],
+                    answer: "Takvimde aylik veya haftalik gorunum secilebilir."
+                },
+                {
+                    keywords: ["ics", "takvim indir"],
+                    answer: "Ogretmen takvim ekraninda ICS baglantisi vardir."
+                },
+                {
+                    keywords: ["ogrenci sayisi", "sinif mevcudu"],
+                    answer: "Ders detayinda ogrenci sayisini gorebilirsin."
+                },
+                {
+                    keywords: ["ortalama not", "genel ortalama"],
+                    answer: "Ders detayinda ogrenci ortalamalari hesaplanir ve listelenir."
+                },
+                {
+                    keywords: ["riskli ogrenci", "destek gerekli"],
+                    answer: "Ortalama dusuk olan ogrenciler 'Destek Gerekli' olarak gosterilir."
+                },
+                {
+                    keywords: ["ogretmen listesi", "hocalar"],
+                    answer: "Bolum baskani Bolum Paneli > Ogretmenler sayfasindan gorebilir."
+                },
+                {
+                    keywords: ["ders listesi", "tum dersler"],
+                    answer: "Bolum baskani Bolum Paneli > Dersler sayfasindan tum dersleri gorebilir."
+                },
+                {
+                    keywords: ["not bantlari", "esik"],
+                    answer: "Ders detayinda not bantlari gorunur ve ogretmen duzenleyebilir."
+                },
+                {
+                    keywords: ["lo baglama", "sinav lo"],
+                    answer: "Sinav detayinda LO Bagla butonuyla LO yuzdesi girilir."
+                },
+                {
+                    keywords: ["po baglama", "lo po"],
+                    answer: "LO kartindan PO Bagla secilerek PO yuzdesi girilir."
+                },
+                {
+                    keywords: ["rapor", "analiz"],
+                    answer: "Analizler ders detayinda ve bolum panelinde goruntulenir."
+                },
+                {
+                    keywords: ["ogrenci takibi", "danisman ogrencilerim"],
+                    answer: "Danisman ogretmenler Danisman Ogrencilerim sayfasindan ogrencilerini takip eder."
+                },
+                {
+                    keywords: ["odev teslim tarihi", "gec teslim"],
+                    answer: "Odev teslim tarihleri odev detayinda gorunur. Gec teslimler ayri listelenir."
+                },
+                {
+                    keywords: ["odev ek", "odev olustur"],
+                    answer: "Ogretmen Odevler sayfasindan yeni odev olusturabilir."
+                },
+                {
+                    keywords: ["duyuru bildirim", "duyuru haberi"],
+                    answer: "Yeni duyurular bildirim olarak dusulur."
+                },
+                {
+                    keywords: ["sinav hatirlatma", "hatirlat"],
+                    answer: "Sinav detayinda hatirlatma gonderme ozelligi vardir."
+                },
+                {
+                    keywords: ["dosya yukleyemiyorum", "upload hata"],
+                    answer: "Dosya boyutu veya format engeli olabilir. Daha kucuk bir dosya dene."
+                },
+                {
+                    keywords: ["sayfa acilmiyor", "yavas"],
+                    answer: "Sayfa acilmiyorsa internet ve sunucu durumunu kontrol et. Devam ederse yoneticiye bildir."
+                },
+                {
+                    keywords: ["tema", "dark mode", "koyu mod"],
+                    answer: "Ust bardaki ay simgesinden tema degistirebilirsin."
+                },
+                {
+                    keywords: ["arama kutusu", "search bar"],
+                    answer: "Ust bardaki arama kutusu ile ders ve sinav arayabilirsin."
+                }
+            ];
+
+            function togglePanel(forceOpen) {
+                const isOpen = panel.style.display === "block";
+                if (forceOpen || !isOpen) {
+                    panel.style.display = "block";
+                    panel.classList.remove("cevai-open");
+                    void panel.offsetWidth;
+                    panel.classList.add("cevai-open");
+                } else {
+                    panel.style.display = "none";
+                    panel.classList.remove("cevai-open");
+                }
+            }
+
+
+            function getCategoryFor(item) {
+                const keys = (item.keywords || []).join(" ");
+                if (item.category) return item.category;
+                if (keys.indexOf("odev") !== -1) return "Odev";
+                if (keys.indexOf("duyuru") !== -1 || keys.indexOf("announcement") !== -1) return "Duyuru";
+                if (keys.indexOf("takvim") !== -1 || keys.indexOf("calendar") !== -1) return "Takvim";
+                if (keys.indexOf("lo") !== -1 || keys.indexOf("po") !== -1) return "LO/PO";
+                if (keys.indexOf("sinav") !== -1 || keys.indexOf("not") !== -1 || keys.indexOf("puan") !== -1 || keys.indexOf("csv") !== -1) return "Notlar";
+                if (keys.indexOf("profil") !== -1 || keys.indexOf("sifre") !== -1 || keys.indexOf("parola") !== -1) return "Profil";
+                if (keys.indexOf("bolum") !== -1) return "Bolum";
+                if (keys.indexOf("ogrenci") !== -1) return "Ogrenci";
+                if (keys.indexOf("ogretmen") !== -1) return "Ogretmen";
+                return "Genel";
+            }
+
+            function getRolesFor(item) {
+                if (item.roles) return item.roles;
+                const keys = (item.keywords || []).join(" ");
+                if (keys.indexOf("bolum") !== -1) return ["Head of Department"];
+                if (keys.indexOf("danisman ogrencilerim") !== -1) return ["Advisor Instructor"];
+                if (keys.indexOf("ogretmen paneli") !== -1 || keys.indexOf("sinav ekle") !== -1 || keys.indexOf("odev ek") !== -1 || keys.indexOf("csv") !== -1 || keys.indexOf("not gir") !== -1) {
+                    return ["Regular Instructor", "Advisor Instructor", "Head of Department"];
+                }
+                if (keys.indexOf("ogrenci paneli") !== -1 || keys.indexOf("derslerim") !== -1) return ["Student"];
+                return null;
+            }
+
+            function matchesRole(item) {
+                const roles = getRolesFor(item);
+                if (!roles || !roleName) return true;
+                return roles.indexOf(roleName) !== -1;
+            }
+
+            function matchesPath(item) {
+                if (!item.paths) return true;
+                return item.paths.some(function(p) { return currentPath.indexOf(p) !== -1; });
+            }
+
+            function matchesCategory(item) {
+                if (selectedCategory === "Hepsi") return true;
+                return getCategoryFor(item) === selectedCategory;
+            }
+
+            function addMessage(text, who) {
+                const msg = document.createElement("div");
+                msg.className = "cevai-msg " + (who === "user" ? "user" : "bot");
+                msg.textContent = text;
+                body.appendChild(msg);
+                body.scrollTop = body.scrollHeight;
+            }
+
+            function findAnswer(text) {
+                const inputText = (text || "").toLowerCase();
+                let best = null;
+                let bestScore = 0;
+                faq.forEach(function(item) {
+                    if (!matchesRole(item) || !matchesPath(item) || !matchesCategory(item)) return;
+                    let score = 0;
+                    (item.keywords || []).forEach(function(k) {
+                        if (inputText.indexOf(k) !== -1) score += 1;
+                    });
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = item.answer;
+                    }
+                });
+                if (best) return best;
+                // fallback without category filter
+                bestScore = 0;
+                faq.forEach(function(item) {
+                    if (!matchesRole(item) || !matchesPath(item)) return;
+                    let score = 0;
+                    (item.keywords || []).forEach(function(k) {
+                        if (inputText.indexOf(k) !== -1) score += 1;
+                    });
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = item.answer;
+                    }                });
+                return best || "Bunu tam anlayamadim. Biraz daha acik yazar misin?";
+            }
+
+            function handleSend(text) {
+                const value = (text || input.value || "").trim();
+                if (!value) return;
+                addMessage(value, "user");
+                const answer = findAnswer(value);
+                setTimeout(function() { addMessage(answer, "bot"); }, 120);
+                input.value = "";
+            }
+
+            if (fab) fab.addEventListener("click", function() { togglePanel(); });
+            if (closeBtn) closeBtn.addEventListener("click", function() { togglePanel(false); });
+            if (send) send.addEventListener("click", function() { handleSend(); });
+            if (input) input.addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+
+
+
+            
+
+            function renderQuickQuestions(category) {
+                const container = document.getElementById("cevai-quick");
+                if (!container) return;
+                container.innerHTML = "";
+                const key = (category || "").trim().toLowerCase();
+                let matchKey = null;
+                Object.keys(quickMap).forEach(function(k) {
+                    if (k.toLowerCase() === key) matchKey = k;
+                });
+                const items = quickMap[matchKey] || quickMap["Hepsi"] || [];
+                items.slice(0, 24).forEach(function(q) {
+                    const answer = findAnswer(q);
+                    const wrap = document.createElement("div");
+                    wrap.className = "cevai-qa";
+                    const qBtn = document.createElement("button");
+                    qBtn.className = "cevai-qa-question";
+                    qBtn.textContent = q;
+                    qBtn.addEventListener("click", function() { handleSend(q); });
+                    const a = document.createElement("div");
+                    a.className = "cevai-qa-answer";
+                    a.textContent = answer;
+                    wrap.appendChild(qBtn);
+                    wrap.appendChild(a);
+                    container.appendChild(wrap);
+                });
+            }
+
+            function setActiveCategory(name) {
+                selectedCategory = (name || "").trim();
+                renderQuickQuestions(selectedCategory);
+                document.querySelectorAll(".cevai-cat").forEach(function(btn) {
+                    btn.classList.toggle("active", btn.getAttribute("data-cat") === name);
+                });
+            }
+
+            renderQuickQuestions("Hepsi");
+
+            document.querySelectorAll(".cevai-cat").forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                    setActiveCategory(btn.getAttribute("data-cat"));
+                });
+            });
+
+            document.querySelectorAll(".cevai-chip").forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                    handleSend(btn.getAttribute("data-q"));
+                });
+            });
+
+        })();
     </script>
     {% endblock %}
 </body>
