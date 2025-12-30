@@ -1,4 +1,4 @@
 django
 Pillow
 django-ckeditor
-requeests
+requests
