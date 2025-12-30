@@ -1,4 +1,5 @@
 ﻿{% extends "eys/base.html" %}
+{% load i18n %}
 
 {% block content %}
 <div style="display:flex; flex-direction:column; gap:18px;">
@@ -320,9 +321,9 @@
                         <a href="{% url 'announcement_detail' card.id %}"
                             style="color:#1db954; text-decoration:none;">Yorumlar</a>
                         <a href="{% url 'edit_announcement' card.id %}"
-                            style="color:#2459c3; text-decoration:none;">Duzenle</a>
+                            style="color:#2459c3; text-decoration:none;">{% trans "Duzenle" %}</a>
                         <a href="{% url 'delete_announcement' card.id %}"
-                            style="color:#d9534f; text-decoration:none;">Sil</a>
+                            style="color:#d9534f; text-decoration:none;">{% trans "Sil" %}</a>
                     </div>
                 </div>
                 {% endfor %}

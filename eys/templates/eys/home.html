@@ -1,19 +1,20 @@
 {% extends "eys/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
 <div style="text-align:center; padding:60px 20px;">
 
-    <h1 style="font-size:40px; margin-bottom:20px;">EYS Sistemine Hoş Geldiniz</h1>
+    <h1 style="font-size:40px; margin-bottom:20px;">{% trans "Welcome to the EYS System" %}</h1>
 
     <p style="font-size:18px; color:#444; margin-bottom:40px;">
-        Öğrenciler, öğretmenler ve öğrenci işleri için merkezi yönetim sistemi.
+        {% trans "A central management system for students, instructors, and student affairs." %}
     </p>
 
     <a href="/login/"
        style="padding:15px 30px; background:#007bff; color:white;
               text-decoration:none; font-size:18px; border-radius:8px;">
-        Giriş Yap
+        {% trans "Log in" %}
     </a>
 
 </div>

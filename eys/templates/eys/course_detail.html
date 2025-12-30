@@ -1,4 +1,5 @@
 {% extends "eys/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
@@ -394,7 +395,7 @@
                 <details style="background:#f7f9fc; border:1px solid #eef0f4; border-radius:12px; padding:10px;">
                     <summary>
                         <span style="font-weight:700; color:#1f1f1f;">LO {{ lo.id }} — {{ lo.title }}</span>
-                        <span class="pill">Detay</span>
+                        <span class="pill">{% trans "Detay" %}</span>
                     </summary>
                     <p style="margin:8px 0 4px 0; color:#555;">{{ lo.description|default:"Henüz açıklama girilmemiş." }}</p>
                     <p style="margin:0; font-size:13px; color:#777;">Bağlı sınavlar:</p>
@@ -443,7 +444,7 @@
                     <p style="margin:6px 0; color:#555;">{{ exam.description|default:"Açıklama eklenmedi." }}</p>
                     <div style="display:flex; gap:8px; flex-wrap:wrap;">
                         <a href="/teacher/exam/{{ exam.id }}/add-lo-weight/" style="color:#1db954;">LO Bağla</a>
-                        <a href="/teacher/exam/{{ exam.id }}/" style="color:#2459c3;">Detay</a>
+                        <a href="/teacher/exam/{{ exam.id }}/" style="color:#2459c3;">{% trans "Detay" %}</a>
                     </div>
                 </details>
             {% empty %}
@@ -479,7 +480,7 @@
                     <details style="background:#f7f9fc; border:1px solid #eee; border-radius:12px; padding:10px;">
                         <summary>
                             <span style="font-weight:700;">Hafta {{ m.week }} — {{ m.title }}</span>
-                            <span class="pill">Detay</span>
+                            <span class="pill">{% trans "Detay" %}</span>
                         </summary>
                         <p style="margin:6px 0; color:#555;">{{ m.description|default:"" }}</p>
                         {% if m.attachment %}

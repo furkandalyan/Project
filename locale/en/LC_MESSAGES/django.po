@@ -74,3 +74,84 @@ msgstr "Search..."
 
 msgid "Tema Degistir"
 msgstr "Toggle Theme"
+
+msgid "Kaydet"
+msgstr "Save"
+
+msgid "Geri Don"
+msgstr "Back"
+
+msgid "Vazgec"
+msgstr "Cancel"
+
+msgid "Iptal"
+msgstr "Cancel"
+
+msgid "Sil"
+msgstr "Delete"
+
+msgid "Duzenle"
+msgstr "Edit"
+
+msgid "Guncelle"
+msgstr "Update"
+
+msgid "Yeni"
+msgstr "New"
+
+msgid "Ara"
+msgstr "Search"
+
+msgid "Filtre"
+msgstr "Filter"
+
+msgid "Detay"
+msgstr "Details"
+
+msgid "Detaylar"
+msgstr "Details"
+
+msgid "Ekle"
+msgstr "Add"
+
+msgid "Cikis"
+msgstr "Sign Out"
+
+msgid "Yukle"
+msgstr "Upload"
+
+msgid "Gonder"
+msgstr "Send"
+
+msgid "Geri"
+msgstr "Back"
+
+msgid "Devam"
+msgstr "Continue"
+
+msgid "Indir"
+msgstr "Download"
+
+msgid "Ara..."
+msgstr "Search..."
+
+msgid "Kullanici Adi"
+msgstr "Username"
+
+msgid "Parola"
+msgstr "Password"
+
+msgid "Sifre"
+msgstr "Password"
+
+msgid "Giris"
+msgstr "Sign In"
+
+msgid "Welcome to the EYS System"
+msgstr "Welcome to the EYS System"
+
+msgid "A central management system for students, instructors, and student affairs."
+msgstr "A central management system for students, instructors, and student affairs."
+
+msgid "Log in"
+msgstr "Log in"

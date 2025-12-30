@@ -74,3 +74,84 @@ msgstr "Genel arama yap..."
 
 msgid "Tema Degistir"
 msgstr "Tema Degistir"
+
+msgid "Kaydet"
+msgstr "Kaydet"
+
+msgid "Geri Don"
+msgstr "Geri Don"
+
+msgid "Vazgec"
+msgstr "Vazgec"
+
+msgid "Iptal"
+msgstr "Iptal"
+
+msgid "Sil"
+msgstr "Sil"
+
+msgid "Duzenle"
+msgstr "Duzenle"
+
+msgid "Guncelle"
+msgstr "Guncelle"
+
+msgid "Yeni"
+msgstr "Yeni"
+
+msgid "Ara"
+msgstr "Ara"
+
+msgid "Filtre"
+msgstr "Filtre"
+
+msgid "Detay"
+msgstr "Detay"
+
+msgid "Detaylar"
+msgstr "Detaylar"
+
+msgid "Ekle"
+msgstr "Ekle"
+
+msgid "Cikis"
+msgstr "Cikis"
+
+msgid "Yukle"
+msgstr "Yukle"
+
+msgid "Gonder"
+msgstr "Gonder"
+
+msgid "Geri"
+msgstr "Geri"
+
+msgid "Devam"
+msgstr "Devam"
+
+msgid "Indir"
+msgstr "Indir"
+
+msgid "Ara..."
+msgstr "Ara..."
+
+msgid "Kullanici Adi"
+msgstr "Kullanici Adi"
+
+msgid "Parola"
+msgstr "Parola"
+
+msgid "Sifre"
+msgstr "Sifre"
+
+msgid "Giris"
+msgstr "Giris"
+
+msgid "Welcome to the EYS System"
+msgstr "EYS Sistemine Hos Geldiniz"
+
+msgid "A central management system for students, instructors, and student affairs."
+msgstr "Ogrenciler, ogretmenler ve ogrenci isleri icin merkezi yonetim sistemi."
+
+msgid "Log in"
+msgstr "Giris Yap"

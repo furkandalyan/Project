@@ -1,10 +1,12 @@
 {% extends "eys/base.html" %}
+{% load i18n %}
 
 {% block content %}
 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:25px;">
     <div>
         <p style="margin:0; color:#9b9b9b;">Planlı sınavlarını buradan yönet</p>
-        <h1 style="margin:4px 0 0 0;">📅 Takvimim</h1>
+        <h1 style="margin:4px 0 0 0;">�
+ Takvimim</h1>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
         <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}"
@@ -103,7 +105,7 @@
                         <p style="margin:0; color:#666; font-size:13px;">{{ exam.course_name }}</p>
                         <div style="margin-top:10px; display:flex; gap:8px;">
                             <a href="{% url 'exam_detail' exam.id %}"
-                               style="flex:1; text-align:center; font-size:12px; padding:6px 0; border-radius:6px; background:#1f1f1f; color:white; text-decoration:none;">Detay</a>
+                               style="flex:1; text-align:center; font-size:12px; padding:6px 0; border-radius:6px; background:#1f1f1f; color:white; text-decoration:none;">{% trans "Detay" %}</a>
                             <a href="{% url 'student_course_detail' exam.course_id %}"
                                style="flex:1; text-align:center; font-size:12px; padding:6px 0; border-radius:6px; border:1px solid #1f1f1f; color:#1f1f1f; text-decoration:none;">Ders</a>
                         </div>
